@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任務代號：解除拖延炸彈</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Tone.js 用於產生緊張音樂與音效 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            /* 特務科技感背景 */
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+        }
+
+        .font-mono {
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        /* 炸彈震動特效 (時間快到時使用) */
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        .danger-shake {
+            animation: shake 0.5s;
+            animation-iteration-count: infinite;
+        }
+
+        /* 按鈕立體點擊效果 */
+        .btn-3d {
+            transition: all 0.1s;
+        }
+        .btn-3d:active {
+            transform: translateY(4px);
+            border-bottom-width: 0px;
+            margin-bottom: 4px;
+        }
+
+        /* 導火線燃燒動畫 */
+        @keyframes burn {
+            0% { filter: drop-shadow(0 0 5px #ef4444) drop-shadow(0 0 10px #f59e0b); }
+            50% { filter: drop-shadow(0 0 10px #ef4444) drop-shadow(0 0 20px #f59e0b); }
+            100% { filter: drop-shadow(0 0 5px #ef4444) drop-shadow(0 0 10px #f59e0b); }
+        }
+        .fuse-spark {
+            animation: burn 0.5s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-100 flex flex-col items-center justify-center p-4 overflow-hidden">
+
+    <!-- 主控台容器 (針對手機版優化高度，適應各種螢幕) -->
+    <div class="w-full max-w-lg bg-slate-800 rounded-[2rem] shadow-2xl border-4 border-slate-700 relative flex flex-col h-[90vh] min-h-[500px] sm:h-[600px]">
+        
+        <!-- 頂部：標題區 (不會變動) -->
+        <div class="p-6 bg-slate-900 rounded-t-[1.8rem] border-b-4 border-slate-700 flex flex-col items-center justify-center z-10">
+            <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-600 drop-shadow-md tracking-wider text-center">
+                任務代號：解除拖延炸彈 💣
+            </h1>
+        </div>
+
+        <!-- 內容區：狀態切換 (設定任務 / 倒數計時 / 結果畫面) -->
+        <div class="flex-1 flex flex-col items-center justify-center p-6 relative overflow-hidden">
+            
+            <!-- 視圖 1：設定任務 -->
+            <div id="setup-view" class="w-full flex flex-col items-center space-y-6 transition-opacity duration-300">
+                <div class="w-full space-y-2">
+                    <label class="block text-slate-400 font-bold ml-2">目標任務是？</label>
+                    <input type="text" id="task-name" placeholder="例如：寫完數學作業、整理書包..." 
+                           class="w-full bg-slate-700 text-xl text-white px-6 py-4 rounded-2xl border-2 border-slate-600 focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/50 transition-all placeholder:text-slate-500">
+                </div>
+                
+                <div class="w-full space-y-2">
+                    <label class="block text-slate-400 font-bold ml-2">需要幾分鐘？ (設定限制時間)</label>
+                    <div class="flex items-center space-x-4">
+                        <button onclick="adjustTime(-5)" class="w-16 h-16 bg-slate-700 rounded-2xl text-2xl font-black text-white hover:bg-slate-600 active:bg-slate-500">-</button>
+                        <input type="number" id="task-time" value="15" min="1" max="120"
+                               class="flex-1 bg-slate-700 text-4xl text-center text-yellow-400 font-black px-4 py-4 rounded-2xl border-2 border-slate-600 focus:outline-none focus:border-yellow-400">
+                        <button onclick="adjustTime(5)" class="w-16 h-16 bg-slate-700 rounded-2xl text-2xl font-black text-white hover:bg-slate-600 active:bg-slate-500">+</button>
+                    </div>
+                </div>
+
+                <button onclick="startMission()" class="btn-3d mt-4 w-full bg-red-500 hover:bg-red-400 text-white font-black text-2xl py-5 rounded-2xl border-b-8 border-red-700 shadow-xl flex items-center justify-center gap-2 tracking-widest">
+                    ⚡ 啟動拆彈程序 ⚡
+                </button>
+            </div>
+
+            <!-- 視圖 2：計時炸彈運行中 -->
+            <div id="timer-view" class="w-full hidden flex-col items-center justify-center space-y-8 h-full">
+                <!-- 任務名稱顯示 -->
+                <div class="bg-slate-900/50 px-6 py-2 rounded-full border border-slate-600">
+                    <span class="text-slate-300 font-bold">目前任務：</span>
+                    <span id="display-task-name" class="text-yellow-400 font-black text-xl"></span>
+                </div>
+
+                <!-- 數位計時器 -->
+                <div id="timer-display" class="font-mono text-7xl sm:text-8xl font-black text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)] tracking-tighter">
+                    00:00
+                </div>
+
+                <!-- 導火線進度條 -->
+                <div class="w-full max-w-sm relative">
+                    <div class="h-4 w-full bg-slate-700 rounded-full overflow-hidden border-2 border-slate-900 relative">
+                        <div id="fuse-bar" class="h-full bg-gradient-to-r from-orange-500 to-yellow-400 w-full transition-all duration-1000 linear origin-left"></div>
+                    </div>
+                    <!-- 火花圖標跟隨進度條 -->
+                    <div id="fuse-sparkle" class="absolute top-1/2 -translate-y-1/2 -ml-3 text-2xl fuse-spark transition-all duration-1000 linear" style="left: 100%;">
+                        🔥
+                    </div>
+                </div>
+
+                <!-- 拆除按鈕 -->
+                <button onclick="defuseBomb()" class="btn-3d w-full max-w-xs bg-emerald-500 hover:bg-emerald-400 text-white font-black text-2xl py-5 rounded-2xl border-b-8 border-emerald-700 shadow-[0_0_20px_rgba(16,185,129,0.4)] flex items-center justify-center gap-2 tracking-widest mt-4">
+                    ✂️ 我完成了！剪斷紅線
+                </button>
+            </div>
+
+            <!-- 視圖 3：大畫面結果 -->
+            <div id="result-view" class="w-full h-full hidden flex-col items-center justify-center text-center space-y-6 z-20">
+                <div id="result-icon" class="text-8xl animate-bounce">🎉</div>
+                <h2 id="result-title" class="text-4xl font-black text-white drop-shadow-lg"></h2>
+                <p id="result-message" class="text-xl text-slate-300 font-bold px-4"></p>
+                
+                <button onclick="resetApp()" class="btn-3d mt-8 bg-blue-500 hover:bg-blue-400 text-white font-black text-xl py-4 px-10 rounded-2xl border-b-8 border-blue-700 shadow-xl">
+                    🔄 接受新任務
+                </button>
+            </div>
+
+        </div>
+
+        <!-- 底部：特務狀態列 -->
+        <div class="bg-slate-900 h-14 rounded-b-[1.8rem] flex items-center px-6 border-t-4 border-slate-700">
+            <div class="flex items-center space-x-2">
+                <div id="status-dot" class="w-3 h-3 rounded-full bg-slate-500 animate-pulse"></div>
+                <span id="status-text" class="text-slate-400 font-bold text-sm tracking-wide">系統待命，請輸入任務。</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // DOM 元素
+        const setupView = document.getElementById('setup-view');
+        const timerView = document.getElementById('timer-view');
+        const resultView = document.getElementById('result-view');
+        
+        const taskNameInput = document.getElementById('task-name');
+        const taskTimeInput = document.getElementById('task-time');
+        
+        const displayTaskName = document.getElementById('display-task-name');
+        const timerDisplay = document.getElementById('timer-display');
+        const fuseBar = document.getElementById('fuse-bar');
+        const fuseSparkle = document.getElementById('fuse-sparkle');
+        const timerContainer = document.getElementById('timer-view'); // 用來加震動特效
+        
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+
+        const resultIcon = document.getElementById('result-icon');
+        const resultTitle = document.getElementById('result-title');
+        const resultMessage = document.getElementById('result-message');
+
+        // 計時器變數
+        let timerInterval;
+        let totalSeconds = 0;
+        let remainingSeconds = 0;
+
+        // 音效相關變數 (Tone.js)
+        let isAudioInitialized = false;
+        let tickSynth;
+        let heartSynth;
+        let bgmLoop;
+        let polySynth;
+
+        async function initAudio() {
+            if (!isAudioInitialized) {
+                await Tone.start();
+                
+                // 滴答聲 (高頻金屬感，模擬炸彈時鐘)
+                tickSynth = new Tone.Synth({
+                    oscillator: { type: "square" },
+                    envelope: { attack: 0.005, decay: 0.05, sustain: 0, release: 0.01 }
+                }).toDestination();
+                tickSynth.volume.value = -18;
+
+                // 心跳聲/低音脈衝 (製造壓迫感)
+                heartSynth = new Tone.MembraneSynth().toDestination();
+                heartSynth.volume.value = -8;
+
+                // 成功/失敗的提示音
+                polySynth = new Tone.PolySynth().toDestination();
+                polySynth.volume.value = -10;
+
+                // 建立循環背景音樂 (BGM)
+                bgmLoop = new Tone.Loop((time) => {
+                    heartSynth.triggerAttackRelease("C2", "8n", time);
+                    tickSynth.triggerAttackRelease("C5", "32n", time + 0.1); // 稍微錯開時間增加層次感
+                }, "4n"); // 4n = 1拍
+
+                isAudioInitialized = true;
+            }
+        }
+
+        // 調整時間按鈕邏輯
+        function adjustTime(amount) {
+            let currentValue = parseInt(taskTimeInput.value) || 0;
+            let newValue = currentValue + amount;
+            if (newValue < 1) newValue = 1;
+            if (newValue > 120) newValue = 120;
+            taskTimeInput.value = newValue;
+        }
+
+        // 啟動任務
+        async function startMission() {
+            const taskName = taskNameInput.value.trim();
+            const taskTime = parseInt(taskTimeInput.value);
+
+            if (!taskName) {
+                alert("特務！請輸入你要完成的任務內容！");
+                taskNameInput.focus();
+                return;
+            }
+            if (!taskTime || taskTime <= 0) {
+                alert("請設定正確的任務時間！");
+                return;
+            }
+
+            // 啟動音效系統與音樂
+            await initAudio();
+            Tone.Transport.bpm.value = 60; // 初始節奏：60 BPM (每秒1下)
+            Tone.Transport.start();
+            bgmLoop.start(0);
+
+            // 設定初始變數
+            totalSeconds = taskTime * 60;
+            remainingSeconds = totalSeconds;
+            
+            // 更新 UI
+            displayTaskName.innerText = taskName;
+            updateTimerDisplay();
+            
+            setupView.classList.add('hidden');
+            timerView.classList.remove('hidden');
+            timerView.classList.add('flex');
+
+            // 狀態列更新
+            statusDot.classList.replace('bg-slate-500', 'bg-red-500');
+            statusText.innerText = "炸彈倒數中... 請盡快完成任務！";
+
+            // 開始倒數
+            clearInterval(timerInterval);
+            timerInterval = setInterval(tick, 1000);
+        }
+
+        // 每一秒的邏輯
+        function tick() {
+            remainingSeconds--;
+            
+            updateTimerDisplay();
+
+            // 導火線進度
+            const percentage = (remainingSeconds / totalSeconds) * 100;
+            fuseBar.style.width = `${percentage}%`;
+            fuseSparkle.style.left = `${percentage}%`;
+
+            // 音樂節奏動態加快邏輯 (增加緊張感)
+            if (isAudioInitialized) {
+                if (remainingSeconds === 60) {
+                    Tone.Transport.bpm.rampTo(100, 10); // 剩1分鐘：節奏逐漸加快至 100 BPM
+                } else if (remainingSeconds === 30) {
+                    Tone.Transport.bpm.rampTo(150, 5);  // 剩30秒：節奏加快至 150 BPM
+                } else if (remainingSeconds === 10) {
+                    Tone.Transport.bpm.rampTo(240, 2);  // 最後10秒：極速心跳
+                }
+            }
+
+            // 緊張特效：剩下不到一分鐘或10%時
+            if (remainingSeconds <= 60 || percentage < 15) {
+                timerContainer.classList.add('danger-shake');
+                timerDisplay.classList.add('animate-pulse');
+            }
+
+            // 時間到：失敗
+            if (remainingSeconds <= 0) {
+                missionFailed();
+            }
+        }
+
+        // 更新數字顯示
+        function updateTimerDisplay() {
+            const m = Math.floor(remainingSeconds / 60).toString().padStart(2, '0');
+            const s = (remainingSeconds % 60).toString().padStart(2, '0');
+            timerDisplay.innerText = `${m}:${s}`;
+        }
+
+        // 成功拆除
+        function defuseBomb() {
+            clearInterval(timerInterval);
+            showResult(true);
+        }
+
+        // 時間到失敗
+        function missionFailed() {
+            clearInterval(timerInterval);
+            showResult(false);
+        }
+
+        // 顯示結果畫面
+        function showResult(isSuccess) {
+            timerView.classList.add('hidden');
+            timerView.classList.remove('flex');
+            timerContainer.classList.remove('danger-shake');
+            timerDisplay.classList.remove('animate-pulse');
+            
+            resultView.classList.remove('hidden');
+            resultView.classList.add('flex');
+
+            // 停止背景音樂
+            if (isAudioInitialized) {
+                bgmLoop.stop();
+                Tone.Transport.stop();
+            }
+
+            if (isSuccess) {
+                // 播放勝利音效 (歡快的和弦)
+                if (isAudioInitialized) polySynth.triggerAttackRelease(["C4", "E4", "G4", "C5"], "1n");
+                
+                resultIcon.innerText = "🏆";
+                resultTitle.innerText = "炸彈已解除！";
+                resultTitle.className = "text-5xl font-black text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.8)]";
+                resultMessage.innerText = "太棒了特務！你沒有被拖延打敗，世界因為你而安全了！";
+                
+                statusDot.classList.replace('bg-red-500', 'bg-emerald-500');
+                statusText.innerText = "任務圓滿成功！";
+            } else {
+                // 播放失敗音效 (沉悶的爆炸聲)
+                if (isAudioInitialized) heartSynth.triggerAttackRelease("C1", "1n");
+                
+                resultIcon.innerText = "💥";
+                resultTitle.innerText = "炸彈引爆了！";
+                resultTitle.className = "text-5xl font-black text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]";
+                resultMessage.innerText = "哎呀！時間不夠了，拖延怪獸暫時贏了。但頂尖特務是不會放棄的，深呼吸，我們再來一次！";
+                
+                statusDot.classList.replace('bg-red-500', 'bg-slate-500');
+                statusText.innerText = "任務失敗，等待重新部署。";
+            }
+        }
+
+        // 重置回設定畫面
+        function resetApp() {
+            resultView.classList.add('hidden');
+            resultView.classList.remove('flex');
+            
+            setupView.classList.remove('hidden');
+            
+            taskNameInput.value = '';
+            taskTimeInput.value = '15'; // 預設回15分鐘
+            
+            fuseBar.style.width = '100%';
+            fuseSparkle.style.left = '100%';
+            
+            statusDot.className = "w-3 h-3 rounded-full bg-slate-500 animate-pulse";
+            statusText.innerText = "系統待命，請輸入任務。";
+        }
+    </script>
+</body>
+</html>

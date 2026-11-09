@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grace Liu | 20年服飾產品開發顧問 & AI 應用規劃師 (AI PM)</title>
+
+    <!-- SEO 基本標籤 -->
+    <meta name="description" content="擁有20年女性服飾與內衣產品開發、採購管理經驗，主導舒適內衣銷售突破百萬件。取得 iPAS AI 應用規劃師認證，專注於以使用者為中心的 AI PM 需求落地與企業導入諮詢。">
+    <meta name="keywords" content="Grace Liu, 服飾產品開發, 內衣研發, 百萬銷售, iPAS AI應用規劃師, AI PM, 產品經理, 採購管理, AI導入諮詢">
+    <meta name="author" content="Grace Liu">
+    <meta name="robots" content="index, follow">
+
+    <!-- GEO 地理在地化標籤 (台灣/台北) -->
+    <meta name="geo.region" content="TW">
+    <meta name="geo.placename" content="Taipei">
+
+    <!-- Open Graph (Facebook / 社群分享) -->
+    <meta property="og:type" content="profile">
+    <meta property="og:title" content="Grace Liu | 20年服飾產品開發專家 邁向 AI PM 需求落地">
+    <meta property="og:description" content="主導開發舒適內衣突破百萬件銷售。結合20年採購量產經驗與 iPAS AI 應用規劃師專業，提供產品落地與 AI 導入諮詢。">
+    <meta property="og:image" content="https://img.ai365.fans/cdn-cgi/image/width=1400,quality=90,format=auto/artworks/c307372d-f253-464e-b49c-14b8f8d76963/y60b6zbnq3r.png">
+    <meta property="og:locale" content="zh_TW">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Grace Liu | 20年服飾開發顧問 & AI PM">
+    <meta name="twitter:description" content="專注女性身型需求，主導內衣突破百萬銷量。結合 iPAS AI 應用規劃，實現需求落地。">
+    <meta name="twitter:image" content="https://img.ai365.fans/cdn-cgi/image/width=1400,quality=90,format=auto/artworks/c307372d-f253-464e-b49c-14b8f8d76963/y60b6zbnq3r.png">
+
+    <!-- AEO / 結構化資料 (Schema.org: Person & FAQPage) 提供給 AI 搜尋引擎如 ChatGPT/Perplexity 精準解析 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Person",
+          "@id": "https://www.linkedin.com/in/graceliu0508#person",
+          "name": "Grace Liu",
+          "jobTitle": ["Senior Apparel Product Development Consultant", "AI Product Manager Candidate"],
+          "description": "擁有20年服飾產品開發與採購經驗，主導舒適內衣銷售突破百萬件，取得 iPAS AI 應用規劃師初級認證，邁向 AI PM 職涯方向。",
+          "image": "https://img.ai365.fans/cdn-cgi/image/width=1400,quality=90,format=auto/artworks/c307372d-f253-464e-b49c-14b8f8d76963/y60b6zbnq3r.png",
+          "sameAs": [
+            "https://www.linkedin.com/in/graceliu0508",
+            "https://www.facebook.com/grace.liu.79219"
+          ],
+          "hasCredential": {
+            "@type": "EducationalOccupationalCredential",
+            "name": "iPAS AI 應用規劃師初級"
+          },
+          "knowsAbout": ["Apparel Product Development", "Underwear Ergonomics", "Product Management", "AI PM", "Supply Chain & Procurement", "Prompt Engineering & AI Implementation"]
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Grace Liu 具備哪些核心產品開發經驗？",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "擁有20年服飾產品開發與採購經驗，專注女性身型需求。主導開發的舒適內衣以透氣、動靜皆宜、穩定不跑位為特色，累計突破百萬件銷售佳績。"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Grace Liu 如何結合 AI 科技與產品管理？",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Grace 已取得經濟部 iPAS AI 應用規劃師認證，將20年深入研究使用者、成本交期量產的敏銳度，轉化為 AI PM 職能，協助將 AI 技術精準落地於實際商業需求。"
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
+    
+    <!-- 引入 Google Fonts: Noto Serif TC (明體/文藝感) & Noto Sans TC (無襯線/易讀) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500&family=Noto+Serif+TC:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- 引入 Tailwind CSS (啟用 dark class 模式) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 設定 Tailwind 自訂主題 -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['"Noto Serif TC"', 'serif'],
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            bg: '#FDFBF7',          /* 溫柔米白背景 */
+                            surface: '#F4EFEA',     /* 淺色區塊底色 */
+                            text: '#4A4238',        /* 深褐色文字 */
+                            accent: '#A68A73',      /* 氣質大地色 */
+                            light: '#D9CFC4',       /* 淺邊框色 */
+                            // 深色模式專用文藝調色
+                            darkBg: '#1C1917',      /* 深暖灰底色 */
+                            darkSurface: '#262220', /* 深色卡片區塊 */
+                            darkText: '#EDE8E1',    /* 柔米白文字 */
+                            darkMuted: '#A89F91',   /* 柔灰副文字 */
+                            darkAccent: '#C9A88F'   /* 暖金棕色 */
+                        }
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 1s ease-out forwards',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(15px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            -webkit-font-smoothing: antialiased;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .fade-delay-1 { animation-delay: 0.15s; }
+        .fade-delay-2 { animation-delay: 0.3s; }
+        .fade-delay-3 { animation-delay: 0.45s; }
+        
+        .animate-fade-in-up {
+            opacity: 0;
+        }
+
+        .soft-shadow {
+            box-shadow: 0 15px 30px -10px rgba(74, 66, 56, 0.08);
+        }
+        .dark .soft-shadow {
+            box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.35);
+        }
+    </style>
+</head>
+<body class="font-sans font-light leading-relaxed bg-brand-bg text-brand-text dark:bg-brand-darkBg dark:text-brand-darkText">
+
+    <!-- 頂部裝飾線與導航控制列 -->
+    <div class="h-1 w-full bg-brand-accent opacity-50"></div>
+    <nav class="max-w-5xl mx-auto px-6 py-4 flex justify-between items-center text-xs tracking-wider">
+        <span class="font-serif text-brand-accent dark:text-brand-darkAccent font-medium text-sm">Grace liu 呂逸庭</span>
+        <div class="flex items-center space-x-3">
+            <!-- 預約諮詢頂部按鈕 -->
+            <button onclick="openConsultModal()" class="hidden sm:inline-flex items-center space-x-1.5 px-3.5 py-1.5 rounded-full border border-brand-accent text-brand-accent dark:text-brand-darkAccent hover:bg-brand-accent hover:text-white dark:hover:bg-brand-darkAccent dark:hover:text-stone-900 transition duration-300">
+                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg>
+                <span>預約 AI 諮詢</span>
+            </button>
+            <!-- 深淺色切換開關 -->
+            <button id="themeToggleBtn" onclick="toggleTheme()" title="切換深淺色模式" class="p-2 rounded-full border border-brand-light/60 dark:border-stone-700 hover:bg-brand-surface dark:hover:bg-stone-800 transition">
+                <svg id="themeIconSun" class="w-4 h-4 hidden dark:block text-brand-darkAccent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+                </svg>
+                <svg id="themeIconMoon" class="w-4 h-4 block dark:hidden text-brand-text" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 背景音樂播放器 (右下角懸浮按鈕) -->
+    <div class="fixed bottom-6 right-6 z-40">
+        <audio id="bgMusic" loop>
+            <source src="https://img.ai365.fans/artworks/c307372d-f253-464e-b49c-14b8f8d76963/6qte7oid579.mp3" type="audio/mpeg">
+        </audio>
+        <button id="musicToggleBtn" onclick="toggleMusic()" class="flex items-center space-x-2 bg-white/95 dark:bg-stone-800/90 backdrop-blur border border-brand-accent/30 text-brand-accent dark:text-brand-darkAccent px-4 py-2.5 rounded-full soft-shadow hover:bg-brand-accent hover:text-white dark:hover:bg-brand-darkAccent dark:hover:text-stone-900 transition duration-300 group">
+            <svg id="musicIcon" class="w-4 h-4 fill-current transition transform group-hover:scale-110" viewBox="0 0 24 24">
+                <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+            </svg>
+            <span id="musicText" class="text-xs font-serif tracking-wider">背景音樂</span>
+        </button>
+    </div>
+
+    <!-- 首頁 Hero 區塊 -->
+    <header id="about" class="max-w-5xl mx-auto px-6 pt-4 pb-6 md:py-8">
+        <div class="grid md:grid-cols-12 gap-8 items-center">
+            
+            <!-- 文字區 -->
+            <div class="md:col-span-7 order-2 md:order-1 animate-fade-in-up fade-delay-1">
+                <p class="text-brand-accent dark:text-brand-darkAccent text-xs tracking-[0.3em] mb-2 font-serif font-medium">Grace liu 呂逸庭 · 20 YEARS OF EXPERIENCE</p>
+                <h1 class="font-serif text-2xl md:text-4xl leading-snug mb-3 font-medium">
+                    專注女性需求與身型，<br>
+                    <span class="block mt-1 text-brand-text/80 dark:text-brand-darkMuted">打造懂妳的舒適體驗。</span>
+                </h1>
+                <p class="text-brand-text/80 dark:text-brand-darkMuted leading-relaxed mb-5 max-w-lg text-sm md:text-base">
+                    擁有 20 年服飾產品開發與採購經驗。我始終相信，好的產品不只是外表的修飾，更是內在的安穩。透過細膩的觀察與專業的開發流程，我將對女性身型的理解，轉化為每天都能陪伴妳的舒適單品。
+                </p>
+
+                <!-- 行動呼籲 (預約諮詢按鈕) + 社群連結 -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <button onclick="openConsultModal()" class="inline-flex items-center space-x-2 bg-brand-accent dark:bg-brand-darkAccent text-white dark:text-stone-900 px-5 py-2.5 rounded-full text-xs font-serif tracking-wider hover:opacity-90 transition duration-300 soft-shadow">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+                        <span>預約 AI 導入諮詢</span>
+                    </button>
+
+                    <div class="flex space-x-2.5">
+                        <a href="https://www.linkedin.com/in/graceliu0508" target="_blank" rel="noopener noreferrer" title="LinkedIn" class="flex items-center justify-center w-9 h-9 rounded-full border border-brand-light dark:border-stone-700 hover:bg-brand-accent hover:text-white dark:hover:bg-brand-darkAccent dark:hover:text-stone-900 transition duration-300 text-brand-accent dark:text-brand-darkAccent soft-shadow">
+                            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                        </a>
+                        <a href="https://www.facebook.com/grace.liu.79219" target="_blank" rel="noopener noreferrer" title="Facebook" class="flex items-center justify-center w-9 h-9 rounded-full border border-brand-light dark:border-stone-700 hover:bg-brand-accent hover:text-white dark:hover:bg-brand-darkAccent dark:hover:text-stone-900 transition duration-300 text-brand-accent dark:text-brand-darkAccent soft-shadow">
+                            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 圖片區 -->
+            <div class="md:col-span-5 order-1 md:order-2 animate-fade-in-up flex justify-center">
+                <div class="relative w-3/4 md:w-full max-w-[280px]">
+                    <div class="absolute inset-0 bg-brand-surface dark:bg-brand-darkSurface rounded-[1.55rem] transform translate-x-3 translate-y-3 -z-10 transition"></div>
+                    <img src="https://img.ai365.fans/cdn-cgi/image/width=1400,quality=90,format=auto/artworks/c307372d-f253-464e-b49c-14b8f8d76963/y60b6zbnq3r.png" 
+                         alt="Grace Liu - 20年服飾開發與AI應用規劃師" 
+                         class="w-full object-cover rounded-[1.5rem] soft-shadow aspect-[4/5]">
+                </div>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- 銷售里程碑區塊 -->
+    <section class="bg-brand-surface dark:bg-brand-darkSurface py-8 my-2 transition">
+        <div class="max-w-4xl mx-auto px-6 text-center animate-fade-in-up fade-delay-2">
+            <h2 class="font-serif text-3xl md:text-4xl text-brand-accent dark:text-brand-darkAccent mb-2">1,000,000+</h2>
+            <h3 class="font-serif text-base md:text-lg mb-2">銷售突破百萬件的舒適奇蹟</h3>
+            <p class="text-brand-text/80 dark:text-brand-darkMuted leading-relaxed max-w-xl mx-auto text-xs md:text-sm">
+                我主導開發的舒適內衣，以<span class="font-medium text-brand-text dark:text-brand-darkText">「透氣、動靜皆宜、穩定不跑位」</span>的穿著體驗為核心。不僅解決了女性日常穿著的痛點，更在市場上獲得了極大的迴響，創下百萬件的銷售佳績。
+            </p>
+        </div>
+    </section>
+
+    <!-- 工作哲學 / 產品開發流程 -->
+    <section id="experience" class="max-w-5xl mx-auto px-6 py-8">
+        <div class="text-center mb-6 animate-fade-in-up">
+            <h2 class="font-serif text-xl md:text-2xl mb-2">從使用者出發的工作哲學</h2>
+            <div class="h-px w-12 bg-brand-accent dark:bg-brand-darkAccent mx-auto"></div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-4">
+            <!-- 卡片 1 -->
+            <div class="bg-white dark:bg-brand-darkSurface p-5 rounded-xl soft-shadow border border-brand-light/30 dark:border-stone-800 animate-fade-in-up fade-delay-1 hover:-translate-y-1 transition duration-300">
+                <div class="text-brand-accent dark:text-brand-darkAccent font-serif text-xl mb-1">01.</div>
+                <h3 class="font-serif text-sm mb-1.5 font-medium">洞察與傾聽</h3>
+                <p class="text-brand-text/70 dark:text-brand-darkMuted leading-relaxed text-xs">
+                    研究市場競品，並廣泛蒐集試穿與消費者回饋。我相信真正的需求藏在日常的對話與反饋中。
+                </p>
+            </div>
+
+            <!-- 卡片 2 -->
+            <div class="bg-white dark:bg-brand-darkSurface p-5 rounded-xl soft-shadow border border-brand-light/30 dark:border-stone-800 animate-fade-in-up fade-delay-2 hover:-translate-y-1 transition duration-300">
+                <div class="text-brand-accent dark:text-brand-darkAccent font-serif text-xl mb-1">02.</div>
+                <h3 class="font-serif text-sm mb-1.5 font-medium">親身驗證</h3>
+                <p class="text-brand-text/70 dark:text-brand-darkMuted leading-relaxed text-xs">
+                    除了客觀數據，我堅持親身試穿與試用。唯有自己能感受到的舒適，才能放心地交到消費者手中。
+                </p>
+            </div>
+
+            <!-- 卡片 3 -->
+            <div class="bg-white dark:bg-brand-darkSurface p-5 rounded-xl soft-shadow border border-brand-light/30 dark:border-stone-800 animate-fade-in-up fade-delay-3 hover:-translate-y-1 transition duration-300">
+                <div class="text-brand-accent dark:text-brand-darkAccent font-serif text-xl mb-1">03.</div>
+                <h3 class="font-serif text-sm mb-1.5 font-medium">落地量產</h3>
+                <p class="text-brand-text/70 dark:text-brand-darkMuted leading-relaxed text-xs">
+                    將感性的需求轉化為理性的規格。結合成本控管、交期規劃與上市節奏，確保好產品能夠順利進入市場。
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI 願景區塊 -->
+    <section id="vision" class="bg-[#F8F6F2] dark:bg-stone-900 border-t border-brand-light/50 dark:border-stone-800 py-8 transition">
+        <div class="max-w-5xl mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-6 items-center">
+                <div class="animate-fade-in-up">
+                    <h2 class="font-serif text-xl md:text-2xl mb-3">擁抱科技，邁向 AI PM</h2>
+                    <p class="text-brand-text/80 dark:text-brand-darkMuted leading-relaxed mb-2.5 text-xs md:text-sm">
+                        在累積了深厚的傳統產品開發經驗後，我深知未來的產品需要更多智慧的輔助。近年我積極投入 AI 領域學習，並已順利取得 <strong class="font-medium text-brand-text dark:text-brand-darkText">iPAS AI 應用規劃師初級</strong> 認證。
+                    </p>
+                    <p class="text-brand-text/80 dark:text-brand-darkMuted leading-relaxed mb-4 text-xs md:text-sm">
+                        我正在持續探索如何將 AI 技術結合我對消費者的深刻理解，讓「需求落地」的過程更加精準與高效。未來，我期許自己能在 AI 產品經理（AI PM）的道路上，繼續創造有溫度的科技產品。
+                    </p>
+                    <button onclick="openConsultModal()" class="text-xs font-serif text-brand-accent dark:text-brand-darkAccent underline underline-offset-4 hover:opacity-80 transition">
+                        → 探討如何為您的團隊落地 AI 應用
+                    </button>
+                </div>
+                
+                <!-- 裝飾性圖文設計 -->
+                <div class="relative p-5 md:p-6 border border-brand-accent/20 dark:border-stone-700 rounded-2xl bg-white dark:bg-brand-darkSurface text-center animate-fade-in-up fade-delay-1 soft-shadow">
+                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#F8F6F2] dark:bg-stone-900 px-3 text-brand-accent dark:text-brand-darkAccent font-serif tracking-widest text-[10px]">
+                        NEXT CHAPTER
+                    </div>
+                    <div class="font-serif text-base md:text-lg text-brand-text dark:text-brand-darkText mb-2 mt-1">
+                        "Technology with Empathy"
+                    </div>
+                    <div class="h-px w-8 bg-brand-light dark:bg-stone-700 mx-auto mb-2"></div>
+                    <p class="text-brand-text/60 dark:text-brand-darkMuted tracking-wider text-[11px]">
+                        20 年經驗 × AI 技術 = 貼近人心的創新
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 預約諮詢互動彈窗 (Modal) -->
+    <div id="consultModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-brand-darkSurface text-brand-text dark:text-brand-darkText rounded-2xl max-w-md w-full p-6 soft-shadow relative border border-brand-light/40 dark:border-stone-700">
+            <button onclick="closeConsultModal()" class="absolute top-4 right-4 text-brand-text/40 dark:text-brand-darkMuted hover:text-brand-text dark:hover:text-white transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h3 class="font-serif text-lg font-medium mb-1">預約 AI 導入與產品規劃諮詢</h3>
+            <p class="text-xs text-brand-text/70 dark:text-brand-darkMuted mb-4">
+                從女性產品開發到企業需求落地，請填寫您的諮詢方向，我將於 1-2 個工作天內回覆。
+            </p>
+            <form onsubmit="handleConsultSubmit(event)" class="space-y-3">
+                <div>
+                    <label class="block text-[11px] mb-1 font-medium">您的稱呼 / 職稱</label>
+                    <input id="formName" type="text" required placeholder="例如：林小姐 / 品牌行銷經理" class="w-full text-xs px-3 py-2 rounded-lg border border-brand-light/60 dark:border-stone-700 bg-brand-bg/50 dark:bg-stone-800 focus:outline-none focus:border-brand-accent">
+                </div>
+                <div>
+                    <label class="block text-[11px] mb-1 font-medium">聯絡信箱或電話</label>
+                    <input id="formContact" type="text" required placeholder="contact@example.com" class="w-full text-xs px-3 py-2 rounded-lg border border-brand-light/60 dark:border-stone-700 bg-brand-bg/50 dark:bg-stone-800 focus:outline-none focus:border-brand-accent">
+                </div>
+                <div>
+                    <label class="block text-[11px] mb-1 font-medium">預計諮詢主題</label>
+                    <select id="formSubject" class="w-full text-xs px-3 py-2 rounded-lg border border-brand-light/60 dark:border-stone-700 bg-brand-bg/50 dark:bg-stone-800 focus:outline-none focus:border-brand-accent">
+                        <option>AI 工具導入與流程規劃 (AI PM)</option>
+                        <option>服飾與內衣產品研發與量產顧問</option>
+                        <option>使用者需求洞察與市場回饋分析</option>
+                        <option>其他合作交流</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[11px] mb-1 font-medium">備註說明 (選填)</label>
+                    <textarea id="formNotes" rows="2" placeholder="簡述您的現況或想探討的問題..." class="w-full text-xs px-3 py-2 rounded-lg border border-brand-light/60 dark:border-stone-700 bg-brand-bg/50 dark:bg-stone-800 focus:outline-none focus:border-brand-accent"></textarea>
+                </div>
+                <div id="modalNotice" class="text-xs text-green-600 dark:text-green-400 hidden pt-1">
+                    感謝您的預約！已收到您的需求，我將盡快與您聯繫。
+                </div>
+                <button id="formSubmitBtn" type="submit" class="w-full py-2.5 rounded-lg bg-brand-accent dark:bg-brand-darkAccent text-white dark:text-stone-900 font-serif text-xs tracking-wider hover:opacity-90 transition mt-2 disabled:opacity-50">
+                    確認送出預約
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 頁尾 -->
+    <footer class="py-6 text-center text-brand-text/50 dark:text-brand-darkMuted bg-brand-bg dark:bg-brand-darkBg transition">
+        <div class="flex justify-center space-x-6 mb-2 text-xs tracking-widest">
+            <a href="https://www.linkedin.com/in/graceliu0508" target="_blank" rel="noopener noreferrer" class="hover:text-brand-accent dark:hover:text-brand-darkAccent transition duration-300">LINKEDIN</a>
+            <a href="https://www.facebook.com/grace.liu.79219" target="_blank" rel="noopener noreferrer" class="hover:text-brand-accent dark:hover:text-brand-darkAccent transition duration-300">FACEBOOK</a>
+        </div>
+        <p class="text-[11px] tracking-widest">© 20年 Portfolio. Design with empathy.</p>
+    </footer>
+
+    <!-- 腳本控制 -->
+    <script>
+        // 深色 / 淺色模式控制 (含 localStorage 記憶)
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        initTheme();
+
+        // 預約諮詢彈窗控制
+        function openConsultModal() {
+            const modal = document.getElementById('consultModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+            }, 10);
+        }
+
+        function closeConsultModal() {
+            const modal = document.getElementById('consultModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('modalNotice').classList.add('hidden');
+            }, 300);
+        }
+
+        async function handleConsultSubmit(e) {
+            e.preventDefault();
+            
+            // 替換為您在 Google Apps Script 部署後取得的 Web App URL
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbznd2uB8IgAyUeJcUW-qfNyosSlAa-RYYc5Iotey6HQbyAMv0zwp4p8V6MRE0sfT54x/exec';
+            
+            const submitBtn = document.getElementById('formSubmitBtn');
+            const notice = document.getElementById('modalNotice');
+            
+            // 蒐集表單資料
+            const formData = {
+                name: document.getElementById('formName').value,
+                contact: document.getElementById('formContact').value,
+                subject: document.getElementById('formSubject').value,
+                notes: document.getElementById('formNotes').value
+            };
+
+            // 更改按鈕狀態，避免重複點擊
+            submitBtn.disabled = true;
+            submitBtn.textContent = '資料傳送中...';
+            notice.classList.add('hidden');
+
+            try {
+                // 發送請求
+                // 註：為避免 GAS 嚴格的 CORS 預檢失敗，這裡不設定 Content-Type: application/json，
+                // 而是讓其以預設的 text/plain 送出 JSON 字串，後端 (GAS) 再自行 parse 即可。
+                const response = await fetch(scriptURL, {
+                    method: 'POST',
+                    body: JSON.stringify(formData)
+                });
+                
+                if (response.ok) {
+                    notice.textContent = '感謝您的預約！已收到您的需求，我將盡快與您聯繫。';
+                    notice.classList.remove('hidden', 'text-red-500');
+                    notice.classList.add('text-green-600', 'dark:text-green-400');
+                    
+                    // 清空表單
+                    e.target.reset();
+                    
+                    // 延遲關閉視窗
+                    setTimeout(() => {
+                        closeConsultModal();
+                    }, 2000);
+                } else {
+                    throw new Error('Network response was not ok.');
+                }
+            } catch (error) {
+                console.error('Error!', error.message);
+                notice.textContent = '傳送失敗，請稍後再試或直接透過社群聯繫。';
+                notice.classList.remove('hidden', 'text-green-600', 'dark:text-green-400');
+                notice.classList.add('text-red-500');
+            } finally {
+                // 恢復按鈕狀態
+                submitBtn.disabled = false;
+                submitBtn.textContent = '確認送出預約';
+            }
+        }
+
+        // 音樂播放切換控制
+        function toggleMusic() {
+            const music = document.getElementById('bgMusic');
+            const musicText = document.getElementById('musicText');
+            const musicBtn = document.getElementById('musicToggleBtn');
+            
+            if (music.paused) {
+                music.play().then(() => {
+                    musicText.textContent = '播放中';
+                    musicBtn.classList.add('bg-brand-accent', 'text-white');
+                    musicBtn.classList.remove('bg-white/95', 'text-brand-accent');
+                }).catch(e => {
+                    console.log("自動播放遭瀏覽器阻擋，需使用者互動", e);
+                });
+            } else {
+                music.pause();
+                musicText.textContent = '背景音樂';
+                musicBtn.classList.remove('bg-brand-accent', 'text-white');
+                musicBtn.classList.add('bg-white/95', 'text-brand-accent');
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animationPlayState = 'running';
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            const animatedElements = document.querySelectorAll('.animate-fade-in-up');
+            animatedElements.forEach(el => {
+                el.style.animationPlayState = 'paused';
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>

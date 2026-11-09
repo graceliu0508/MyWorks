@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>我的網頁作品集 | Grace Liu 呂逸庭</title>
+  <meta name="description" content="Grace Liu 呂逸庭的個人網頁作品集 — 結合 20 年產品開發洞察與 iPAS AI 應用規劃師專業，收錄時鐘計時、互動遊戲、開運占卜與商務數位工具等 12 件前端互動作品。">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Noto+Serif+TC:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Noto Sans TC"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            serif: ['"Noto Serif TC"', 'serif'],
+          },
+          colors: {
+            brand: {
+              bg: '#FDFBF7',
+              surface: '#F4EFEA',
+              text: '#3E362E',
+              accent: '#A68A73',
+              accentDark: '#8C6F58',
+              light: '#E6DEC8',
+              darkBg: '#141210',
+              darkSurface: '#211E1B',
+              darkCard: '#292521',
+              darkText: '#F3EFEA',
+              darkMuted: '#A89F91',
+              darkAccent: '#D4B499'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+    }
+    @media (min-width: 768px) {
+      body {
+        padding-bottom: 0;
+      }
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .card-hover {
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .card-hover:hover {
+      transform: translateY(-4px);
+    }
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+    }
+    .animate-float-slow {
+      animation: floatSlow 4s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="bg-brand-bg text-brand-text dark:bg-brand-darkBg dark:text-brand-darkText antialiased transition-colors duration-300">
+
+  <!-- 頂部裝飾細線 -->
+  <div class="h-1 w-full bg-gradient-to-r from-amber-600/60 via-brand-accent to-rose-500/60"></div>
+
+  <!-- 頂部常駐導覽列 (Mobile-First Sticky Header) -->
+  <header class="sticky top-0 z-40 bg-brand-bg/90 dark:bg-brand-darkBg/90 backdrop-blur-md border-b border-stone-200/80 dark:border-stone-800">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
+      <a href="#top" class="flex items-center gap-2.5 group">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-accent to-amber-700 text-white flex items-center justify-center font-serif font-bold text-base shadow-sm">
+          G
+        </div>
+        <div>
+          <span class="font-serif font-bold text-base sm:text-lg tracking-wide block leading-none text-brand-text dark:text-brand-darkText">
+            我的網頁作品集
+          </span>
+          <span class="text-[11px] text-stone-500 dark:text-brand-darkMuted tracking-wider block mt-0.5">
+            Grace Liu 呂逸庭 · AI PM &amp; Web Creator
+          </span>
+        </div>
+      </a>
+
+      <!-- 桌面版導覽與深淺色切換 -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <nav class="hidden md:flex items-center gap-1 text-sm font-medium mr-2">
+          <a href="#directory" class="px-3 py-1.5 rounded-lg hover:bg-brand-surface dark:hover:bg-brand-darkSurface transition">作品目錄</a>
+          <a href="#works" class="px-3 py-1.5 rounded-lg hover:bg-brand-surface dark:hover:bg-brand-darkSurface transition">作品圖卡 (12)</a>
+          <a href="#about" class="px-3 py-1.5 rounded-lg hover:bg-brand-surface dark:hover:bg-brand-darkSurface transition">關於我</a>
+        </nav>
+
+        <a href="./about/portfolio_website.html" target="_blank" rel="noopener" class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium bg-brand-accent text-white hover:bg-brand-accentDark transition shadow-sm">
+          <span>個人品牌主頁</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        </a>
+
+        <button onclick="toggleTheme()" aria-label="切換深淺色模式" class="p-2 rounded-xl border border-stone-200 dark:border-stone-700 bg-white/80 dark:bg-brand-darkSurface text-stone-700 dark:text-amber-300 hover:bg-stone-100 dark:hover:bg-stone-800 transition">
+          <svg class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="5" stroke-width="2"></circle>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path>
+          </svg>
+          <svg class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero 首屏：手機優先視覺導覽 -->
+  <section id="top" class="relative overflow-hidden pt-6 pb-8 md:py-12 px-4 border-b border-stone-200/70 dark:border-stone-800/80 bg-gradient-to-b from-brand-surface/60 to-brand-bg dark:from-brand-darkSurface/50 dark:to-brand-darkBg">
+    <div class="max-w-6xl mx-auto">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div class="max-w-2xl">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100/80 dark:bg-amber-950/60 border border-amber-300/60 dark:border-amber-700/50 text-amber-900 dark:text-amber-300 text-xs font-semibold mb-3">
+            <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+            <span>Mobile-First Portfolio · 20年產品開發 × iPAS AI 應用規劃師</span>
+          </div>
+          <h1 class="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-brand-text dark:text-brand-darkText leading-tight">
+            我的網頁作品集
+          </h1>
+          <p class="mt-3 text-sm sm:text-base text-stone-600 dark:text-brand-darkMuted leading-relaxed">
+            從女性身型洞察到數位產品落地，這裡收錄了我運用 HTML5、Canvas、Web Audio 與各項前端 API 打造的 <strong class="text-brand-accent dark:text-brand-darkAccent font-semibold">12 件互動式網頁作品</strong>，涵蓋專注計時、休閒遊戲、開運占卜與企業實務工具。
+          </p>
+
+          <!-- 快速統計數據小卡 (手機一列 4 格) -->
+          <div class="grid grid-cols-4 gap-2 sm:gap-3 mt-5">
+            <div class="bg-white/90 dark:bg-brand-darkCard p-2.5 sm:p-3 rounded-2xl border border-stone-200/70 dark:border-stone-800 text-center shadow-sm">
+              <div class="text-lg sm:text-2xl font-black text-brand-accent dark:text-brand-darkAccent">12</div>
+              <div class="text-[11px] text-stone-500 dark:text-stone-400 font-medium">互動作品</div>
+            </div>
+            <div class="bg-white/90 dark:bg-brand-darkCard p-2.5 sm:p-3 rounded-2xl border border-stone-200/70 dark:border-stone-800 text-center shadow-sm">
+              <div class="text-lg sm:text-2xl font-black text-amber-600 dark:text-amber-400">5</div>
+              <div class="text-[11px] text-stone-500 dark:text-stone-400 font-medium">主題分類</div>
+            </div>
+            <div class="bg-white/90 dark:bg-brand-darkCard p-2.5 sm:p-3 rounded-2xl border border-stone-200/70 dark:border-stone-800 text-center shadow-sm">
+              <div class="text-lg sm:text-2xl font-black text-emerald-600 dark:text-emerald-400">15+</div>
+              <div class="text-[11px] text-stone-500 dark:text-stone-400 font-medium">Web APIs</div>
+            </div>
+            <div class="bg-white/90 dark:bg-brand-darkCard p-2.5 sm:p-3 rounded-2xl border border-stone-200/70 dark:border-stone-800 text-center shadow-sm">
+              <div class="text-lg sm:text-2xl font-black text-rose-500 dark:text-rose-400">100%</div>
+              <div class="text-[11px] text-stone-500 dark:text-stone-400 font-medium">RWD 手機適配</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 手機/桌面快速跳轉卡片 -->
+        <div class="w-full md:w-80 bg-white dark:bg-brand-darkCard rounded-2xl p-4 border border-stone-200/80 dark:border-stone-800 shadow-md">
+          <div class="flex items-center gap-3 pb-3 mb-3 border-b border-stone-100 dark:border-stone-800">
+            <img src="https://img.ai365.fans/cdn-cgi/image/width=1400,quality=90,format=auto/artworks/c307372d-f253-464e-b49c-14b8f8d76963/y60b6zbnq3r.png"
+                 alt="Grace Liu 呂逸庭"
+                 class="w-12 h-12 rounded-full object-cover border-2 border-brand-accent shrink-0">
+            <div class="min-w-0">
+              <div class="font-serif font-bold text-sm text-brand-text dark:text-brand-darkText truncate">Grace Liu 呂逸庭</div>
+              <div class="text-xs text-stone-500 dark:text-brand-darkMuted truncate">20年產品開發顧問 · AI PM</div>
+              <div class="text-[11px] text-amber-700 dark:text-amber-400 font-medium mt-0.5">✦ iPAS AI 應用規劃師認證</div>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2 text-xs font-semibold">
+            <a href="#directory" class="py-2.5 px-3 rounded-xl bg-brand-surface dark:bg-stone-800 text-brand-text dark:text-brand-darkText hover:bg-brand-accent hover:text-white transition text-center flex items-center justify-center gap-1.5">
+              <span>📑</span> <span>作品總目錄</span>
+            </a>
+            <a href="#about" class="py-2.5 px-3 rounded-xl bg-brand-accent text-white hover:bg-brand-accentDark transition text-center flex items-center justify-center gap-1.5">
+              <span>👩‍💼</span> <span>關於我介紹</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 區塊一：作品目錄 (快速索引與分類導覽) -->
+  <section id="directory" class="max-w-6xl mx-auto px-4 pt-7 pb-4">
+    <div class="bg-white dark:bg-brand-darkCard rounded-3xl p-4 sm:p-6 border border-stone-200/80 dark:border-stone-800 shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-stone-100 dark:border-stone-800">
+        <div>
+          <span class="text-[11px] font-bold uppercase tracking-widest text-brand-accent dark:text-brand-darkAccent">PORTFOLIO DIRECTORY</span>
+          <h2 class="font-serif text-xl sm:text-2xl font-bold text-brand-text dark:text-brand-darkText flex items-center gap-2">
+            <span>📑 作品目錄索引</span>
+            <span class="text-xs font-sans font-semibold px-2.5 py-0.5 rounded-full bg-brand-surface dark:bg-stone-800 text-stone-600 dark:text-stone-300">共 5 大資料夾 · 12 件作品</span>
+          </h2>
+        </div>
+        <p class="text-xs text-stone-500 dark:text-brand-darkMuted">
+          點擊下方目錄項目可快速定位至該作品圖卡，或直接點選「開啟」啟動作品。
+        </p>
+      </div>
+
+      <!-- 作品目錄列表 (依資料夾分類呈現，手機單欄、桌面雙欄/三欄) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mt-4 text-xs">
+        <!-- 1. clock/ -->
+        <div class="p-3.5 rounded-2xl bg-amber-50/60 dark:bg-stone-900/70 border border-amber-200/70 dark:border-stone-800">
+          <div class="font-bold text-amber-900 dark:text-amber-300 mb-2 flex items-center justify-between">
+            <span>⏱️ clock/ 時鐘與專注計時</span>
+            <span class="text-[11px] px-2 py-0.5 rounded-full bg-amber-200/70 dark:bg-amber-950 text-amber-900 dark:text-amber-300">4 件</span>
+          </div>
+          <ul class="space-y-1.5 text-stone-700 dark:text-stone-300">
+            <li class="flex items-center justify-between gap-2 py-1 border-b border-amber-200/40 dark:border-stone-800">
+              <a href="#work-bomb-timer" onclick="filterByCategory('all')" class="hover:text-brand-accent font-medium truncate">01. 任務代號：解除拖延炸彈</a>
+              <a href="./clock/clock_%20count_code_artifact.html" target="_blank" class="shrink-0 text-[11px] text-amber-700 dark:text-amber-400 font-bold hover:underline">開啟 ↗</a>
+            </li>
+            <li class="flex items-center justify-between gap-2 py-1 border-b border-amber-200/40 dark:border-stone-800">
+              <a href="#work-grace-timer" onclick="filterByCategory('all')" class="hover:text-brand-accent font-medium truncate">02. Grace 的美學計時器</a>
+              <a href="./clock/clock_aesthetic_timer.html" target="_blank" class="shrink-0 text-[11px] text-amber-700 dark:text-amber-400 font-bold hover:underline">開啟 ↗</a>
+            </li>
+            <li class="flex items-center justify-between gap-2 py-1 border-b border-amber-200/40 dark:border-stone-800">
+              <a href="#work-animal-clock" onclick="filterByCategory('all')" class="hover:text-brand-accent font-medium truncate">03. 超大型可愛動物時鐘</a>
+              <a href="./clock/clock_large_cute_animal.html" target="_blank" class="shrink-0 text-[11px] text-amber-700 dark:text-amber-400 font-bold hover:underline">開啟 ↗</a>
+            </li>
+            <li class="flex items-center justify-between gap-2 py-1">
+              <a href="#work-onepiece-timer" onclick="filterByCategory('all')" class="hover:text-brand-accent font-medium truncate">04. 航海王熱血大數字倒數計時器</a>
+              <a href="./clock/clock_one%20piece_artifact.html" target="_blank" class="shrink-0 text-[11px] text-amber-700 dark:text-amber-400 font-bold hover:underline">開啟 ↗</a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- 2. game/ & about/ -->
+        <div class="p-3.5 rounded-2xl bg-indigo-50/60 dark:bg-stone-900/70 border border-indigo-200/70 dark:border-stone-800 flex flex-col justify-between gap-3">
+          <div>
+            <div class="font-bold text-indigo-900 dark:text-indigo-300 mb-2 flex items-center justify-between">
+              <span>🎮 game/ 街機互動遊戲</span>
+              <span class="text-[11px] px-2 py-0.5 rounded-full bg-indigo-200/70 dark:bg-indigo-950 text-indigo-900 dark:text-indigo-300">2 件</span>
+            </div>
+            <ul class="space-y-1.5 text-stone-700 dark:text-stone-300">
+              <li class="flex items-center justify-between gap-2 py-1 border-b border-indigo-200/40 dark:border-stone-800">
+                <a href="#work-galaxy-striker" onclick="filterByCategory('all')" class="hover:text-indigo-600 font-medium truncate">05. 星際航擊大作戰 Galaxy Striker</a>
+                <a href="./game/game_%20Galaxy%20Striker.html" target="_blank" class="shrink-0 text-[11px] text-indigo-700 dark:text-indigo-400 font-bold hover:underline">開啟 ↗</a>
+              </li>
+              <li class="flex items-center justify-between gap-2 py-1">
+                <a href="#work-cyber-brick" onclick="filterByCategory('all')" class="hover:text-indigo-600 font-medium truncate">06. 《打磚塊大作戰》賽博航海篇</a>
+                <a href="./game/game_brick_artifact.html" target="_blank" class="shrink-0 text-[11px] text-indigo-700 dark:text-indigo-400 font-bold hover:underline">開啟 ↗</a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="pt-2 border-t border-indigo-200/50 dark:border-stone-800">
+            <div class="font-bold text-stone-800 dark:text-amber-200 mb-1.5 flex items-center justify-between">
+              <span>👩‍💼 about/ 個人品牌與諮詢</span>
+              <span class="text-[11px] px-2 py-0.5 rounded-full bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300">1 件</span>
+            </div>
+            <div class="flex items-center justify-between gap-2 py-0.5 text-stone-700 dark:text-stone-300">
+              <a href="#work-personal-brand" onclick="filterByCategory('all')" class="hover:text-brand-accent font-medium truncate">12. Grace Liu 個人品牌與 AI 諮詢網</a>
+              <a href="./about/portfolio_website.html" target="_blank" class="shrink-0 text-[11px] text-brand-accent dark:text-brand-darkAccent font-bold hover:underline">開啟 ↗</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Lucky/ & others/ -->
+        <div class="p-3.5 rounded-2xl bg-rose-50/60 dark:bg-stone-900/70 border border-rose-200/70 dark:border-stone-800 flex flex-col justify-between gap-3">
+          <div>
+            <div class="font-bold text-rose-900 dark:text-rose-300 mb-2 flex items-center justify-between">
+              <span>🔮 Lucky/ 開運選號與占卜</span>
+              <span class="text-[11px] px-2 py-0.5 rounded-full bg-rose-200/70 dark:bg-rose-950 text-rose-900 dark:text-rose-300">3 件</span>
+            </div>
+            <ul class="space-y-1.5 text-stone-700 dark:text-stone-300">
+              <li class="flex items-center justify-between gap-2 py-1 border-b border-rose-200/40 dark:border-stone-800">
+                <a href="#work-zodiac" onclick="filterByCategory('all')" class="hover:text-rose-600 font-medium truncate">07. 十二星座週運速報</a>
+                <a href="./Lucky/star%20sign.html" target="_blank" class="shrink-0 text-[11px] text-rose-700 dark:text-rose-400 font-bold hover:underline">開啟 ↗</a>
+              </li>
+              <li class="flex items-center justify-between gap-2 py-1 border-b border-rose-200/40 dark:border-stone-800">
+                <a href="#work-lotto" onclick="filterByCategory('all')" class="hover:text-rose-600 font-medium truncate">08. 喵嗚萌萌大樂透．開運隨機選號機</a>
+                <a href="./Lucky/taiwan_lotto_lucky_picker.html" target="_blank" class="shrink-0 text-[11px] text-rose-700 dark:text-rose-400 font-bold hover:underline">開啟 ↗</a>
+              </li>
+              <li class="flex items-center justify-between gap-2 py-1">
+                <a href="#work-tarot" onclick="filterByCategory('all')" class="hover:text-rose-600 font-medium truncate">09. 月影塔羅 Moonlit Tarot</a>
+                <a href="./Lucky/Tarot%20cards.html" target="_blank" class="shrink-0 text-[11px] text-rose-700 dark:text-rose-400 font-bold hover:underline">開啟 ↗</a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="pt-2 border-t border-rose-200/50 dark:border-stone-800">
+            <div class="font-bold text-emerald-900 dark:text-emerald-300 mb-1.5 flex items-center justify-between">
+              <span>💼 others/ 商務與生活工具</span>
+              <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-200/70 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-300">2 件</span>
+            </div>
+            <ul class="space-y-1 text-stone-700 dark:text-stone-300">
+              <li class="flex items-center justify-between gap-2 py-0.5 border-b border-rose-200/30 dark:border-stone-800">
+                <a href="#work-expense" onclick="filterByCategory('all')" class="hover:text-emerald-600 font-medium truncate">10. 企業差旅費報支申請系統</a>
+                <a href="./others/business%20travel%20expence%20claim%20code_artifact.html" target="_blank" class="shrink-0 text-[11px] text-emerald-700 dark:text-emerald-400 font-bold hover:underline">開啟 ↗</a>
+              </li>
+              <li class="flex items-center justify-between gap-2 py-0.5">
+                <a href="#work-invoice" onclick="filterByCategory('all')" class="hover:text-emerald-600 font-medium truncate">11. 招財喵吉發票對獎機</a>
+                <a href="./others/invoice%20code_artifact.html" target="_blank" class="shrink-0 text-[11px] text-emerald-700 dark:text-emerald-400 font-bold hover:underline">開啟 ↗</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 區塊二：作品小圖卡展示區 (含手機橫向滑動篩選列 + 搜尋框) -->
+  <section id="works" class="max-w-6xl mx-auto px-4 py-6">
+    <!-- 分類與搜尋控制列 -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6">
+      <!-- 手機橫向滑動分類膠囊 -->
+      <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1" role="tablist" aria-label="作品分類篩選">
+        <button onclick="filterByCategory('all')" data-cat="all" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition bg-brand-text text-white dark:bg-brand-darkAccent dark:text-stone-900 shadow-sm">
+          全部作品 (12)
+        </button>
+        <button onclick="filterByCategory('clock')" data-cat="clock" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition bg-white dark:bg-brand-darkCard text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hover:border-brand-accent">
+          ⏱️ 時鐘與計時 (4)
+        </button>
+        <button onclick="filterByCategory('game')" data-cat="game" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition bg-white dark:bg-brand-darkCard text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hover:border-brand-accent">
+          🎮 互動遊戲 (2)
+        </button>
+        <button onclick="filterByCategory('lucky')" data-cat="lucky" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition bg-white dark:bg-brand-darkCard text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hover:border-brand-accent">
+          🔮 開運與占卜 (3)
+        </button>
+        <button onclick="filterByCategory('others')" data-cat="others" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition bg-white dark:bg-brand-darkCard text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hover:border-brand-accent">
+          💼 商務與生活 (2)
+        </button>
+        <button onclick="filterByCategory('about')" data-cat="about" class="cat-btn shrink-0 px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition bg-white dark:bg-brand-darkCard text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hover:border-brand-accent">
+          👩‍💼 個人品牌 (1)
+        </button>
+      </div>
+
+      <!-- 關鍵字搜尋 -->
+      <div class="relative w-full md:w-64">
+        <input id="searchInput" type="search" oninput="handleSearch(this.value)" placeholder="搜尋作品名稱、API 或場景..."
+               class="w-full pl-9 pr-4 py-2 rounded-full text-xs sm:text-sm bg-white dark:bg-brand-darkCard border border-stone-200 dark:border-stone-700 focus:outline-none focus:border-brand-accent">
+        <svg class="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 作品小圖卡網格 (手機單欄、平板雙欄、桌面三欄) -->
+    <div id="cardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- 由下方 JavaScript 根據真實作品資料動態渲染 12 張精緻小圖卡 -->
+    </div>
+
+    <!-- 無搜尋結果提示 -->
+    <div id="emptyState" class="hidden text-center py-12 bg-white dark:bg-brand-darkCard rounded-3xl border border-stone-200 dark:border-stone-800">
+      <div class="text-4xl mb-2">🔍</div>
+      <p class="text-sm font-bold text-stone-600 dark:text-stone-300">找不到符合條件的作品</p>
+      <button onclick="resetFilter()" class="mt-3 px-4 py-2 rounded-full text-xs font-bold bg-brand-accent text-white">顯示全部作品</button>
+    </div>
+  </section>
+
+  <!-- 區塊三：關於我 (About Me - Grace Liu 呂逸庭) -->
+  <section id="about" class="max-w-6xl mx-auto px-4 py-8">
+    <div class="bg-gradient-to-br from-brand-surface via-white to-amber-50/40 dark:from-brand-darkSurface dark:via-brand-darkCard dark:to-stone-900 rounded-3xl p-6 sm:p-8 md:p-10 border border-stone-200/90 dark:border-stone-800 shadow-md">
+      
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+        <!-- 個人形象照與徽章 (手機置頂) -->
+        <div class="md:col-span-4 flex flex-col items-center text-center">
+          <div class="relative w-44 sm:w-52 aspect-[4/5] mb-4">
+            <div class="absolute inset-0 bg-brand-accent/20 dark:bg-brand-darkAccent/20 rounded-3xl translate-x-2.5 translate-y-2.5"></div>
+            <img src="https://img.ai365.fans/cdn-cgi/image/width=1400,quality=90,format=auto/artworks/c307372d-f253-464e-b49c-14b8f8d76963/y60b6zbnq3r.png"
+                 alt="Grace Liu 呂逸庭 - 20年服飾產品開發顧問 & AI 應用規劃師"
+                 class="relative w-full h-full object-cover rounded-3xl shadow-lg border-2 border-white dark:border-stone-700">
+          </div>
+          <span class="px-3 py-1 rounded-full bg-brand-accent text-white text-xs font-serif tracking-wider shadow-sm">
+            iPAS AI 應用規劃師初級認證
+          </span>
+          <p class="mt-2 font-serif text-xs text-stone-500 dark:text-brand-darkMuted italic">
+            "Technology with Empathy — 20 年經驗 × AI 技術"
+          </p>
+        </div>
+
+        <!-- 關於我詳細介紹 -->
+        <div class="md:col-span-8 space-y-4">
+          <div>
+            <span class="text-xs font-serif tracking-[0.25em] text-brand-accent dark:text-brand-darkAccent font-semibold uppercase">
+              ABOUT ME · 關於我
+            </span>
+            <h2 class="font-serif text-2xl sm:text-3xl font-bold text-brand-text dark:text-brand-darkText mt-1">
+              Grace Liu 呂逸庭｜從百萬件產品開發邁向 AI PM
+            </h2>
+          </div>
+
+          <p class="text-sm sm:text-base text-stone-700 dark:text-stone-300 leading-relaxed">
+            擁有 <strong>20 年女性服飾與內衣產品開發、採購管理經驗</strong>。我始終相信，好的產品不只是外表的修飾，更是內在的安穩。主導開發的舒適內衣以「透氣、動靜皆宜、穩定不跑位」為核心，不僅解決女性日常穿著痛點，更創下累計突破 <strong class="text-brand-accent dark:text-brand-darkAccent">1,000,000+ 百萬件</strong> 的銷售佳績。
+          </p>
+
+          <p class="text-sm sm:text-base text-stone-700 dark:text-stone-300 leading-relaxed">
+            近年積極投入 AI 領域並取得經濟部 <strong>iPAS AI 應用規劃師</strong> 認證。我將 20 年深入洞察使用者需求、親身驗證與成本交期量產的產品思維，結合生成式 AI 與前端互動開發，轉化為 <strong>AI 產品經理（AI PM）</strong> 的核心動能，創造有溫度且精準落地的科技產品。
+          </p>
+
+          <!-- 三大核心產品哲學 -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+            <div class="bg-white/90 dark:bg-stone-900/80 p-4 rounded-2xl border border-stone-200/70 dark:border-stone-800">
+              <div class="font-serif font-bold text-brand-accent dark:text-brand-darkAccent text-base">01. 洞察與傾聽</div>
+              <p class="text-xs text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">
+                深入研究市場競品與真實回饋，從日常對話與痛點中挖掘使用者真正的需求。
+              </p>
+            </div>
+            <div class="bg-white/90 dark:bg-stone-900/80 p-4 rounded-2xl border border-stone-200/70 dark:border-stone-800">
+              <div class="font-serif font-bold text-brand-accent dark:text-brand-darkAccent text-base">02. 親身驗證</div>
+              <p class="text-xs text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">
+                兼顧客觀數據與實際體驗，反覆測試每一個互動細節，確保順暢直覺的使用感受。
+              </p>
+            </div>
+            <div class="bg-white/90 dark:bg-stone-900/80 p-4 rounded-2xl border border-stone-200/70 dark:border-stone-800">
+              <div class="font-serif font-bold text-brand-accent dark:text-brand-darkAccent text-base">03. 落地量產</div>
+              <p class="text-xs text-stone-600 dark:text-stone-400 mt-1 leading-relaxed">
+                將感性需求轉化為理性規格，結合 AI 工具與前端技術，讓創意快速驗證並交付上場。
+              </p>
+            </div>
+          </div>
+
+          <!-- 社群與行動呼籲按鈕 -->
+          <div class="flex flex-wrap items-center gap-3 pt-3">
+            <a href="./about/portfolio_website.html" target="_blank" rel="noopener"
+               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-accent hover:bg-brand-accentDark text-white text-xs sm:text-sm font-bold shadow-sm transition">
+              <span>🌐 開啟完整個人品牌與預約諮詢網</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </a>
+
+            <a href="https://www.linkedin.com/in/graceliu0508" target="_blank" rel="noopener noreferrer"
+               class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs sm:text-sm font-semibold hover:border-brand-accent transition">
+              <svg class="w-4 h-4 text-[#0A66C2] fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+              <span>LinkedIn</span>
+            </a>
+
+            <a href="https://www.facebook.com/grace.liu.79219" target="_blank" rel="noopener noreferrer"
+               class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-xs sm:text-sm font-semibold hover:border-brand-accent transition">
+              <svg class="w-4 h-4 text-[#1877F2] fill-current" viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/></svg>
+              <span>Facebook</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 頁尾 -->
+  <footer class="max-w-6xl mx-auto px-4 py-8 text-center text-xs text-stone-500 dark:text-stone-400 border-t border-stone-200/60 dark:border-stone-800">
+    <p class="font-serif text-sm text-brand-text dark:text-brand-darkText font-semibold mb-1">我的網頁作品集 · Grace Liu 呂逸庭</p>
+    <p>© 2026 Grace Liu. Design with Empathy · 20年產品開發經驗 × AI 應用規劃</p>
+  </footer>
+
+  <!-- 手機專屬底部固定導覽列 (Mobile Bottom Navigation Bar) -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-brand-darkSurface/95 backdrop-blur-md border-t border-stone-200 dark:border-stone-800 px-2 py-1.5 flex items-center justify-around shadow-lg" style="padding-bottom: calc(0.375rem + env(safe-area-inset-bottom, 0px));">
+    <a href="#top" class="flex flex-col items-center py-1 px-3 rounded-xl text-stone-600 dark:text-stone-300 hover:text-brand-accent">
+      <span class="text-base leading-none">🏠</span>
+      <span class="text-[10px] font-bold mt-1">首頁</span>
+    </a>
+    <a href="#directory" class="flex flex-col items-center py-1 px-3 rounded-xl text-stone-600 dark:text-stone-300 hover:text-brand-accent">
+      <span class="text-base leading-none">📑</span>
+      <span class="text-[10px] font-bold mt-1">作品目錄</span>
+    </a>
+    <a href="#works" class="flex flex-col items-center py-1 px-3 rounded-xl text-brand-accent dark:text-brand-darkAccent">
+      <span class="text-base leading-none">🎨</span>
+      <span class="text-[10px] font-bold mt-1">作品圖卡</span>
+    </a>
+    <a href="#about" class="flex flex-col items-center py-1 px-3 rounded-xl text-stone-600 dark:text-stone-300 hover:text-brand-accent">
+      <span class="text-base leading-none">👩‍💼</span>
+      <span class="text-[10px] font-bold mt-1">關於我</span>
+    </a>
+  </nav>
+
+  <!-- 頁內即時預覽 Modal (支援手機與桌面直接免跳頁體驗作品，或新分頁開啟) -->
+  <div id="previewModal" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-sm flex flex-col">
+    <div class="bg-stone-900 text-white px-4 py-3 flex items-center justify-between border-b border-stone-700">
+      <div class="flex items-center gap-2 min-w-0">
+        <span id="modalEmoji" class="text-lg">🚀</span>
+        <div class="truncate">
+          <div id="modalTitle" class="font-bold text-sm truncate">作品預覽</div>
+          <div id="modalPath" class="text-[11px] text-stone-400 font-mono truncate"></div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <a id="modalDriveLink" href="#" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-semibold border border-stone-600 transition">
+          雲端硬碟檢視
+        </a>
+        <a id="modalNewTabLink" href="#" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-lg bg-brand-accent hover:bg-brand-accentDark text-white text-xs font-bold transition">
+          新分頁打開 ↗
+        </a>
+        <button onclick="closePreview()" class="p-1.5 rounded-lg bg-stone-800 hover:bg-rose-600 text-white transition" aria-label="關閉預覽">
+          ✕
+        </button>
+      </div>
+    </div>
+    <div class="flex-1 bg-stone-950 relative">
+      <iframe id="previewIframe" src="about:blank" class="w-full h-full border-0" title="作品互動預覽"></iframe>
+    </div>
+  </div>
+
+  <!-- 12 件作品完整資料庫與渲染腳本 -->
+  <script>
+    const WORKS_DATA = [
+      {
+        id: 'work-bomb-timer',
+        num: '01',
+        category: 'clock',
+        categoryLabel: '時鐘與計時',
+        folder: 'clock/',
+        title: '任務代號：解除拖延炸彈',
+        subtitle: '特務拆彈主題遊戲化專注計時器',
+        path: './clock/clock_%20count_code_artifact.html',
+        rawPath: 'clock/clock_ count_code_artifact.html',
+        driveUrl: 'https://drive.google.com/file/d/1ODmw_3Gpt6t2X-NM2f68KF28OrO7qYcd/view',
+        emoji: '💣',
+        gradient: 'from-slate-900 via-red-950 to-amber-900',
+        accentBadge: 'bg-red-500/20 text-red-200 border-red-400/30',
+        previewLabel: '00:59 🔥 拆彈倒數中',
+        description: '以特務拆彈為主題的遊戲化專注倒數計時器。使用者可自訂目標任務名稱與限制時間，啟動後搭配動態燃燒導火線進度條與模擬心跳滴答聲；隨剩餘時間減少，背景音樂 BPM 會分階段加速並觸發畫面震動特效，完成任務即可點擊「剪斷紅線」成功拆彈，有效擊退拖延症。',
+        apis: ['Tone.js 音訊合成 API', 'Web Audio BPM 動態調速', 'SetInterval 計時器 API', 'CSS Keyframes 震動特效'],
+        scenarios: '兒童與學生寫作業限時挑戰、個人番茄鐘深度工作、家務整理或短時間高專注力衝刺任務。'
+      },
+      {
+        id: 'work-grace-timer',
+        num: '02',
+        category: 'clock',
+        categoryLabel: '時鐘與計時',
+        folder: 'clock/',
+        title: 'Grace 的美學計時器',
+        subtitle: '吉卜利/時尚/古典三主題沉浸式計時器',
+        path: './clock/clock_aesthetic_timer.html',
+        rawPath: 'clock/clock_aesthetic_timer.html',
+        driveUrl: 'https://drive.google.com/file/d/1wAW54oxQHCYsstq1iltqCdWR0EAg00lo/view',
+        emoji: '🌅',
+        gradient: 'from-amber-700 via-orange-600 to-rose-700',
+        accentBadge: 'bg-amber-300/20 text-amber-100 border-amber-300/40',
+        previewLabel: '25:00 ✨ 呼吸光暈圓環',
+        description: '融合吉卜利休閒、現代時尚與古典復古三大主題的沉浸式美學計時器。具備 SVG 圓形呼吸光暈進度條、翻牌式微動畫數字與正能量金句自動輪播；內建雙圖層無縫淡入淡出風景桌布系統，支援自訂標題、完成祝賀詞、快捷時間標籤與最多 10 張自訂背景圖，倒數結束更會釋放繽紛慶祝紙花。',
+        apis: ['Web Storage (localStorage) API', 'Canvas Confetti 紙花 API', 'SVG Stroke-dashoffset 動畫', 'Image Preload 預載機制', 'KeyboardEvent 空白鍵控制'],
+        scenarios: '冥想與正念呼吸練習、閱讀與寫作伴讀計時、瑜珈伸展、會議休息倒數與桌面美學氛圍營造。'
+      },
+      {
+        id: 'work-animal-clock',
+        num: '03',
+        category: 'clock',
+        categoryLabel: '時鐘與計時',
+        folder: 'clock/',
+        title: '超大型可愛動物時鐘',
+        subtitle: '高畫質萌寵輪播全螢幕療癒數位時鐘',
+        path: './clock/clock_large_cute_animal.html',
+        rawPath: 'clock/clock_large_cute_animal.html',
+        driveUrl: 'https://drive.google.com/file/d/1wpRGX0QJWimVQHMRW6X80ajesBUB_KAb/view',
+        emoji: '🐾',
+        gradient: 'from-pink-600 via-rose-500 to-amber-500',
+        accentBadge: 'bg-pink-200/20 text-pink-100 border-pink-200/40',
+        previewLabel: '10:30:28 🐶 萌寵桌布輪播',
+        description: '專為大螢幕與桌布展示設計的療癒系全螢幕數位時鐘。精選 12 張高解析度萌寵攝影（薩摩耶、摺耳貓、小水獺等），透過雙緩衝圖層實現絲滑交叉淡入淡出輪播，並依據一天不同時段自動切換暖心問候語；支援 12/24 小時制、秒數開關、背景調光深淺與雙擊全螢幕切換。',
+        apis: ['Fullscreen API 全螢幕控制', 'JavaScript Date 即時時鐘', 'Unsplash 高畫質影像 API', 'Lucide Icons 圖示庫', '雙圖層 Cross-fade 緩存'],
+        scenarios: '書房與辦公桌常駐螢幕時鐘、教室與會議室大型看板、居家數位相框與午後療癒放鬆背景。'
+      },
+      {
+        id: 'work-onepiece-timer',
+        num: '04',
+        category: 'clock',
+        categoryLabel: '時鐘與計時',
+        folder: 'clock/',
+        title: '航海王熱血大數字倒數計時器',
+        subtitle: '三大航海主題與原生音效合成專注計時',
+        path: './clock/clock_one%20piece_artifact.html',
+        rawPath: 'clock/clock_one piece_artifact.html',
+        driveUrl: 'https://drive.google.com/file/d/1MhdZ8MnVITyi8CounUATelBMd4keQ6tq/view',
+        emoji: '⚓',
+        gradient: 'from-blue-900 via-sky-800 to-amber-600',
+        accentBadge: 'bg-amber-400/20 text-amber-200 border-amber-300/40',
+        previewLabel: '25:00 👒 偉大航道專注',
+        description: '以航海冒險為靈感打造的熱血大數字專注計時器。內建「經典草帽」、「新世界深海」與「冒險羅盤」三種漸層配色主題，結合橡膠果實彈跳按鈕手感、飄浮雲朵 SVG 動畫與網頁標題即時倒數同步；採用原生音訊合成倒數提示音與勝利號角，完成航行時自動噴發彩帶並彈出祝賀視窗。',
+        apis: ['Web Audio API 原生音效合成', 'Fullscreen API 全螢幕模式', 'Canvas Confetti 慶祝彩帶', 'Document Title 動態同步'],
+        scenarios: '25 分鐘番茄工作法（航海專注）、健身間歇訓練計時、桌遊與團康活動倒數、課堂測驗限時提醒。'
+      },
+      {
+        id: 'work-galaxy-striker',
+        num: '05',
+        category: 'game',
+        categoryLabel: '互動遊戲',
+        folder: 'game/',
+        title: '星際航擊大作戰 Galaxy Striker',
+        subtitle: '視差星空與程序化合成電音縱向射擊遊戲',
+        path: './game/game_%20Galaxy%20Striker.html',
+        rawPath: 'game/game_ Galaxy Striker.html',
+        driveUrl: 'https://drive.google.com/file/d/1Q9BE4WFdK9UWZIZK98Fuwet_5HZRI4Ki/view',
+        emoji: '🚀',
+        gradient: 'from-indigo-950 via-purple-900 to-cyan-700',
+        accentBadge: 'bg-cyan-400/20 text-cyan-200 border-cyan-400/40',
+        previewLabel: 'WAVE 1 · HI-SCORE 射擊',
+        description: '純原生程式碼打造的街機風縱向太空射擊遊戲。具備三層視差滾動星空與動態星雲背景，支援多波次敵機生成、Boss 戰、連擊加分與武器升級、護盾、急速射擊等道具掉落；搭載純 Web Audio 即時合成的 138 BPM 動感電子背景樂與爆炸音效，並針對手機觸控偏移與高刷新率螢幕深度優化。',
+        apis: ['HTML5 Canvas 2D 渲染 API', 'Web Audio API 編曲合成器', 'Touch & Pointer Events 觸控', 'Page Visibility API 自動暫停', 'localStorage 最高分紀錄'],
+        scenarios: '手機與電腦休閒娛樂、零外部音訊素材之程序化音樂遊戲開發示範、RWD 觸控互動教學展示。'
+      },
+      {
+        id: 'work-cyber-brick',
+        num: '06',
+        category: 'game',
+        categoryLabel: '互動遊戲',
+        folder: 'game/',
+        title: '《打磚塊大作戰》— 賽博航海篇',
+        subtitle: '惡魔果實強化與霓虹粒子物理打磚塊',
+        path: './game/game_brick_artifact.html',
+        rawPath: 'game/game_brick_artifact.html',
+        driveUrl: 'https://drive.google.com/file/d/1HgpS86SMoJ7Z61mfCPKhr9a48CCLKixv/view',
+        emoji: '🧱',
+        gradient: 'from-slate-950 via-cyan-900 to-yellow-600',
+        accentBadge: 'bg-yellow-400/20 text-yellow-200 border-yellow-400/40',
+        previewLabel: 'CYBER BREAKOUT · 霸氣貫穿',
+        description: '結合賽博龐克霓虹視覺與航海霸氣元素的街機打磚塊遊戲。設計一般磚、強化裝甲磚與連鎖引爆的紅色炸彈磚，擊碎後可隨機獲得「多重分身」、「橡膠變寬」、「武裝色貫穿球」與「霸王色防護網」四大強化果實；搭配畫面震動回饋、粒子爆破特效與 8-bit Synthwave 合成低音配樂，爽快感十足。',
+        apis: ['HTML5 Canvas 2D 物理與粒子', 'Web Audio BiquadFilter 合成', 'requestAnimationFrame 遊戲迴圈', 'Touch & Mouse Events 拖曳控制', 'localStorage 戰績儲存'],
+        scenarios: '通勤零碎時間解壓小遊戲、Web 2D 物理碰撞與粒子特效實作範例、復古街機互動體驗。'
+      },
+      {
+        id: 'work-zodiac',
+        num: '07',
+        category: 'lucky',
+        categoryLabel: '開運與占卜',
+        folder: 'Lucky/',
+        title: '十二星座週運速報',
+        subtitle: '復古報刊新野獸派風格星座週運指南',
+        path: './Lucky/star%20sign.html',
+        rawPath: 'Lucky/star sign.html',
+        driveUrl: 'https://drive.google.com/file/d/1BlT-KQ-HFzhbGlrEhqVnD0jTdvjZkC5c/view',
+        emoji: '♈',
+        gradient: 'from-red-700 via-amber-600 to-yellow-500',
+        accentBadge: 'bg-amber-100/25 text-amber-100 border-amber-200/40',
+        previewLabel: '12 SIGNS · 愛情/工作/財運',
+        description: '採用美式復古報刊與新野獸派（Neo-Brutalism）粗框陰影風格設計的十二星座每週運勢看板。點選任一星座即可無縫切換當週整體節奏總覽、幸運指數百分比計量條、幸運色與幸運數字，並分欄呈現愛情運、工作運、財運解析與本週暖心提醒，版面鮮明且支援手機自適應網格。',
+        apis: ['FreeHoroscopeAPI 端點結構', 'CSS light-dark() 色彩模式', 'ARIA 無障礙狀態連動 API', 'JavaScript Date 動態年份'],
+        scenarios: '每週星座運勢快速查詢、社群媒體生活風格內容互動頁、報刊雜誌風前端視覺設計展示。'
+      },
+      {
+        id: 'work-lotto',
+        num: '08',
+        category: 'lucky',
+        categoryLabel: '開運與占卜',
+        folder: 'Lucky/',
+        title: '喵嗚萌萌大樂透．開運隨機選號機',
+        subtitle: '四大選號演算法與招財貓互動包牌工具',
+        path: './Lucky/taiwan_lotto_lucky_picker.html',
+        rawPath: 'Lucky/taiwan_lotto_lucky_picker.html',
+        driveUrl: 'https://drive.google.com/file/d/191DXpSL-KyK0J2KnscOGGTIWJ86rIKXf/view',
+        emoji: '🧧',
+        gradient: 'from-pink-500 via-rose-400 to-amber-400',
+        accentBadge: 'bg-white/25 text-white border-white/40',
+        previewLabel: '01~49 選 6 碼 · 招財喵加持',
+        description: '結合招財貓互動儀式感的台灣彩券大樂透（01～49 選 6 碼）智慧選號工具。提供「純純隨機」、「陰陽奇偶平衡」、「冷熱高低交替」與「生辰開運符」四大選號演算法，支援自訂必含幸運號與排除忌諱號；內建摸摸招財貓累積歐氣值、單組或五組連發包牌、3D 彩球彈跳動畫與一鍵複製選號清單功能。',
+        apis: ['Tone.js PolySynth 萌系音效', 'Clipboard 剪貼簿複製 API', 'Canvas Confetti 開運紙花', '加權隨機與奇偶平衡演算法'],
+        scenarios: '台灣大樂透彩券包牌與快選參考、親友聚會開運娛樂互動、摸彩與隨機數字抽取工具。'
+      },
+      {
+        id: 'work-tarot',
+        num: '09',
+        category: 'lucky',
+        categoryLabel: '開運與占卜',
+        folder: 'Lucky/',
+        title: '月影塔羅 Moonlit Tarot',
+        subtitle: '78 張全牌組過去現在未來三牌陣占卜',
+        path: './Lucky/Tarot%20cards.html',
+        rawPath: 'Lucky/Tarot cards.html',
+        driveUrl: 'https://drive.google.com/file/d/1ofc1EuTpKxZ7SLDvCVsfFATi0XAIiiRT/view',
+        emoji: '🌙',
+        gradient: 'from-indigo-950 via-slate-900 to-amber-800',
+        accentBadge: 'bg-amber-300/20 text-amber-200 border-amber-300/40',
+        previewLabel: '78 CARDS · 過去 / 現在 / 未來',
+        description: '以羊皮紙與夜藍金箔美學打造的沉浸式三牌陣（過去、現在、未來）塔羅占卜系統。完整收錄 78 張偉特塔羅牌組與正逆位詳盡中文牌義，提供綜合、愛情、事業、學業與內在五大提問方向；具備擬真交錯洗牌動畫、3D 翻牌過渡與原創 SVG 牌面插畫，並自動生成三張牌的整體脈絡總結與行動建議。',
+        apis: ['Tarot API (ekelen 78張牌資料集)', 'CSS 3D Transforms 翻牌特效', '動態 SVG 塔羅牌面繪製引擎', 'prefers-color-scheme 主題感知'],
+        scenarios: '日常自我探索與心靈沉澱、感情與職涯抉擇梳理、無障礙與深淺色雙棲之文藝風互動網頁示範。'
+      },
+      {
+        id: 'work-expense',
+        num: '10',
+        category: 'others',
+        categoryLabel: '商務與生活',
+        folder: 'others/',
+        title: '企業差旅費報支申請系統',
+        subtitle: '多幣別自動試算與格式化 Excel 報表匯出',
+        path: './others/business%20travel%20expence%20claim%20code_artifact.html',
+        rawPath: 'others/business travel expence claim code_artifact.html',
+        driveUrl: 'https://drive.google.com/file/d/1Hj0p-kU6jSgtqwzhv_qWo2nc_KsCa-X-/view',
+        emoji: '💼',
+        gradient: 'from-slate-800 via-blue-900 to-sky-700',
+        accentBadge: 'bg-sky-300/20 text-sky-100 border-sky-300/40',
+        previewLabel: 'EXP-2026 · 一鍵匯出 .xlsx',
+        description: '專為企業行政與出差人員設計的數位化差旅費報支單系統。可自動生成具日期與亂數之申請單號，支援多幣別（TWD、USD、JPY 等）與八大費用類別動態新增、刪除與即時試算預借款扣抵後之實付淨額；填寫完成後可一鍵匯出含專業表格框線、字型設定、雙底線結算與簽核欄位的 .xlsx 報表。',
+        apis: ['ExcelJS 報表格式化匯出 API', 'FileSaver.js / Blob 檔案下載', 'HTML5 Date & Number 格式化', '動態表格 DOM 增刪管理'],
+        scenarios: '企業員工出差費用申報、中小型團隊免後端表單數位化、財務核銷單據自動排版與 Excel 匯出。'
+      },
+      {
+        id: 'work-invoice',
+        num: '11',
+        category: 'others',
+        categoryLabel: '商務與生活',
+        folder: 'others/',
+        title: '招財喵吉發票對獎機',
+        subtitle: '眼睛看板、末三碼快篩與相機 QR 掃碼對獎',
+        path: './others/invoice%20code_artifact.html',
+        rawPath: 'others/invoice code_artifact.html',
+        driveUrl: 'https://drive.google.com/file/d/1jqGP92HYt0eaclUNootx3IwTdsKAt3fl/view',
+        emoji: '🐱',
+        gradient: 'from-amber-500 via-orange-500 to-red-500',
+        accentBadge: 'bg-white/25 text-white border-white/40',
+        previewLabel: '統一發票 4 合 1 掃碼對獎',
+        description: '整合四種對獎模式的台灣統一發票開運對獎神器。獨創免打字的「眼睛直覺對獎看板」高亮顯示頭獎末三碼，並提供「末三碼九宮格快篩」、「完整 8 碼精準比對」與「相機掃描電子發票 QR Code / 上傳照片辨識」功能；內建多期別切換、對獎歷史小冊與招財貓語音級別的暖心鼓勵與中獎慶祝彩帶。',
+        apis: ['Html5Qrcode 相機與圖片掃碼 API', 'MediaDevices getUserMedia 鏡頭', 'Web Audio API 獎項音效合成', 'Canvas Confetti 彩帶特效'],
+        scenarios: '每單月 25 日統一發票開獎快速核對、大量紙本發票末三碼極速篩選、手機相機掃碼自動兌獎。'
+      },
+      {
+        id: 'work-personal-brand',
+        num: '12',
+        category: 'about',
+        categoryLabel: '個人品牌',
+        folder: 'about/',
+        title: 'Grace Liu 個人品牌與 AI 諮詢網站',
+        subtitle: '20年服飾開發顧問暨 AI PM 預約諮詢平台',
+        path: './about/portfolio_website.html',
+        rawPath: 'about/portfolio_website.html',
+        driveUrl: 'https://drive.google.com/file/d/1uFcqejNgW6tcw0vJtnXKEBm7VAOE0k7B/view',
+        emoji: '👩‍💼',
+        gradient: 'from-stone-700 via-amber-800 to-stone-900',
+        accentBadge: 'bg-amber-200/20 text-amber-100 border-amber-200/40',
+        previewLabel: '1,000,000+ 銷售實績 × AI PM',
+        description: '專為 20 年服飾產品開發顧問暨 iPAS AI 應用規劃師打造的文藝大地色系個人品牌網站。展現主導百萬件舒適內衣銷售的「洞察、驗證、量產」三步驟哲學與 AI PM 轉型願景；內建深淺色主題記憶、懸浮背景音樂播放器、AEO 結構化資料標記，並串接 Google Apps Script 雲端表單實現線上預約諮詢。',
+        apis: ['Fetch API + Google Apps Script', 'Schema.org JSON-LD (SEO/AEO)', 'IntersectionObserver 捲動動畫', 'HTML5 Audio 背景音樂 API', 'localStorage 深淺色記憶'],
+        scenarios: 'AI PM 與產品顧問個人品牌形象展示、企業 AI 導入諮詢預約收集、SEO 與 AI 搜尋引擎優化（AEO）實務示範。'
+      }
+    ];
+
+    let currentCategory = 'all';
+    let currentSearch = '';
+
+    function renderCards() {
+      const grid = document.getElementById('cardsGrid');
+      const emptyState = document.getElementById('emptyState');
+
+      const filtered = WORKS_DATA.filter(item => {
+        const matchCat = currentCategory === 'all' || item.category === currentCategory;
+        const q = currentSearch.trim().toLowerCase();
+        const matchQuery = !q ||
+          item.title.toLowerCase().includes(q) ||
+          item.subtitle.toLowerCase().includes(q) ||
+          item.description.toLowerCase().includes(q) ||
+          item.scenarios.toLowerCase().includes(q) ||
+          item.apis.some(a => a.toLowerCase().includes(q));
+        return matchCat && matchQuery;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      grid.innerHTML = filtered.map(item => `
+        <article id="${item.id}" class="card-hover bg-white dark:bg-brand-darkCard rounded-3xl border border-stone-200/90 dark:border-stone-800 shadow-sm overflow-hidden flex flex-col justify-between">
+          <div>
+            <!-- 小圖卡視覺預覽區 (Mini-Card Graphic Header) -->
+            <div class="relative h-40 bg-gradient-to-br ${item.gradient} p-4 flex flex-col justify-between text-white overflow-hidden">
+              <!-- 背景幾何裝飾光暈 -->
+              <div class="absolute -right-6 -bottom-8 text-8xl opacity-15 select-none pointer-events-none transform rotate-12">
+                ${item.emoji}
+              </div>
+              <div class="absolute top-0 left-0 right-0 h-full bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.18),transparent_60%)] pointer-events-none"></div>
+
+              <!-- 頂部標籤列 -->
+              <div class="relative z-10 flex items-center justify-between gap-2">
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold border backdrop-blur-sm ${item.accentBadge}">
+                  #${item.num} · ${item.categoryLabel}
+                </span>
+                <span class="text-[11px] font-mono bg-black/30 px-2.5 py-0.5 rounded-full border border-white/15 backdrop-blur-sm">
+                  📂 ${item.folder}
+                </span>
+              </div>
+
+              <!-- 中央微縮視覺圖示與模擬介面膠囊 -->
+              <div class="relative z-10 flex items-end justify-between gap-3 mt-auto">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-md border border-white/30 flex items-center justify-center text-2xl shadow-inner shrink-0 animate-float-slow">
+                    ${item.emoji}
+                  </div>
+                  <div class="min-w-0">
+                    <h3 class="font-bold text-base sm:text-lg leading-snug text-white drop-shadow truncate">
+                      ${item.title}
+                    </h3>
+                    <p class="text-xs text-white/80 truncate mt-0.5">
+                      ${item.subtitle}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 底部模擬狀態條 -->
+              <div class="relative z-10 mt-2 pt-2 border-t border-white/15 flex items-center justify-between text-[11px] text-white/90 font-medium">
+                <span class="truncate">${item.previewLabel}</span>
+                <span class="font-mono text-[10px] opacity-75">HTML5 · RWD</span>
+              </div>
+            </div>
+
+            <!-- 圖卡下方內容區：100字簡介、使用API、應用場景 -->
+            <div class="p-5 space-y-4">
+              <!-- 100字作品簡介 -->
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="text-[11px] font-bold uppercase tracking-wider text-brand-accent dark:text-brand-darkAccent flex items-center gap-1">
+                    <span>📝 作品簡介</span>
+                  </span>
+                  <span class="text-[10px] text-stone-400 dark:text-stone-500">約 ${item.description.length} 字</span>
+                </div>
+                <p class="text-xs sm:text-[13px] text-stone-700 dark:text-stone-300 leading-relaxed text-justify">
+                  ${item.description}
+                </p>
+              </div>
+
+              <!-- 使用到的 API 與技術 -->
+              <div>
+                <div class="text-[11px] font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400 mb-1.5 flex items-center gap-1">
+                  <span>⚡ 使用到的 API 與技術</span>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  ${item.apis.map(api => `
+                    <span class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-brand-surface dark:bg-stone-800 text-stone-700 dark:text-stone-200 border border-stone-200/80 dark:border-stone-700">
+                      ${api}
+                    </span>
+                  `).join('')}
+                </div>
+              </div>
+
+              <!-- 應用場景 -->
+              <div class="p-3 rounded-2xl bg-stone-50 dark:bg-stone-900/70 border border-stone-200/60 dark:border-stone-800">
+                <div class="text-[11px] font-bold text-stone-600 dark:text-stone-300 mb-0.5 flex items-center gap-1">
+                  <span>🎯 應用場景</span>
+                </div>
+                <p class="text-xs text-stone-600 dark:text-stone-400 leading-relaxed">
+                  ${item.scenarios}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 底部操作按鈕區：打開作品 + 頁內預覽 -->
+          <div class="px-5 pb-5 pt-1 flex items-center gap-2">
+            <a href="${item.path}" target="_blank" rel="noopener"
+               class="flex-1 py-2.5 px-4 rounded-xl bg-brand-text hover:bg-brand-accent dark:bg-brand-darkAccent dark:hover:bg-amber-300 text-white dark:text-stone-900 font-bold text-xs sm:text-sm text-center shadow-sm transition flex items-center justify-center gap-1.5">
+              <span>🚀 打開作品</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+            </a>
+            <button type="button" onclick="openPreview('${item.id}')"
+                    class="py-2.5 px-3.5 rounded-xl bg-brand-surface hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 font-semibold text-xs sm:text-sm transition flex items-center justify-center gap-1"
+                    title="在目前頁面內開啟互動預覽視窗">
+              <span>📱 預覽</span>
+            </button>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function filterByCategory(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+        if (btn.getAttribute('data-cat') === cat) {
+          btn.className = 'cat-btn shrink-0 px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition bg-brand-text text-white dark:bg-brand-darkAccent dark:text-stone-900 shadow-sm';
+        } else {
+          btn.className = 'cat-btn shrink-0 px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition bg-white dark:bg-brand-darkCard text-stone-600 dark:text-stone-300 border border-stone-200 dark:border-stone-700 hover:border-brand-accent';
+        }
+      });
+      renderCards();
+    }
+
+    function handleSearch(val) {
+      currentSearch = val;
+      renderCards();
+    }
+
+    function resetFilter() {
+      currentSearch = '';
+      document.getElementById('searchInput').value = '';
+      filterByCategory('all');
+    }
+
+    // 頁內預覽視窗控制
+    function openPreview(workId) {
+      const item = WORKS_DATA.find(w => w.id === workId);
+      if (!item) return;
+      document.getElementById('modalEmoji').textContent = item.emoji;
+      document.getElementById('modalTitle').textContent = item.title;
+      document.getElementById('modalPath').textContent = item.rawPath;
+      document.getElementById('modalNewTabLink').href = item.path;
+      document.getElementById('modalDriveLink').href = item.driveUrl;
+      document.getElementById('previewIframe').src = item.path;
+      document.getElementById('previewModal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closePreview() {
+      document.getElementById('previewModal').classList.add('hidden');
+      document.getElementById('previewIframe').src = 'about:blank';
+      document.body.style.overflow = '';
+    }
+
+    // 深淺色模式控制
+    function initTheme() {
+      const saved = localStorage.getItem('portfolio_theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (!saved && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('portfolio_theme', isDark ? 'dark' : 'light');
+    }
+
+    initTheme();
+    renderCards();
+  </script>
+</body>
+</html>

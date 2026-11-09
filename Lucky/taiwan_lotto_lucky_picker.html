@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>✨ 喵嗚萌萌大樂透．開運隨機選號機 ✨</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tone.js for cute procedural sound effects -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- Google Fonts: Zen Maru Gothic & Nunito -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@400;700;900&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Zen Maru Gothic', cursive, sans-serif;
+      background: radial-gradient(circle at top, #FFF0F5 0%, #FFF7ED 50%, #F5F3FF 100%);
+      min-height: 100vh;
+    }
+
+    /* Floating Cloud Animation */
+    @keyframes floatSoft {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-8px) rotate(1.5deg); }
+    }
+
+    @keyframes popBounce {
+      0% { transform: scale(0.3) rotate(-20deg); opacity: 0; }
+      60% { transform: scale(1.15) rotate(8deg); opacity: 1; }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+
+    @keyframes pawTap {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(6px) rotate(-10deg); }
+    }
+
+    @keyframes sparkleGlow {
+      0%, 100% { opacity: 0.4; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.15); filter: drop-shadow(0 0 10px #f472b6); }
+    }
+
+    .animate-float {
+      animation: floatSoft 4s ease-in-out infinite;
+    }
+
+    .animate-paw {
+      animation: pawTap 1.2s ease-in-out infinite;
+    }
+
+    .animate-sparkle {
+      animation: sparkleGlow 2.5s infinite ease-in-out;
+    }
+
+    .ball-pop {
+      animation: popBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    /* Lotto Ball Gradient & 3D Lighting */
+    .lotto-ball {
+      position: relative;
+      background: radial-gradient(circle at 32% 28%, #ffffff 0%, rgba(255,255,255,0.85) 15%, transparent 40%),
+                  linear-gradient(135deg, var(--ball-c1), var(--ball-c2));
+      box-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.12),
+                  0 4px 6px -2px rgba(0, 0, 0, 0.05),
+                  inset 0 -6px 8px rgba(0, 0, 0, 0.18),
+                  inset 0 4px 6px rgba(255, 255, 255, 0.6);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .lotto-ball:hover {
+      transform: translateY(-6px) scale(1.08);
+    }
+
+    /* Custom cute scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #FBCFE8;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+  </style>
+</head>
+<body class="text-stone-700 antialiased selection:bg-pink-200 selection:text-pink-800 flex flex-col justify-between min-h-screen">
+
+  <!-- Floating Background Decorative Sparkles -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden -z-10 opacity-70">
+    <div class="absolute top-10 left-[8%] text-3xl animate-float" style="animation-delay: 0s;">✨</div>
+    <div class="absolute top-28 right-[12%] text-2xl animate-float" style="animation-delay: 1.5s;">🍀</div>
+    <div class="absolute bottom-20 left-[15%] text-3xl animate-float" style="animation-delay: 2.2s;">🐾</div>
+    <div class="absolute bottom-32 right-[10%] text-4xl animate-float" style="animation-delay: 0.8s;">🌈</div>
+    <div class="absolute top-1/2 left-[3%] text-2xl animate-sparkle">⭐</div>
+    <div class="absolute top-1/3 right-[4%] text-2xl animate-sparkle" style="animation-delay: 1s;">🌸</div>
+  </div>
+
+  <!-- Header Banner -->
+  <header class="w-full pt-8 pb-4 text-center px-4">
+    <div class="inline-flex items-center gap-2 bg-white/80 backdrop-blur-md px-4 py-1.5 rounded-full border border-pink-100 shadow-sm text-sm text-pink-500 font-bold mb-3 animate-float">
+      <span>🐱 招財招福研究所</span>
+      <span class="w-1.5 h-1.5 rounded-full bg-pink-400"></span>
+      <span id="daily-zodiac">今日幸運色：櫻花粉 🌸</span>
+    </div>
+
+    <h1 class="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-rose-400 to-amber-400 tracking-wide drop-shadow-sm flex items-center justify-center gap-2">
+      大樂透．開運隨機選號
+      <span class="text-2xl md:text-3xl animate-bounce">🧧</span>
+    </h1>
+    <p class="mt-2 text-stone-500 text-sm md:text-base font-medium max-w-md mx-auto">
+      台灣彩券大樂透 (01~49 選 6 碼)。摸摸招財貓爪，今天頭獎就是你！💰✨
+    </p>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-4xl w-full mx-auto px-4 py-4 flex-1">
+    
+    <!-- Lucky Cat & Golden Crystal Card -->
+    <div class="bg-white/90 backdrop-blur-md rounded-3xl p-6 md:p-8 shadow-xl border border-pink-100/80 mb-6 transition-all duration-300">
+      
+      <!-- Ritual / Fortune Mascot Row -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-pink-100/60 pb-6 mb-6">
+        
+        <!-- Interactive Lucky Cat Avatar -->
+        <div class="flex items-center gap-4 cursor-pointer select-none group" id="cat-avatar-btn" title="摸摸招財貓爪吸歐氣！">
+          <div class="relative w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-tr from-amber-100 to-pink-100 rounded-2xl flex items-center justify-center text-4xl sm:text-5xl shadow-inner border border-amber-200 group-hover:scale-105 transition-transform">
+            <span id="cat-emoji" class="group-hover:rotate-6 transition-transform">🐱</span>
+            <span class="absolute -bottom-1 -right-1 text-2xl animate-paw">🐾</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-black text-stone-800 text-lg">招財元氣喵喵</span>
+              <span class="text-xs bg-rose-100 text-rose-600 px-2 py-0.5 rounded-full font-bold">點我摸頭摸爪</span>
+            </div>
+            <div id="cat-speech" class="text-xs md:text-sm text-stone-500 mt-1 font-medium italic">
+              「喵～好運積攢中！今天你的財庫閃閃發亮唷！」
+            </div>
+            <div class="text-[11px] text-amber-500 font-semibold mt-0.5">
+              歐氣加持次數：<span id="rub-count" class="font-bold text-sm">0</span> 次 🌟
+            </div>
+          </div>
+        </div>
+
+        <!-- Audio & Mode quick toggles -->
+        <div class="flex items-center gap-3">
+          <button id="sound-btn" class="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-stone-100 hover:bg-pink-100 text-stone-600 hover:text-pink-600 font-bold text-xs transition border border-stone-200/60 shadow-sm">
+            <span id="sound-icon">🔊</span>
+            <span id="sound-text">可愛音效</span>
+          </button>
+
+          <button id="ritual-btn" class="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-amber-100 to-amber-200 text-amber-800 font-bold text-xs transition border border-amber-300 shadow-sm hover:brightness-105 active:scale-95">
+            <span>✨</span>
+            <span>開運儀式</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Strategy Selector Tab -->
+      <div class="mb-6">
+        <label class="block text-xs font-bold text-stone-400 uppercase tracking-wider mb-2">選號魔法流派</label>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <button data-mode="pure" class="mode-btn active-mode flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl text-xs sm:text-sm font-bold border transition">
+            <span>🎲</span> 純純隨機
+          </button>
+          <button data-mode="balanced" class="mode-btn inactive-mode flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl text-xs sm:text-sm font-bold border transition">
+            <span>⚖️</span> 陰陽奇偶平衡
+          </button>
+          <button data-mode="hotcold" class="mode-btn inactive-mode flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl text-xs sm:text-sm font-bold border transition">
+            <span>🔥</span> 冷熱交替運
+          </button>
+          <button data-mode="birthday" class="mode-btn inactive-mode flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl text-xs sm:text-sm font-bold border transition">
+            <span>🎂</span> 生辰開運符
+          </button>
+        </div>
+      </div>
+
+      <!-- Numbers Display Arena -->
+      <div class="bg-gradient-to-b from-stone-50 to-pink-50/40 rounded-2xl p-6 border border-pink-100/80 min-h-[160px] flex flex-col items-center justify-center relative overflow-hidden">
+        
+        <!-- Background Mascot Watermark -->
+        <div class="absolute -right-4 -bottom-4 text-8xl text-pink-100/40 select-none pointer-events-none font-bold">
+          777
+        </div>
+
+        <div id="balls-container" class="flex flex-wrap items-center justify-center gap-3 sm:gap-4 z-10 w-full py-2">
+          <!-- Default preview placeholder balls -->
+          <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-dashed border-pink-200 flex items-center justify-center text-pink-300 font-bold text-lg sm:text-xl">?</div>
+          <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-dashed border-pink-200 flex items-center justify-center text-pink-300 font-bold text-lg sm:text-xl">?</div>
+          <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-dashed border-pink-200 flex items-center justify-center text-pink-300 font-bold text-lg sm:text-xl">?</div>
+          <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-dashed border-pink-200 flex items-center justify-center text-pink-300 font-bold text-lg sm:text-xl">?</div>
+          <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-dashed border-pink-200 flex items-center justify-center text-pink-300 font-bold text-lg sm:text-xl">?</div>
+          <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-dashed border-pink-200 flex items-center justify-center text-pink-300 font-bold text-lg sm:text-xl">?</div>
+        </div>
+
+        <div id="fortune-tagline" class="mt-4 text-xs font-bold text-pink-400 bg-white/80 px-4 py-1.5 rounded-full border border-pink-100 shadow-sm z-10 flex items-center gap-1.5">
+          <span>💖</span>
+          <span id="fortune-text">準備好了嗎？按下方按鈕為你搖出財富密碼！</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons Row -->
+      <div class="mt-6 flex flex-col sm:flex-row gap-3 items-center justify-center">
+        <!-- Main Generate 1 Set -->
+        <button id="generate-single-btn" class="w-full sm:w-auto flex-1 py-4 px-8 rounded-2xl bg-gradient-to-r from-rose-400 via-pink-500 to-amber-400 hover:from-rose-500 hover:to-amber-500 text-white font-black text-lg shadow-lg shadow-pink-300/40 hover:shadow-pink-300/60 active:scale-95 transition-all flex items-center justify-center gap-2">
+          <span class="text-xl">🪄</span>
+          <span>喵爪一揮．抽 1 組</span>
+        </button>
+
+        <!-- Generate 5 Sets (包牌快選) -->
+        <button id="generate-five-btn" class="w-full sm:w-auto py-4 px-6 rounded-2xl bg-white hover:bg-pink-50 text-pink-600 font-bold text-base border-2 border-pink-300 shadow-sm hover:border-pink-400 active:scale-95 transition-all flex items-center justify-center gap-2">
+          <span>📦</span>
+          <span>連發 5 組 (一單)</span>
+        </button>
+
+        <!-- Copy Current Numbers -->
+        <button id="copy-btn" class="w-full sm:w-auto py-4 px-6 rounded-2xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-base transition-all flex items-center justify-center gap-2 active:scale-95">
+          <span>📋</span>
+          <span id="copy-text">複製號碼</span>
+        </button>
+      </div>
+
+      <!-- Exclude / Include Numbers Custom Filter (Drawer/Collapsible) -->
+      <div class="mt-5 pt-4 border-t border-dashed border-stone-200">
+        <details class="group cursor-pointer">
+          <summary class="flex items-center justify-between text-xs font-bold text-stone-500 hover:text-pink-500 list-none">
+            <span class="flex items-center gap-1">
+              <span>⚙️</span> 開運過濾自訂（鎖定幸運號碼 / 排除不喜歡號碼）
+            </span>
+            <span class="text-stone-400 group-open:rotate-180 transition-transform">▼</span>
+          </summary>
+          <div class="mt-3 p-4 bg-stone-50 rounded-2xl grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div>
+              <label class="block font-bold text-stone-600 mb-1">
+                ⭐ 必定包含的幸運號 (最多 5 個，逗號分隔)：
+              </label>
+              <input type="text" id="include-numbers" placeholder="例如: 7, 18, 26" class="w-full px-3 py-2 bg-white rounded-xl border border-stone-200 focus:outline-none focus:border-pink-400 font-mono text-sm">
+            </div>
+            <div>
+              <label class="block font-bold text-stone-600 mb-1">
+                🚫 想要避開的號碼 (逗號分隔)：
+              </label>
+              <input type="text" id="exclude-numbers" placeholder="例如: 4, 14, 44" class="w-full px-3 py-2 bg-white rounded-xl border border-stone-200 focus:outline-none focus:border-pink-400 font-mono text-sm">
+            </div>
+          </div>
+        </details>
+      </div>
+
+    </div>
+
+    <!-- History / Multiple Sets List -->
+    <section class="bg-white/80 backdrop-blur-md rounded-3xl p-6 shadow-md border border-pink-100">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-extrabold text-stone-800 flex items-center gap-2 text-base md:text-lg">
+          <span>📜</span> 本次開運選號清單
+          <span id="history-badge" class="bg-pink-100 text-pink-600 text-xs px-2.5 py-0.5 rounded-full font-bold">0 組</span>
+        </h2>
+        <div class="flex items-center gap-2">
+          <button id="copy-all-btn" class="text-xs text-pink-600 font-bold hover:underline px-2 py-1">
+            一鍵全複製
+          </button>
+          <span class="text-stone-300">|</span>
+          <button id="clear-history-btn" class="text-xs text-stone-400 font-bold hover:text-rose-500 px-2 py-1">
+            清空紀錄
+          </button>
+        </div>
+      </div>
+
+      <!-- History Table / Rows -->
+      <div id="history-container" class="space-y-2.5 max-h-[300px] overflow-y-auto pr-1">
+        <div id="empty-history" class="text-center py-8 text-stone-400 text-xs sm:text-sm font-medium">
+          🐾 還沒有生成號碼喔！點擊「抽 1 組」或「連發 5 組」開始吧～
+        </div>
+      </div>
+    </section>
+
+    <!-- Cute Tips & Taiwan Lotto Knowledge -->
+    <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div class="bg-pink-50/70 border border-pink-100 rounded-2xl p-4 text-xs text-pink-900 flex flex-col justify-between">
+        <div class="font-bold flex items-center gap-1.5 text-pink-700 mb-1">
+          <span>⏰</span> 開獎時間
+        </div>
+        <p class="text-stone-600 leading-relaxed">
+          台灣彩券大樂透每週<strong>二、五</strong>晚上 8:30 開獎，下注截止為開獎日晚上 8:00。
+        </p>
+      </div>
+
+      <div class="bg-amber-50/70 border border-amber-100 rounded-2xl p-4 text-xs text-amber-900 flex flex-col justify-between">
+        <div class="font-bold flex items-center gap-1.5 text-amber-700 mb-1">
+          <span>💰</span> 遊戲規則
+        </div>
+        <p class="text-stone-600 leading-relaxed">
+          從 <strong>01 到 49</strong> 中任選 6 個號碼。每注售價為新台幣 <strong>$50 元</strong>。
+        </p>
+      </div>
+
+      <div class="bg-emerald-50/70 border border-emerald-100 rounded-2xl p-4 text-xs text-emerald-900 flex flex-col justify-between">
+        <div class="font-bold flex items-center gap-1.5 text-emerald-700 mb-1">
+          <span>🍀</span> 幸運心態
+        </div>
+        <p class="text-stone-600 leading-relaxed">
+          買彩券做公益，量力而為最開心！心存善念，好運自然水到渠成～
+        </p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Cute Footer -->
+  <footer class="w-full text-center py-6 text-xs text-stone-400">
+    <p>May the Fortune be with you ✨ 祝您早日抱回頭獎億萬大禮！</p>
+  </footer>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-stone-900/90 text-white font-bold text-xs sm:text-sm py-2.5 px-5 rounded-full shadow-2xl backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center gap-2">
+    <span id="toast-icon">✨</span>
+    <span id="toast-msg">提示訊息</span>
+  </div>
+
+  <!-- JavaScript Logic -->
+  <script>
+    // --- Application State ---
+    const state = {
+      soundEnabled: true,
+      currentMode: 'pure', // 'pure', 'balanced', 'hotcold', 'birthday'
+      currentNumbers: [],
+      historyList: [],
+      rubCounter: 0
+    };
+
+    // --- Lucky Mascot Dialogue Lines ---
+    const catSpeeches = [
+      "「喵～好運積攢中！今天你的財庫閃閃發亮唷！」",
+      "「爪爪開光！億萬頭獎離你越來越近了喵～」",
+      "「摸摸肉球～帶走滿滿財氣與平安金幣！」",
+      "「喵嗚！第六感告訴我，這組號碼很有戲！」",
+      "「金銀財寶湧進來，招財大吉大利喵！」",
+      "「今天買彩券，順路也請我吃條肉泥吧喵～🐟」"
+    ];
+
+    const luckyBlessings = [
+      "「紫氣東來，金光耀眼！這組號碼氣場超強」",
+      "「陰陽調和，吉星高照！祝一擊必中！」",
+      "「福星高照，橫財就手，今天財神跟你走」",
+      "「氣勢如虹！大樂透千萬大獎近在眼前」",
+      "「好運連發！做公益兼中大獎，美夢成真！」"
+    ];
+
+    // --- Color mapping for balls based on Taiwan Lotto typical color brackets ---
+    function getBallColors(number) {
+      if (number <= 10) {
+        // Soft Lemon / Gold (01 - 10)
+        return { c1: '#FBBF24', c2: '#F59E0B', text: '#78350F' };
+      } else if (number <= 20) {
+        // Sky Blue / Ocean (11 - 20)
+        return { c1: '#60A5FA', c2: '#3B82F6', text: '#1E3A8A' };
+      } else if (number <= 30) {
+        // Sakura Pink / Coral (21 - 30)
+        return { c1: '#F472B6', c2: '#EC4899', text: '#831843' };
+      } else if (number <= 40) {
+        // Mint Green / Emerald (31 - 40)
+        return { c1: '#34D399', c2: '#10B981', text: '#064E3B' };
+      } else {
+        // Lavender Purple (41 - 49)
+        return { c1: '#C084FC', c2: '#8B5CF6', text: '#4C1D95' };
+      }
+    }
+
+    // --- Tone.js Cute Procedural Sound Synthesizer ---
+    let synth = null;
+    let chimeSynth = null;
+
+    function initAudio() {
+      if (!synth && window.Tone) {
+        synth = new Tone.PolySynth(Tone.Synth, {
+          oscillator: { type: 'sine' },
+          envelope: { attack: 0.01, decay: 0.15, sustain: 0.05, release: 0.2 }
+        }).toDestination();
+        synth.volume.value = -8;
+
+        chimeSynth = new Tone.MembraneSynth().toDestination();
+        chimeSynth.volume.value = -10;
+      }
+    }
+
+    function playPopSound(index) {
+      if (!state.soundEnabled) return;
+      try {
+        if (Tone.context.state !== 'running') {
+          Tone.start();
+        }
+        initAudio();
+        const notes = ["C5", "E5", "G5", "A5", "C6", "E6"];
+        const note = notes[index % notes.length];
+        synth.triggerAttackRelease(note, "16n", undefined, 0.4);
+      } catch (e) {
+        // Silently catch audio restrictions
+      }
+    }
+
+    function playWinSound() {
+      if (!state.soundEnabled) return;
+      try {
+        if (Tone.context.state !== 'running') {
+          Tone.start();
+        }
+        initAudio();
+        const now = Tone.now();
+        synth.triggerAttackRelease("C5", "16n", now);
+        synth.triggerAttackRelease("E5", "16n", now + 0.1);
+        synth.triggerAttackRelease("G5", "16n", now + 0.2);
+        synth.triggerAttackRelease("B5", "16n", now + 0.3);
+        synth.triggerAttackRelease("C6", "8n", now + 0.4);
+      } catch (e) {}
+    }
+
+    function playPurrSound() {
+      if (!state.soundEnabled) return;
+      try {
+        if (Tone.context.state !== 'running') {
+          Tone.start();
+        }
+        initAudio();
+        chimeSynth.triggerAttackRelease("A3", "8n");
+      } catch (e) {}
+    }
+
+    // --- Toast Helper ---
+    let toastTimer = null;
+    function showToast(message, icon = "✨") {
+      const toast = document.getElementById("toast");
+      const toastMsg = document.getElementById("toast-msg");
+      const toastIcon = document.getElementById("toast-icon");
+      
+      toastMsg.innerText = message;
+      toastIcon.innerText = icon;
+      
+      toast.classList.remove("opacity-0", "pointer-events-none");
+      toast.classList.add("opacity-100");
+      
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove("opacity-100");
+        toast.classList.add("opacity-0", "pointer-events-none");
+      }, 2500);
+    }
+
+    // --- Confetti Celebration ---
+    function triggerConfetti() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 50,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#F472B6', '#FBBF24', '#60A5FA', '#34D399', '#C084FC']
+        });
+      }
+    }
+
+    // --- Custom Number Filter Parser ---
+    function getFilters() {
+      const incRaw = document.getElementById("include-numbers").value;
+      const excRaw = document.getElementById("exclude-numbers").value;
+
+      const parseNums = (str) => {
+        return str
+          .split(/[,，\s]+/)
+          .map(n => parseInt(n.trim(), 10))
+          .filter(n => !isNaN(n) && n >= 1 && n <= 49);
+      };
+
+      const includes = [...new Set(parseNums(incRaw))].slice(0, 5);
+      const excludes = new Set(parseNums(excRaw));
+
+      return { includes, excludes };
+    }
+
+    // --- Lotto Selection Logic Engines ---
+    function generateLottoSet(mode = state.currentMode) {
+      const { includes, excludes } = getFilters();
+      let pool = [];
+
+      for (let i = 1; i <= 49; i++) {
+        if (!excludes.has(i)) {
+          pool.push(i);
+        }
+      }
+
+      // If exclude eliminated too many numbers
+      if (pool.length < 6) {
+        showToast("排除的號碼過多，剩餘不足 6 個號碼！已自動重置條件", "⚠️");
+        pool = Array.from({ length: 49 }, (_, i) => i + 1);
+      }
+
+      let selected = new Set(includes.filter(num => pool.includes(num)));
+
+      // Apply algorithms based on strategy
+      if (mode === 'balanced') {
+        // Aim for 3 Odd & 3 Even balance
+        while (selected.size < 6) {
+          const currentArr = Array.from(selected);
+          const oddCount = currentArr.filter(n => n % 2 !== 0).length;
+          const evenCount = currentArr.length - oddCount;
+
+          let targetPool = pool.filter(n => !selected.has(n));
+          if (oddCount >= 3 && targetPool.some(n => n % 2 === 0)) {
+            targetPool = targetPool.filter(n => n % 2 === 0);
+          } else if (evenCount >= 3 && targetPool.some(n => n % 2 !== 0)) {
+            targetPool = targetPool.filter(n => n % 2 !== 0);
+          }
+
+          if (targetPool.length === 0) targetPool = pool.filter(n => !selected.has(n));
+          const pick = targetPool[Math.floor(Math.random() * targetPool.length)];
+          selected.add(pick);
+        }
+      } else if (mode === 'hotcold') {
+        // High (25-49) vs Low (1-24) combination balance
+        while (selected.size < 6) {
+          const currentArr = Array.from(selected);
+          const lowCount = currentArr.filter(n => n <= 24).length;
+          const highCount = currentArr.length - lowCount;
+
+          let targetPool = pool.filter(n => !selected.has(n));
+          if (lowCount >= 3 && targetPool.some(n => n >= 25)) {
+            targetPool = targetPool.filter(n => n >= 25);
+          } else if (highCount >= 3 && targetPool.some(n => n < 25)) {
+            targetPool = targetPool.filter(n => n < 25);
+          }
+
+          if (targetPool.length === 0) targetPool = pool.filter(n => !selected.has(n));
+          const pick = targetPool[Math.floor(Math.random() * targetPool.length)];
+          selected.add(pick);
+        }
+      } else if (mode === 'birthday') {
+        // Give preference to calendar numbers (1 - 31), mixed with high lucky stars
+        while (selected.size < 6) {
+          let targetPool = pool.filter(n => !selected.has(n));
+          // 65% probability of drawing from 1..31
+          const favorBirthday = Math.random() < 0.65;
+          const bdayPool = targetPool.filter(n => n <= 31);
+
+          let pick;
+          if (favorBirthday && bdayPool.length > 0) {
+            pick = bdayPool[Math.floor(Math.random() * bdayPool.length)];
+          } else {
+            pick = targetPool[Math.floor(Math.random() * targetPool.length)];
+          }
+          selected.add(pick);
+        }
+      } else {
+        // Pure Random
+        while (selected.size < 6) {
+          const remaining = pool.filter(n => !selected.has(n));
+          const pick = remaining[Math.floor(Math.random() * remaining.length)];
+          selected.add(pick);
+        }
+      }
+
+      // Sort numbers in ascending order as standard lottery tickets
+      return Array.from(selected).sort((a, b) => a - b);
+    }
+
+    // --- Render Main Number Display with Animation ---
+    function renderMainBallAnimation(numbers) {
+      const container = document.getElementById("balls-container");
+      container.innerHTML = "";
+
+      numbers.forEach((num, index) => {
+        const formatted = String(num).padStart(2, '0');
+        const colors = getBallColors(num);
+        
+        const ball = document.createElement("div");
+        ball.className = "lotto-ball ball-pop w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center font-black text-xl sm:text-2xl cursor-default select-none";
+        ball.style.setProperty('--ball-c1', colors.c1);
+        ball.style.setProperty('--ball-c2', colors.c2);
+        ball.style.color = '#FFFFFF';
+        ball.style.animationDelay = `${index * 80}ms`;
+        ball.textContent = formatted;
+
+        setTimeout(() => {
+          playPopSound(index);
+        }, index * 80);
+
+        container.appendChild(ball);
+      });
+
+      // Update fortune phrase
+      const randomPhrase = luckyBlessings[Math.floor(Math.random() * luckyBlessings.length)];
+      document.getElementById("fortune-text").innerText = randomPhrase;
+
+      setTimeout(() => {
+        playWinSound();
+        triggerConfetti();
+      }, 550);
+    }
+
+    // --- Add to History Section ---
+    function appendHistory(numbers, modeLabel) {
+      state.historyList.unshift({ numbers, modeLabel, time: new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) });
+      updateHistoryUI();
+    }
+
+    function updateHistoryUI() {
+      const container = document.getElementById("history-container");
+      const emptyMsg = document.getElementById("empty-history");
+      const badge = document.getElementById("history-badge");
+
+      badge.innerText = `${state.historyList.length} 組`;
+
+      if (state.historyList.length === 0) {
+        container.innerHTML = "";
+        container.appendChild(emptyMsg);
+        return;
+      }
+
+      container.innerHTML = "";
+      state.historyList.forEach((item, idx) => {
+        const row = document.createElement("div");
+        row.className = "flex items-center justify-between p-3 bg-stone-50/90 hover:bg-pink-50/50 rounded-2xl border border-stone-200/60 transition";
+
+        // Ball chips
+        const ballsHtml = item.numbers.map(num => {
+          const colors = getBallColors(num);
+          return `<span class="inline-flex items-center justify-center w-8 h-8 rounded-full font-bold text-xs text-white shadow-sm" style="background: linear-gradient(135deg, ${colors.c1}, ${colors.c2})">${String(num).padStart(2, '0')}</span>`;
+        }).join(" ");
+
+        row.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="text-xs font-bold text-stone-400 font-mono">#${state.historyList.length - idx}</span>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              ${ballsHtml}
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="hidden sm:inline-block text-[11px] font-bold text-pink-500 bg-pink-100/60 px-2 py-0.5 rounded-full">${item.modeLabel}</span>
+            <button class="copy-single-row-btn p-1.5 text-stone-400 hover:text-pink-600 rounded-lg transition" title="複製此組號碼" data-nums="${item.numbers.map(n => String(n).padStart(2, '0')).join(', ')}">
+              📋
+            </button>
+          </div>
+        `;
+
+        container.appendChild(row);
+      });
+
+      // Bind row copy buttons
+      document.querySelectorAll(".copy-single-row-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const textToCopy = e.currentTarget.getAttribute("data-nums");
+          copyTextToClipboard(textToCopy);
+          showToast(`已複製號碼：${textToCopy}`, "📋");
+        });
+      });
+    }
+
+    // --- Clipboard Utility using document.execCommand for safe iFrame compatibility ---
+    function copyTextToClipboard(text) {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.left = "-9999px";
+      textarea.style.top = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      try {
+        document.execCommand('copy');
+      } catch (err) {
+        console.error('Failed to copy', err);
+      }
+      document.body.removeChild(textarea);
+    }
+
+    // --- Mode Names Dictionary ---
+    function getModeName(mode) {
+      switch(mode) {
+        case 'pure': return '純純隨機';
+        case 'balanced': return '陰陽平衡';
+        case 'hotcold': return '冷熱交替';
+        case 'birthday': return '生辰開運';
+        default: return '幸運選號';
+      }
+    }
+
+    // --- Event Listeners Initialization ---
+    function setupEvents() {
+      // 1. Single Pick
+      document.getElementById("generate-single-btn").addEventListener("click", () => {
+        const nums = generateLottoSet(state.currentMode);
+        state.currentNumbers = nums;
+        renderMainBallAnimation(nums);
+        appendHistory(nums, getModeName(state.currentMode));
+      });
+
+      // 2. Batch 5 Sets (連發 5 組)
+      document.getElementById("generate-five-btn").addEventListener("click", () => {
+        let lastSet = null;
+        for (let i = 0; i < 5; i++) {
+          const set = generateLottoSet(state.currentMode);
+          lastSet = set;
+          appendHistory(set, getModeName(state.currentMode));
+        }
+        state.currentNumbers = lastSet;
+        renderMainBallAnimation(lastSet);
+        showToast("已為您連續生成 5 組開運號碼！包中頭獎～", "📦");
+      });
+
+      // 3. Mode Selection Buttons
+      const modeButtons = document.querySelectorAll(".mode-btn");
+      modeButtons.forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          modeButtons.forEach(b => {
+            b.classList.remove("active-mode", "bg-pink-500", "text-white", "border-pink-500", "shadow-sm");
+            b.classList.add("inactive-mode", "bg-white", "text-stone-600", "border-stone-200");
+          });
+          btn.classList.add("active-mode", "bg-pink-500", "text-white", "border-pink-500", "shadow-sm");
+          btn.classList.remove("inactive-mode", "bg-white", "text-stone-600", "border-stone-200");
+
+          state.currentMode = btn.getAttribute("data-mode");
+          showToast(`已切換模式：${getModeName(state.currentMode)}`, "🔮");
+        });
+      });
+
+      // 4. Mascot Cat Interactive Rubbing
+      const catBtn = document.getElementById("cat-avatar-btn");
+      catBtn.addEventListener("click", () => {
+        state.rubCounter++;
+        document.getElementById("rub-count").innerText = state.rubCounter;
+        
+        // Random cute meow speech
+        const speech = catSpeeches[Math.floor(Math.random() * catSpeeches.length)];
+        document.getElementById("cat-speech").innerText = speech;
+
+        const catEmoji = document.getElementById("cat-emoji");
+        catEmoji.style.transform = "scale(1.3) rotate(-15deg)";
+        setTimeout(() => catEmoji.style.transform = "scale(1) rotate(0deg)", 200);
+
+        playPurrSound();
+        showToast("摸摸招財貓！歐氣值 +100 🐾", "💖");
+      });
+
+      // 5. Sound Toggle
+      const soundBtn = document.getElementById("sound-btn");
+      soundBtn.addEventListener("click", () => {
+        state.soundEnabled = !state.soundEnabled;
+        document.getElementById("sound-icon").innerText = state.soundEnabled ? "🔊" : "🔇";
+        document.getElementById("sound-text").innerText = state.soundEnabled ? "可愛音效" : "靜音模式";
+        showToast(state.soundEnabled ? "已開啟音效 🎵" : "已切換靜音 🤫", state.soundEnabled ? "🔊" : "🔇");
+      });
+
+      // 6. Ritual Button (開運祈福儀式)
+      const ritualBtn = document.getElementById("ritual-btn");
+      ritualBtn.addEventListener("click", () => {
+        triggerConfetti();
+        playWinSound();
+        showToast("✨ 恭請財神降臨！財帛宮金光照耀，偏財運暴增！", "🧧");
+      });
+
+      // 7. Copy Current Set
+      document.getElementById("copy-btn").addEventListener("click", () => {
+        if (!state.currentNumbers || state.currentNumbers.length === 0) {
+          showToast("請先生成一組號碼再複製唷！", "🐱");
+          return;
+        }
+        const str = state.currentNumbers.map(n => String(n).padStart(2, '0')).join(', ');
+        copyTextToClipboard(str);
+        showToast(`已複製號碼：${str}`, "📋");
+      });
+
+      // 8. Copy All History
+      document.getElementById("copy-all-btn").addEventListener("click", () => {
+        if (state.historyList.length === 0) {
+          showToast("目前沒有號碼可以複製哦！", "🐱");
+          return;
+        }
+        const formattedList = state.historyList
+          .map((item, idx) => `第 ${idx + 1} 組 (${item.modeLabel}): ${item.numbers.map(n => String(n).padStart(2, '0')).join(', ')}`)
+          .join('\n');
+        
+        copyTextToClipboard(formattedList);
+        showToast(`已複製全部 ${state.historyList.length} 組號碼！`, "📑");
+      });
+
+      // 9. Clear History
+      document.getElementById("clear-history-btn").addEventListener("click", () => {
+        if (state.historyList.length === 0) return;
+        state.historyList = [];
+        updateHistoryUI();
+        showToast("歷史號碼已全部清空！", "🧹");
+      });
+    }
+
+    // --- Dynamic Daily Fortune Hint ---
+    function setDailyFortuneZodiac() {
+      const luckyColors = [
+        "櫻花粉 🌸 (招正偏財)", "活力黃 🍋 (金光滿照)", "蜜桃橘 🍑 (吉星引路)",
+        "薄荷綠 🌿 (貴人扶持)", "星空紫 🔮 (靈感爆棚)"
+      ];
+      const todayColor = luckyColors[new Date().getDay() % luckyColors.length];
+      document.getElementById("daily-zodiac").innerText = `今日幸運色：${todayColor}`;
+    }
+
+    // --- Initialize on Page Load ---
+    window.addEventListener("DOMContentLoaded", () => {
+      setDailyFortuneZodiac();
+      setupEvents();
+
+      // Set initial active state visual on pure button
+      const initialMode = document.querySelector('[data-mode="pure"]');
+      initialMode.classList.add("bg-pink-500", "text-white", "border-pink-500", "shadow-sm");
+      
+      // Auto generate the first lucky number set on load!
+      setTimeout(() => {
+        const firstSet = generateLottoSet('pure');
+        state.currentNumbers = firstSet;
+        renderMainBallAnimation(firstSet);
+        appendHistory(firstSet, '純純隨機');
+      }, 400);
+    });
+  </script>
+</body>
+</html>

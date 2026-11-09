@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>超大型可愛動物時鐘</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Outfit:wght@300;600;800;900&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Fredoka', 'Zen Maru Gothic', sans-serif;
+            overflow: hidden;
+        }
+
+        .time-font {
+            font-family: 'Outfit', sans-serif;
+            font-feature-settings: "tnum" 1, "zero" 1;
+            letter-spacing: -0.04em;
+        }
+
+        /* 背景平滑淡入淡出 */
+        .bg-layer {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            transition: opacity 1.8s cubic-bezier(0.4, 0, 0.2, 1), transform 12s ease-out;
+            will-change: opacity, transform;
+        }
+
+        .bg-active {
+            opacity: 1;
+            transform: scale(1.04);
+            z-index: 1;
+        }
+
+        .bg-inactive {
+            opacity: 0;
+            transform: scale(1.0);
+            z-index: 0;
+        }
+
+        /* 脈衝發光呼吸燈 */
+        .time-glow {
+            text-shadow: 
+                0 0 40px rgba(255, 255, 255, 0.45),
+                0 4px 30px rgba(0, 0, 0, 0.7);
+        }
+
+        .time-subglow {
+            text-shadow: 0 2px 16px rgba(0, 0, 0, 0.75);
+        }
+
+        /* 玻璃擬態質感面板 */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.35);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+        }
+
+        /* 進度條轉圈/流暢倒數 */
+        .timer-progress {
+            transition: width 1s linear;
+        }
+    </style>
+</head>
+<body class="relative w-screen h-screen bg-neutral-950 text-white flex flex-col justify-between p-6 md:p-12 selection:bg-pink-500 selection:text-white">
+
+    <!-- 背景圖雙層緩存，達成絲滑交叉淡入淡出 -->
+    <div id="bgA" class="bg-layer bg-active"></div>
+    <div id="bgB" class="bg-layer bg-inactive"></div>
+
+    <!-- 動態暗角及漸變遮罩，確保時鐘高對比極度清晰 -->
+    <div id="overlayMask" class="absolute inset-0 bg-black/40 backdrop-blur-[1px] z-10 transition-colors duration-500"></div>
+
+    <!-- 頂部資訊列：日期、星期、全螢幕與設定 -->
+    <header class="relative z-20 flex justify-between items-center w-full max-w-7xl mx-auto">
+        <div class="flex items-center gap-3">
+            <span class="inline-flex items-center justify-center p-2.5 rounded-2xl glass-panel text-amber-300">
+                <i data-lucide="paw-print" class="w-6 h-6"></i>
+            </span>
+            <div>
+                <div id="dateDisplay" class="text-xl md:text-2xl font-bold tracking-wider time-subglow">2026年 10月 28日</div>
+                <div id="dayDisplay" class="text-xs md:text-sm text-pink-200/90 font-semibold uppercase tracking-widest">星期三 • Wednesday</div>
+            </div>
+        </div>
+
+        <!-- 頂部右側功能操作鈕 -->
+        <div class="flex items-center gap-3">
+            <button id="nextBtn" title="下一張可愛動物" class="glass-panel hover:bg-white/20 active:scale-95 transition-all p-3 rounded-2xl flex items-center gap-2 group">
+                <i data-lucide="shuffle" class="w-5 h-5 text-pink-300 group-hover:rotate-180 transition-transform duration-500"></i>
+                <span class="text-xs font-semibold hidden sm:inline">換一張</span>
+            </button>
+
+            <button id="toggleSettingsBtn" title="設定" class="glass-panel hover:bg-white/20 active:scale-95 transition-all p-3 rounded-2xl">
+                <i data-lucide="settings" class="w-5 h-5 text-white"></i>
+            </button>
+
+            <button id="fullscreenBtn" title="全螢幕" class="glass-panel hover:bg-white/20 active:scale-95 transition-all p-3 rounded-2xl">
+                <i data-lucide="maximize" class="w-5 h-5 text-white" id="fullscreenIcon"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- 中央核心：超大型數字時鐘展示區 -->
+    <main class="relative z-20 flex flex-col items-center justify-center my-auto w-full text-center">
+        <!-- 容器外圈微發光卡片 -->
+        <div class="w-full max-w-6xl mx-auto flex flex-col items-center justify-center py-6 sm:py-10 px-4 rounded-3xl transition-all duration-300">
+            
+            <!-- 上標籤：上午/下午與問候語 -->
+            <div class="flex items-center gap-3 mb-2 sm:mb-4">
+                <span id="ampmTag" class="px-3.5 py-1 text-sm md:text-base font-extrabold uppercase rounded-full bg-pink-500/80 tracking-wider shadow-lg backdrop-blur-md">
+                    上午
+                </span>
+                <span id="greetingText" class="text-sm md:text-lg font-medium text-pink-100/90 tracking-wide time-subglow">
+                    今天也是充滿活力的一天 🐾
+                </span>
+            </div>
+
+            <!-- 超大數字時間本體 -->
+            <div class="flex items-baseline justify-center select-none w-full">
+                <!-- 時 & 分 -->
+                <div id="mainTimeDisplay" class="time-font font-black text-[20vw] sm:text-[18vw] lg:text-[14rem] leading-none text-white time-glow tracking-tight drop-shadow-2xl">
+                    10:19
+                </div>
+
+                <!-- 秒數區 (可開關) -->
+                <div id="secondWrapper" class="flex flex-col items-start ml-2 sm:ml-4 lg:ml-6 pb-2 sm:pb-6">
+                    <span id="secondDisplay" class="time-font font-extrabold text-[7vw] sm:text-[5vw] lg:text-[4.5rem] leading-none text-pink-300/95 time-glow">
+                        :28
+                    </span>
+                    <span class="text-[10px] sm:text-xs font-bold text-white/70 uppercase tracking-widest mt-1">SECONDS</span>
+                </div>
+            </div>
+
+            <!-- 當前動物名稱標籤 -->
+            <div class="mt-4 sm:mt-6 inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-panel text-white/90 text-xs sm:text-sm font-medium">
+                <i data-lucide="heart" class="w-3.5 h-3.5 text-pink-400 fill-pink-400 animate-pulse"></i>
+                <span id="animalTitle">萌寵：雪地薩摩耶幼犬</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- 底部控制與 30 秒自動切換進度條 -->
+    <footer class="relative z-20 w-full max-w-7xl mx-auto flex flex-col gap-3">
+        <!-- 30 秒換圖倒數進度條 -->
+        <div class="w-full bg-white/20 backdrop-blur-md h-1.5 rounded-full overflow-hidden">
+            <div id="progressBar" class="timer-progress bg-gradient-to-r from-pink-400 via-amber-300 to-teal-300 h-full w-full"></div>
+        </div>
+
+        <div class="flex justify-between items-center text-xs text-white/70 font-medium px-1">
+            <div class="flex items-center gap-2">
+                <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                <span id="countdownText">30 秒後自動更換背景</span>
+            </div>
+            <div class="hidden sm:block">
+                <span>超大螢幕桌布模式 • 雙擊畫面可切換全螢幕</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 設定懸浮視窗 (Modal Drawer) -->
+    <div id="settingsModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass-panel bg-neutral-900/90 text-white rounded-3xl p-6 sm:p-8 w-full max-w-md border border-white/20 shadow-2xl transform scale-95 transition-transform duration-300" id="settingsContent">
+            
+            <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-5">
+                <div class="flex items-center gap-2.5">
+                    <i data-lucide="sliders" class="w-5 h-5 text-pink-400"></i>
+                    <h3 class="text-lg font-bold">時鐘與背景偏好設定</h3>
+                </div>
+                <button id="closeSettingsBtn" class="p-1 rounded-xl hover:bg-white/10 text-white/70 hover:text-white transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="space-y-5 text-sm">
+                <!-- 時間格式開關 -->
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="font-semibold">24 小時制</div>
+                        <div class="text-xs text-white/60">關閉後將以 12 小時制 (AM/PM) 呈現</div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="format24Toggle" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-500"></div>
+                    </label>
+                </div>
+
+                <!-- 顯示秒數開關 -->
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="font-semibold">顯示即時秒數</div>
+                        <div class="text-xs text-white/60">顯示或隱藏右側滾動秒數</div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="showSecondsToggle" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pink-500"></div>
+                    </label>
+                </div>
+
+                <!-- 背景暗度調節 -->
+                <div class="space-y-2">
+                    <div class="flex justify-between text-xs">
+                        <span class="font-semibold">背景調光深淺</span>
+                        <span id="darknessValue" class="text-pink-300 font-mono">40%</span>
+                    </div>
+                    <input id="darknessRange" type="range" min="10" max="80" value="40" class="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer accent-pink-500">
+                </div>
+
+                <!-- 換圖週期 -->
+                <div class="space-y-1">
+                    <label class="font-semibold block">背景輪播週期</label>
+                    <select id="intervalSelect" class="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-pink-500">
+                        <option value="15" class="bg-neutral-800">15 秒 (快速欣賞)</option>
+                        <option value="30" class="bg-neutral-800" selected>30 秒 (預設標準)</option>
+                        <option value="60" class="bg-neutral-800">1 分鐘 (悠閒模式)</option>
+                        <option value="120" class="bg-neutral-800">2 分鐘 (沈浸專注)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-white/10 flex justify-end">
+                <button id="saveSettingsBtn" class="w-full py-2.5 bg-gradient-to-r from-pink-500 to-rose-400 hover:from-pink-600 hover:to-rose-500 font-semibold rounded-xl shadow-lg transition">
+                    完成並套用
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 高解析度可愛動物攝影圖庫 (使用 Unsplash 高畫質寵物與野生萌寵影像)
+        const CUTE_ANIMALS = [
+            {
+                title: "呆萌薩摩耶幼犬 (Samoyed Puppy)",
+                url: "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=2160&q=80"
+            },
+            {
+                title: "圓滾滾蘇格蘭摺耳貓 (Cute Scottish Fold)",
+                url: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&w=2160&q=80"
+            },
+            {
+                title: "好奇的小水獺 (Playful Sea Otter)",
+                url: "https://images.unsplash.com/photo-1579202673506-ca3ce28943ef?auto=format&fit=crop&w=2160&q=80"
+            },
+            {
+                title: "萌度爆表的金毛幼犬 (Golden Retriever Puppy)",
+                url: "https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?auto=format&fit=crop&w=2160&q=80"
+            },
+            {
+                title: "吃草的小刺蝟 (Cute Little Hedgehog)",
+                url: "https://images.unsplash.com/photo-1508817628294-5a453fa0b8fb?auto=format&fit=crop&w=2160&q=80"
+            },
+            {
+                title: "懶洋洋的赤狐幼崽 (Fluffy Red Fox)",
+                url: "https://images.unsplash.com/photo-1516934024742-b461fba47600?auto=format&fit=crop&w=2160&q=80"
+            },
+            {
+                title: "蓬鬆垂耳兔 (Adorable Fluffy Bunny)",
+                url: "https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?auto=format&fit=crop&w=2160&q=80"
+            },
+            {
+                title: "吐舌頭的小柴犬 (Shiba Inu Smile)",
+                url: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&w=2160&q=80"
+            },
+            {
+                title: "在樹上午睡的考拉 (Sleeping Koala)",
+                url: "https://images.unsplash.com/photo-1526970371689-5942459fb29a?auto=format&fit=crop&w=2160&q=80"
+            },
+            {
+                title: "探頭探腦的土撥鼠 (Chubby Prairie Dog)",
+                url: "https://images.unsplash.com/photo-1500485035595-cbe6f645feb1?auto=format&fit=crop&w=2160&q=80"
+            },
+            {
+                title: "抱著胡蘿蔔的倉鼠 (Sweet Hamster)",
+                url: "https://images.unsplash.com/photo-1425082661705-1834bfd09dca?auto=format&fit=crop&w=2160&q=80"
+            },
+            {
+                title: "純真無邪的藍眼小貓 (Blue-eyed Kitten)",
+                url: "https://images.unsplash.com/photo-1573865526739-10659fec78a5?auto=format&fit=crop&w=2160&q=80"
+            }
+        ];
+
+        // 狀態管理
+        let currentImageIndex = 0;
+        let activeBgIsA = true;
+        let switchIntervalSeconds = 30; // 預設 30 秒更換
+        let remainingSeconds = switchIntervalSeconds;
+        let is24Hour = true;
+        let showSeconds = true;
+
+        // DOM 元素引用
+        const bgA = document.getElementById('bgA');
+        const bgB = document.getElementById('bgB');
+        const mainTimeDisplay = document.getElementById('mainTimeDisplay');
+        const secondDisplay = document.getElementById('secondDisplay');
+        const secondWrapper = document.getElementById('secondWrapper');
+        const ampmTag = document.getElementById('ampmTag');
+        const dateDisplay = document.getElementById('dateDisplay');
+        const dayDisplay = document.getElementById('dayDisplay');
+        const greetingText = document.getElementById('greetingText');
+        const animalTitle = document.getElementById('animalTitle');
+        const progressBar = document.getElementById('progressBar');
+        const countdownText = document.getElementById('countdownText');
+        const overlayMask = document.getElementById('overlayMask');
+
+        // 控制按鈕與設定視窗
+        const nextBtn = document.getElementById('nextBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const fullscreenIcon = document.getElementById('fullscreenIcon');
+        const toggleSettingsBtn = document.getElementById('toggleSettingsBtn');
+        const settingsModal = document.getElementById('settingsModal');
+        const settingsContent = document.getElementById('settingsContent');
+        const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+        const format24Toggle = document.getElementById('format24Toggle');
+        const showSecondsToggle = document.getElementById('showSecondsToggle');
+        const darknessRange = document.getElementById('darknessRange');
+        const darknessValue = document.getElementById('darknessValue');
+        const intervalSelect = document.getElementById('intervalSelect');
+
+        // 初始化圖示
+        lucide.createIcons();
+
+        // 預加載圖片函數，防止換圖時閃黑
+        function preloadImage(url) {
+            const img = new Image();
+            img.src = url;
+        }
+
+        // 預加載下一張
+        function preloadNextImages() {
+            const nextIdx = (currentImageIndex + 1) % CUTE_ANIMALS.length;
+            preloadImage(CUTE_ANIMALS[nextIdx].url);
+        }
+
+        // 更換背景圖 (雙層互相切換)
+        function changeBackground(targetIndex = null) {
+            if (targetIndex !== null) {
+                currentImageIndex = targetIndex % CUTE_ANIMALS.length;
+            } else {
+                currentImageIndex = (currentImageIndex + 1) % CUTE_ANIMALS.length;
+            }
+
+            const currentAnimal = CUTE_ANIMALS[currentImageIndex];
+            const incomingBg = activeBgIsA ? bgB : bgA;
+            const outgoingBg = activeBgIsA ? bgA : bgB;
+
+            // 設置新圖
+            incomingBg.style.backgroundImage = `url('${currentAnimal.url}')`;
+
+            // 切換層級透明度
+            incomingBg.classList.remove('bg-inactive');
+            incomingBg.classList.add('bg-active');
+
+            outgoingBg.classList.remove('bg-active');
+            outgoingBg.classList.add('bg-inactive');
+
+            // 翻轉 active 標記
+            activeBgIsA = !activeBgIsA;
+
+            // 更新文字描述
+            animalTitle.textContent = `萌寵：${currentAnimal.title}`;
+
+            // 重設倒數進度
+            remainingSeconds = switchIntervalSeconds;
+            updateProgressBar();
+
+            // 預載下一張
+            preloadNextImages();
+        }
+
+        // 更新進度條
+        function updateProgressBar() {
+            const pct = (remainingSeconds / switchIntervalSeconds) * 100;
+            progressBar.style.width = `${pct}%`;
+            countdownText.textContent = `${remainingSeconds} 秒後自動更換背景`;
+        }
+
+        // 根據時間產生親切問候
+        function getGreeting(hours) {
+            if (hours >= 5 && hours < 9) return "清晨的第一縷陽光，今天也要元氣滿滿 🐾";
+            if (hours >= 9 && hours < 12) return "早安！專注工作，別忘了補充水份 🍵";
+            if (hours >= 12 && hours < 14) return "午安！適時伸個懶腰、休息一下吧 🍱";
+            if (hours >= 14 && hours < 18) return "午後時光，讓可愛動物為你充充電 ☀️";
+            if (hours >= 18 && hours < 22) return "晚安！卸下一整天的忙碌與疲憊 ✨";
+            return "深夜時分，夜貓子該好好睡個美容覺囉 🌙";
+        }
+
+        // 核心：即時時間更新
+        function updateClock() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+
+            // AM / PM 處理
+            const isPM = hours >= 12;
+            ampmTag.textContent = isPM ? "下午 PM" : "上午 AM";
+            ampmTag.style.display = is24Hour ? "none" : "inline-block";
+
+            // 12/24小時制判斷
+            let displayHours = hours;
+            if (!is24Hour) {
+                displayHours = hours % 12;
+                if (displayHours === 0) displayHours = 12;
+            }
+            const hoursStr = String(displayHours).padStart(2, '0');
+
+            // 主時間
+            mainTimeDisplay.textContent = `${hoursStr}:${minutes}`;
+            secondDisplay.textContent = `:${seconds}`;
+
+            // 更新日期與星期
+            const year = now.getFullYear();
+            const month = now.getMonth() + 1;
+            const date = now.getDate();
+            const daysOfWeek = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+            const daysOfWeekEn = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const dayOfWeek = daysOfWeek[now.getDay()];
+            const dayOfWeekEn = daysOfWeekEn[now.getDay()];
+
+            dateDisplay.textContent = `${year}年 ${month}月 ${date}日`;
+            dayDisplay.textContent = `${dayOfWeek} • ${dayOfWeekEn}`;
+
+            // 問候語
+            greetingText.textContent = getGreeting(hours);
+        }
+
+        // 每秒定時器 (時鐘與背景輪播倒數)
+        function startTickers() {
+            updateClock();
+            setInterval(() => {
+                updateClock();
+
+                // 倒數換背景
+                remainingSeconds--;
+                if (remainingSeconds <= 0) {
+                    changeBackground();
+                } else {
+                    updateProgressBar();
+                }
+            }, 1000);
+        }
+
+        // 手動下一張
+        nextBtn.addEventListener('click', () => {
+            changeBackground();
+        });
+
+        // 全螢幕切換
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.warn(`全螢幕請求被拒絕: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+        // 監聽全螢幕變化以切換 icon
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                fullscreenBtn.innerHTML = `<i data-lucide="minimize" class="w-5 h-5 text-white"></i>`;
+            } else {
+                fullscreenBtn.innerHTML = `<i data-lucide="maximize" class="w-5 h-5 text-white"></i>`;
+            }
+            lucide.createIcons();
+        });
+
+        // 雙擊畫面空白處進入/退出全螢幕
+        document.addEventListener('dblclick', (e) => {
+            // 如果點擊到按鈕或彈窗則不觸發
+            if (e.target.closest('button') || e.target.closest('#settingsModal')) return;
+            toggleFullscreen();
+        });
+
+        // 設定面板開關
+        function openSettings() {
+            settingsModal.classList.remove('opacity-0', 'pointer-events-none');
+            settingsContent.classList.remove('scale-95');
+            settingsContent.classList.add('scale-100');
+        }
+
+        function closeSettings() {
+            settingsModal.classList.add('opacity-0', 'pointer-events-none');
+            settingsContent.classList.add('scale-95');
+            settingsContent.classList.remove('scale-100');
+        }
+
+        toggleSettingsBtn.addEventListener('click', openSettings);
+        closeSettingsBtn.addEventListener('click', closeSettings);
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) closeSettings();
+        });
+
+        // 設定項：24小時制切換
+        format24Toggle.addEventListener('change', (e) => {
+            is24Hour = e.target.checked;
+            updateClock();
+        });
+
+        // 設定項：顯示秒數切換
+        showSecondsToggle.addEventListener('change', (e) => {
+            showSeconds = e.target.checked;
+            secondWrapper.style.display = showSeconds ? 'flex' : 'none';
+        });
+
+        // 設定項：暗度調節
+        darknessRange.addEventListener('input', (e) => {
+            const val = e.target.value;
+            darknessValue.textContent = `${val}%`;
+            overlayMask.style.backgroundColor = `rgba(0, 0, 0, ${val / 100})`;
+        });
+
+        // 設定項：時間週期切換
+        intervalSelect.addEventListener('change', (e) => {
+            switchIntervalSeconds = parseInt(e.target.value, 10);
+            remainingSeconds = switchIntervalSeconds;
+            updateProgressBar();
+        });
+
+        saveSettingsBtn.addEventListener('click', closeSettings);
+
+        // 初始化背景與排程
+        function initApp() {
+            // 隨機選擇第一張
+            currentImageIndex = Math.floor(Math.random() * CUTE_ANIMALS.length);
+            const firstAnimal = CUTE_ANIMALS[currentImageIndex];
+            bgA.style.backgroundImage = `url('${firstAnimal.url}')`;
+            animalTitle.textContent = `萌寵：${firstAnimal.title}`;
+
+            // 預載第二張
+            preloadNextImages();
+
+            // 啟動主迴圈
+            startTickers();
+            updateProgressBar();
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>

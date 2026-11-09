@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grace 的計時器</title>
+  <!-- Google Fonts: Noto Sans TC, Quicksand, Cormorant Garamond, Cinzel -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Cormorant+Garamond:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <!-- Canvas Confetti for Celebration -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    /* ========== CSS 變數與主題系統 ========== */
+    :root {
+      --font-family: 'Quicksand', 'Noto Sans TC', sans-serif;
+      --font-digits: 'Quicksand', sans-serif;
+      --glass-bg: rgba(255, 255, 255, 0.12);
+      --glass-border: rgba(255, 255, 255, 0.28);
+      --glass-shadow: 0 16px 36px rgba(0, 0, 0, 0.22);
+      --text-main: #ffffff;
+      --text-sub: rgba(255, 255, 255, 0.92);
+      --accent-color: #f59e0b;
+      --accent-gradient: linear-gradient(135deg, #fde68a 0%, #fbbf24 50%, #f59e0b 100%);
+      --ring-trail: rgba(255, 255, 255, 0.15);
+      --btn-bg: rgba(255, 255, 255, 0.16);
+      --btn-hover: rgba(255, 255, 255, 0.28);
+      --overlay-dim: rgba(18, 16, 24, 0.25);
+      --scale-digits: 1;
+    }
+
+    /* 主題：休閒 (Casual Ghibli - 日出黃昏微調) */
+    body.theme-casual {
+      --glass-bg: rgba(255, 255, 255, 0.12);
+      --glass-border: rgba(255, 255, 255, 0.25);
+      --text-main: #ffffff;
+      --accent-color: #fbbf24;
+      --accent-gradient: linear-gradient(135deg, #fde68a 0%, #fbbf24 50%, #f97316 100%);
+      --overlay-dim: rgba(20, 16, 22, 0.22);
+    }
+
+    /* 主題：時尚 (Modern Chic) */
+    body.theme-chic {
+      --font-family: 'Noto Sans TC', sans-serif;
+      --glass-bg: rgba(18, 22, 34, 0.42);
+      --glass-border: rgba(255, 255, 255, 0.15);
+      --glass-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+      --text-main: #f8fafc;
+      --text-sub: rgba(248, 250, 252, 0.88);
+      --accent-color: #f472b6;
+      --accent-gradient: linear-gradient(135deg, #f472b6 0%, #c084fc 50%, #818cf8 100%);
+      --ring-trail: rgba(255, 255, 255, 0.1);
+      --btn-bg: rgba(255, 255, 255, 0.12);
+      --btn-hover: rgba(255, 255, 255, 0.22);
+      --overlay-dim: rgba(12, 12, 18, 0.35);
+    }
+
+    /* 主題：古典 (Classic Vintage) */
+    body.theme-vintage {
+      --font-family: 'Cormorant Garamond', 'Noto Sans TC', serif;
+      --font-digits: 'Cinzel', serif;
+      --glass-bg: rgba(38, 24, 16, 0.4);
+      --glass-border: rgba(246, 211, 160, 0.25);
+      --glass-shadow: 0 16px 36px rgba(22, 14, 8, 0.38);
+      --text-main: #fef3c7;
+      --text-sub: rgba(254, 243, 199, 0.9);
+      --accent-color: #fbbf24;
+      --accent-gradient: linear-gradient(135deg, #fde68a 0%, #d97706 60%, #b45309 100%);
+      --ring-trail: rgba(254, 243, 199, 0.12);
+      --btn-bg: rgba(217, 119, 6, 0.2);
+      --btn-hover: rgba(217, 119, 6, 0.35);
+      --overlay-dim: rgba(24, 16, 12, 0.32);
+    }
+
+    /* ========== 全域重置 ========== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      font-family: var(--font-family);
+      width: 100vw;
+      min-height: 100vh;
+      overflow-x: hidden;
+      overflow-y: auto;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background-color: #121820;
+    }
+
+    /* 背景圖輪播圖層 */
+    #bg-layer-1, #bg-layer-2 {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      transition: opacity 1.8s ease-in-out, transform 9s ease-out;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    #bg-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--overlay-dim);
+      backdrop-filter: blur(1.5px);
+      -webkit-backdrop-filter: blur(1.5px);
+      z-index: 1;
+      pointer-events: none;
+      transition: background 0.6s ease;
+    }
+
+    /* ========== 右下角大標題 ========== */
+    .app-title-corner {
+      position: fixed;
+      bottom: 24px;
+      right: 28px;
+      z-index: 50;
+      font-size: clamp(1.15rem, 2.2vw, 1.6rem);
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      color: var(--text-main);
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.65), 0 0 6px rgba(0, 0, 0, 0.4);
+      pointer-events: auto;
+      padding: 8px 18px;
+      background: rgba(0, 0, 0, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 9999px;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      transition: all 0.3s ease;
+      cursor: default;
+    }
+
+    .app-title-corner:hover {
+      background: rgba(0, 0, 0, 0.3);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    /* ========== 主計時卡片容器 (弱化毛玻璃) ========== */
+    .timer-container {
+      position: relative;
+      z-index: 10;
+      width: min(92vw, 680px);
+      margin: 30px auto;
+      padding: 38px 28px 34px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 36px;
+      box-shadow: var(--glass-shadow);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* 正能量金句輪播列 */
+    .quote-box {
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      padding: 0 16px;
+      max-width: 90%;
+    }
+
+    .quote-text {
+      font-size: clamp(1.05rem, 2.5vw, 1.35rem);
+      font-weight: 600;
+      color: var(--text-sub);
+      text-shadow: 0 2px 10px rgba(0,0,0,0.45);
+      line-height: 1.4;
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .quote-text.fade-out {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    .quote-text.fade-in {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    /* ========== 圓形進度條與大數字區 ========== */
+    .timer-display-wrap {
+      position: relative;
+      width: clamp(260px, 45vw, 360px);
+      height: clamp(260px, 45vw, 360px);
+      margin: 10px 0 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .progress-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+      overflow: visible;
+    }
+
+    .progress-track {
+      fill: none;
+      stroke: var(--ring-trail);
+      stroke-width: 14;
+    }
+
+    .progress-bar {
+      fill: none;
+      stroke: url(#timerGradient);
+      stroke-width: 14;
+      stroke-linecap: round;
+      stroke-dasharray: 879.6; /* 2 * PI * 140 */
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 0.8s ease;
+      filter: drop-shadow(0 0 12px rgba(110, 231, 183, 0.65));
+    }
+
+    /* 呼吸光暈動畫 (運行中) */
+    .running .progress-bar {
+      animation: breatheGlow 3s infinite alternate ease-in-out;
+    }
+
+    @keyframes breatheGlow {
+      0% {
+        filter: drop-shadow(0 0 8px rgba(110, 231, 183, 0.45));
+      }
+      100% {
+        filter: drop-shadow(0 0 22px rgba(110, 231, 183, 0.95));
+      }
+    }
+
+    /* 最後 10 秒心跳急促警告 */
+    .warning-pulse {
+      animation: urgentPulse 0.8s infinite alternate cubic-bezier(0.3, 0, 0.8, 1) !important;
+    }
+    @keyframes urgentPulse {
+      0% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.6));
+      }
+      100% {
+        transform: scale(1.03);
+        filter: drop-shadow(0 0 26px rgba(239, 68, 68, 1));
+      }
+    }
+
+    /* 巨大翻頁數字 */
+    .time-digits-container {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-digits);
+      font-weight: 700;
+      font-size: clamp(3.4rem, 8.5vw, 5.4rem);
+      line-height: 1;
+      letter-spacing: 2px;
+      color: var(--text-main);
+      text-shadow: 0 4px 18px rgba(0,0,0,0.5);
+      transform: scale(var(--scale-digits));
+      transition: transform 0.3s;
+    }
+
+    .digit-group {
+      display: inline-flex;
+      position: relative;
+      overflow: hidden;
+      height: 1.15em;
+    }
+
+    .digit-char {
+      display: inline-block;
+      transition: transform 0.35s cubic-bezier(0.2, 0.85, 0.4, 1.2), opacity 0.3s ease;
+      min-width: 0.6em;
+      text-align: center;
+    }
+
+    .digit-colon {
+      margin: 0 4px;
+      animation: colonBlink 1.5s infinite;
+      display: inline-block;
+    }
+
+    @keyframes colonBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* 倒數完成訊息浮層 */
+    .completion-banner {
+      position: absolute;
+      z-index: 5;
+      font-size: clamp(1.2rem, 3vw, 1.7rem);
+      font-weight: 700;
+      color: #fff;
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(245, 158, 11, 0.9));
+      padding: 12px 28px;
+      border-radius: 50px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.6) translateY(20px);
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .completion-banner.show {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1) translateY(0);
+      animation: bannerBounce 2s infinite ease-in-out;
+    }
+    @keyframes bannerBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    /* ========== 主控制按鈕 (Start / Pause / Reset) ========== */
+    .main-controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 25px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .ctrl-btn {
+      appearance: none;
+      border: 1px solid var(--glass-border);
+      background: var(--btn-bg);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: clamp(0.95rem, 2vw, 1.15rem);
+      font-weight: 600;
+      padding: 14px 32px;
+      border-radius: 9999px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.3, 1);
+    }
+
+    .ctrl-btn:hover {
+      background: var(--btn-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.28);
+    }
+
+    .ctrl-btn:active {
+      transform: translateY(1px) scale(0.97);
+    }
+
+    .ctrl-btn.primary {
+      background: var(--accent-gradient);
+      color: #042f2e;
+      border: none;
+      font-weight: 700;
+      box-shadow: 0 8px 24px rgba(52, 211, 153, 0.45);
+    }
+    .ctrl-btn.primary:hover {
+      box-shadow: 0 12px 28px rgba(52, 211, 153, 0.6);
+      filter: brightness(1.08);
+    }
+
+    /* ========== 預設時間按鈕區 ========== */
+    .presets-wrap {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .presets-title {
+      font-size: 0.95rem;
+      color: var(--text-sub);
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+
+    .preset-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 580px;
+    }
+
+    .preset-chip {
+      appearance: none;
+      border: 1px solid var(--glass-border);
+      background: var(--btn-bg);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 600;
+      padding: 9px 20px;
+      border-radius: 18px;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .preset-chip:hover {
+      background: var(--btn-hover);
+      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.6);
+    }
+
+    .preset-chip.active {
+      background: rgba(255, 255, 255, 0.85);
+      color: #111827;
+      box-shadow: 0 6px 18px rgba(255,255,255,0.4);
+      font-weight: 700;
+    }
+
+    /* ========== 右上角齒輪按鈕 (最高 z-index，防遮擋) ========== */
+    .settings-fab {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 100;
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      transition: all 0.3s cubic-bezier(0.2, 0.8, 0.3, 1);
+    }
+
+    .settings-fab:hover {
+      transform: rotate(45deg) scale(1.1);
+      background: var(--btn-hover);
+    }
+
+    .settings-fab svg {
+      width: 26px;
+      height: 26px;
+      fill: currentColor;
+    }
+
+    /* ========== 抽屜式設定面板 ========== */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 150;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+      backdrop-filter: blur(4px);
+    }
+    .drawer-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: min(440px, 92vw);
+      height: 100vh;
+      background: rgba(26, 32, 44, 0.88);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border-left: 1px solid rgba(255, 255, 255, 0.18);
+      z-index: 160;
+      box-shadow: -10px 0 40px rgba(0, 0, 0, 0.5);
+      transform: translateX(100%);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      color: #f1f5f9;
+    }
+    .drawer.open {
+      transform: translateX(0);
+    }
+
+    .drawer-header {
+      padding: 24px 28px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .drawer-header h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .drawer-close {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 2rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+    .drawer-close:hover {
+      color: #fff;
+    }
+
+    .drawer-body {
+      padding: 24px 28px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .drawer-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .drawer-section label {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      padding: 11px 14px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 12px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .form-input:focus, .form-select:focus {
+      border-color: #34d399;
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .form-select option {
+      background: #1e293b;
+      color: #fff;
+    }
+
+    /* 正能量句子清單管理 */
+    .quote-item-row, .preset-item-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .btn-icon-del {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+    .btn-icon-del:hover {
+      background: rgba(239, 68, 68, 0.45);
+      color: #fff;
+    }
+
+    .btn-add-item {
+      background: rgba(52, 211, 153, 0.18);
+      border: 1px dashed rgba(52, 211, 153, 0.5);
+      color: #6ee7b7;
+      padding: 9px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn-add-item:hover {
+      background: rgba(52, 211, 153, 0.32);
+      border-style: solid;
+    }
+
+    /* 背景圖列表管理 */
+    .bg-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 220px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .bg-item-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .bg-item-card input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #34d399;
+      cursor: pointer;
+    }
+
+    .bg-thumb-preview {
+      width: 44px;
+      height: 32px;
+      border-radius: 6px;
+      object-fit: cover;
+      background: #334155;
+    }
+
+    .bg-input-field {
+      flex: 1;
+      min-width: 0;
+      font-size: 0.85rem;
+      padding: 6px 10px;
+    }
+
+    /* 快捷切換開關 (Toggle Switch) */
+    .switch-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 26px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: rgba(255, 255, 255, 0.2);
+      transition: .3s;
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #10b981;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    /* 手機直式排版優化 */
+    @media (max-width: 640px) {
+      .timer-container {
+        padding: 26px 18px;
+        width: 94vw;
+        border-radius: 28px;
+      }
+      .app-title-corner {
+        bottom: 14px;
+        right: 14px;
+        font-size: 0.95rem;
+        padding: 6px 14px;
+      }
+      .main-controls {
+        gap: 10px;
+      }
+      .ctrl-btn {
+        padding: 12px 22px;
+        font-size: 0.95rem;
+      }
+      .settings-fab {
+        top: 16px;
+        right: 16px;
+        width: 46px;
+        height: 46px;
+      }
+    }
+  </style>
+</head>
+
+<body class="theme-casual">
+
+  <!-- 雙層背景實現流暢 Cross-fade 輪播 -->
+  <div id="bg-layer-1"></div>
+  <div id="bg-layer-2" style="opacity: 0;"></div>
+  <div id="bg-overlay"></div>
+
+  <!-- 右下角大標題 -->
+  <aside class="app-title-corner" id="displayTitle">Grace 的計時器</aside>
+
+  <!-- 右上角保證可點擊的設定齒輪按鈕 -->
+  <button id="btnOpenSettings" class="settings-fab" aria-label="打開設定">
+    <svg viewBox="0 0 24 24">
+      <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58a.488.488 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+    </svg>
+  </button>
+
+  <!-- 主計時面板 -->
+  <main class="timer-container" id="mainContainer">
+    <!-- 正能量句子 (輪播) -->
+    <div class="quote-box">
+      <div class="quote-text" id="displayQuote">讓每個微小專注，滋養未來的繁花</div>
+    </div>
+
+    <!-- 圓形進度條與中央大時間 -->
+    <div class="timer-display-wrap" id="timerWrapper">
+      <svg class="progress-svg" viewBox="0 0 320 320">
+        <defs>
+          <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#fde68a" />
+            <stop offset="50%" stop-color="#fbbf24" />
+            <stop offset="100%" stop-color="#f97316" />
+          </linearGradient>
+        </defs>
+        <!-- 背景底圈 -->
+        <circle class="progress-track" cx="160" cy="160" r="140"></circle>
+        <!-- 動態前進度圈 -->
+        <circle class="progress-bar" id="progressBar" cx="160" cy="160" r="140"></circle>
+      </svg>
+
+      <!-- 翻頁動畫時間數字 -->
+      <div class="time-digits-container" id="digitsContainer" aria-label="倒數計時剩餘時間">
+        <div class="digit-group"><span class="digit-char" id="m1">0</span></div>
+        <div class="digit-group"><span class="digit-char" id="m2">5</span></div>
+        <span class="digit-colon">:</span>
+        <div class="digit-group"><span class="digit-char" id="s1">0</span></div>
+        <div class="digit-group"><span class="digit-char" id="s2">0</span></div>
+      </div>
+
+      <!-- 倒數結束提示標籤 -->
+      <div class="completion-banner" id="completionBanner">時光漫步結束，太棒了！ ✨</div>
+    </div>
+
+    <!-- 控制按鈕 -->
+    <div class="main-controls">
+      <button class="ctrl-btn primary" id="btnStartPause">
+        <span id="startIcon">▶</span>
+        <span id="startText">Start</span>
+      </button>
+      <button class="ctrl-btn" id="btnReset">
+        <span>↺</span>
+        <span>Reset</span>
+      </button>
+    </div>
+
+    <!-- 預設快捷時間 -->
+    <div class="presets-wrap">
+      <span class="presets-title">快速選擇時間</span>
+      <div class="preset-list" id="presetChipsContainer">
+        <!-- 動態由 JavaScript 生成按鈕 -->
+      </div>
+    </div>
+  </main>
+
+  <!-- 抽屜式設定遮罩與面板 -->
+  <div class="drawer-backdrop" id="drawerBackdrop"></div>
+  <aside class="drawer" id="settingsDrawer">
+    <div class="drawer-header">
+      <h2>設定偏好</h2>
+      <button class="drawer-close" id="btnCloseSettings" aria-label="關閉設定">&times;</button>
+    </div>
+
+    <div class="drawer-body">
+      <!-- 標題設定 -->
+      <div class="drawer-section">
+        <label for="inputTitle">計時器大標題</label>
+        <input type="text" id="inputTitle" class="form-input" placeholder="例如：Grace 的計時器">
+      </div>
+
+      <!-- 完成提示語 -->
+      <div class="drawer-section">
+        <label for="inputCompletionMsg">完成時提示語</label>
+        <input type="text" id="inputCompletionMsg" class="form-input" placeholder="例如：專注時光圓滿結束！">
+      </div>
+
+      <!-- 風格主題切換 -->
+      <div class="drawer-section">
+        <label for="selectTheme">主題風格</label>
+        <select id="selectTheme" class="form-select">
+          <option value="theme-casual">吉卜利休閒 (Casual Ghibli)</option>
+          <option value="theme-chic">現代時尚 (Modern Chic)</option>
+          <option value="theme-vintage">古典復古 (Classic Vintage)</option>
+        </select>
+      </div>
+
+      <!-- 字型尺寸微調 -->
+      <div class="drawer-section">
+        <label for="selectDigitScale">數字字型大小</label>
+        <select id="selectDigitScale" class="form-select">
+          <option value="0.9">稍微收斂 (90%)</option>
+          <option value="1" selected>標準超大 (100%)</option>
+          <option value="1.12">磅礡震撼 (112%)</option>
+        </select>
+      </div>
+
+      <!-- 正能量文字管理 -->
+      <div class="drawer-section">
+        <label>正能量文字輪播句子</label>
+        <div id="quotesListContainer"></div>
+        <button class="btn-add-item" id="btnAddQuote">+ 新增正能量金句</button>
+      </div>
+
+      <!-- 預設時間按鈕管理 -->
+      <div class="drawer-section">
+        <label>預設時間標籤 (分鐘)</label>
+        <div id="presetsListContainer"></div>
+        <button class="btn-add-item" id="btnAddPreset">+ 新增自訂時間按鈕</button>
+      </div>
+
+      <!-- 背景圖自動輪播開關 -->
+      <div class="drawer-section">
+        <label class="switch-wrap">
+          <span>開啟背景自動輪播 (每 14 秒)</span>
+          <label class="switch">
+            <input type="checkbox" id="toggleBgRotate" checked>
+            <span class="slider"></span>
+          </label>
+        </label>
+      </div>
+
+      <!-- 背景圖片清單管理 (最多 10 張自訂 + 4 張預設，合流輪播) -->
+      <div class="drawer-section">
+        <label>背景圖片管理 (勾選納入輪播)</label>
+        <p style="font-size:0.8rem; color:#94a3b8; margin-top:-6px;">預設與自訂圖片共同輪播，最多可新增 10 張 URL。</p>
+        <div class="bg-list" id="bgItemsContainer"></div>
+        <button class="btn-add-item" id="btnAddBgUrl">+ 新增自訂圖片 URL</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========== JAVASCRIPT 核心邏輯 ========== -->
+  <script>
+    /* 預設 4 張吉卜利風格的日出、日落與暮光風景桌布 */
+    const DEFAULT_BACKGROUNDS = [
+      { id: 'def_1', url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80', enabled: true, isDefault: true }, // 溫暖暮光沙灘日落
+      { id: 'def_2', url: 'https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=1920&q=80', enabled: true, isDefault: true }, // 金黃晨曦穿透雲海山嵐
+      { id: 'def_3', url: 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?auto=format&fit=crop&w=1920&q=80', enabled: true, isDefault: true }, // 樹梢溫煦斜陽晨光
+      { id: 'def_4', url: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=1920&q=80', enabled: true, isDefault: true }  // 綠意盎然的山谷金黃日暮
+    ];
+
+    /* 預設設定物件 */
+    const appState = {
+      title: 'Grace 的計時器',
+      completionMsg: '時光漫步結束，太棒了！ ✨',
+      theme: 'theme-casual',
+      digitScale: '1',
+      quotes: [
+        '讓每個微小專注，滋養未來的繁花',
+        '慢慢來，最平靜的心能走最遠的路',
+        '風吹拂過的山坡，每一刻都是新的啟程',
+        '今天也是值得被溫柔以待的一天'
+      ],
+      currentQuoteIndex: 0,
+      presets: [5, 10, 15, 25],
+      bgRotate: true,
+      customBackgrounds: [], // 最多 10 個自訂 URL
+      // 計時核心數據
+      totalSeconds: 300,      // 當前設定總秒數 (預設 5 分鐘)
+      remainingSeconds: 300,  // 當前剩餘秒數
+      isRunning: false,
+      timerInterval: null,
+      quoteInterval: null,
+      bgInterval: null,
+      currentBgIndex: 0,
+      activeBgLayer: 1
+    };
+
+    /* ========== DOM 元素快取 ========== */
+    const dom = {
+      body: document.body,
+      displayTitle: document.getElementById('displayTitle'),
+      displayQuote: document.getElementById('displayQuote'),
+      progressBar: document.getElementById('progressBar'),
+      timerWrapper: document.getElementById('timerWrapper'),
+      m1: document.getElementById('m1'),
+      m2: document.getElementById('m2'),
+      s1: document.getElementById('s1'),
+      s2: document.getElementById('s2'),
+      completionBanner: document.getElementById('completionBanner'),
+      btnStartPause: document.getElementById('btnStartPause'),
+      startIcon: document.getElementById('startIcon'),
+      startText: document.getElementById('startText'),
+      btnReset: document.getElementById('btnReset'),
+      presetChipsContainer: document.getElementById('presetChipsContainer'),
+      // 設定面板
+      btnOpenSettings: document.getElementById('btnOpenSettings'),
+      btnCloseSettings: document.getElementById('btnCloseSettings'),
+      drawerBackdrop: document.getElementById('drawerBackdrop'),
+      settingsDrawer: document.getElementById('settingsDrawer'),
+      inputTitle: document.getElementById('inputTitle'),
+      inputCompletionMsg: document.getElementById('inputCompletionMsg'),
+      selectTheme: document.getElementById('selectTheme'),
+      selectDigitScale: document.getElementById('selectDigitScale'),
+      quotesListContainer: document.getElementById('quotesListContainer'),
+      btnAddQuote: document.getElementById('btnAddQuote'),
+      presetsListContainer: document.getElementById('presetsListContainer'),
+      btnAddPreset: document.getElementById('btnAddPreset'),
+      toggleBgRotate: document.getElementById('toggleBgRotate'),
+      bgItemsContainer: document.getElementById('bgItemsContainer'),
+      btnAddBgUrl: document.getElementById('btnAddBgUrl'),
+      // 背景雙圖層
+      bgLayer1: document.getElementById('bgLayer1') || document.getElementById('bg-layer-1'),
+      bgLayer2: document.getElementById('bgLayer2') || document.getElementById('bg-layer-2')
+    };
+
+    const CIRCUMFERENCE = 2 * Math.PI * 140; // 879.64
+
+    /* ========== 本地儲存讀取與寫入 ========== */
+    function loadStorage() {
+      try {
+        const saved = localStorage.getItem('grace_timer_cfg');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.title) appState.title = parsed.title;
+          if (parsed.completionMsg) appState.completionMsg = parsed.completionMsg;
+          if (parsed.theme) appState.theme = parsed.theme;
+          if (parsed.digitScale) appState.digitScale = parsed.digitScale;
+          if (Array.isArray(parsed.quotes) && parsed.quotes.length > 0) appState.quotes = parsed.quotes;
+          if (Array.isArray(parsed.presets) && parsed.presets.length > 0) appState.presets = parsed.presets;
+          if (typeof parsed.bgRotate === 'boolean') appState.bgRotate = parsed.bgRotate;
+          if (Array.isArray(parsed.customBackgrounds)) appState.customBackgrounds = parsed.customBackgrounds;
+        }
+      } catch (e) {
+        console.warn('載入 localStorage 發生問題，將使用預設設定', e);
+      }
+    }
+
+    function saveStorage() {
+      try {
+        const toSave = {
+          title: appState.title,
+          completionMsg: appState.completionMsg,
+          theme: appState.theme,
+          digitScale: appState.digitScale,
+          quotes: appState.quotes,
+          presets: appState.presets,
+          bgRotate: appState.bgRotate,
+          customBackgrounds: appState.customBackgrounds
+        };
+        localStorage.setItem('grace_timer_cfg', JSON.stringify(toSave));
+      } catch (e) {
+        console.warn('無法儲存至 localStorage', e);
+      }
+    }
+
+    /* ========== 計時器核心功能 ========== */
+    function formatTime(totalSec) {
+      const mins = Math.floor(totalSec / 60);
+      const secs = totalSec % 60;
+      const mm = String(mins).padStart(2, '0');
+      const ss = String(secs).padStart(2, '0');
+      return {
+        m1: mm[0],
+        m2: mm[1],
+        s1: ss[0],
+        s2: ss[1]
+      };
+    }
+
+    /* 數字翻牌微動畫切換 */
+    function updateDigitElement(el, newVal) {
+      if (el.textContent !== newVal) {
+        el.style.transform = 'translateY(-30%) scale(0.9)';
+        el.style.opacity = '0';
+        setTimeout(() => {
+          el.textContent = newVal;
+          el.style.transform = 'translateY(30%) scale(0.9)';
+          requestAnimationFrame(() => {
+            el.style.transform = 'translateY(0) scale(1)';
+            el.style.opacity = '1';
+          });
+        }, 120);
+      }
+    }
+
+    function renderDisplay() {
+      const { m1, m2, s1, s2 } = formatTime(appState.remainingSeconds);
+      updateDigitElement(dom.m1, m1);
+      updateDigitElement(dom.m2, m2);
+      updateDigitElement(dom.s1, s1);
+      updateDigitElement(dom.s2, s2);
+
+      // 進度條計算
+      let fraction = appState.totalSeconds > 0 ? (appState.remainingSeconds / appState.totalSeconds) : 0;
+      fraction = Math.max(0, Math.min(1, fraction));
+      const strokeOffset = CIRCUMFERENCE * (1 - fraction);
+      dom.progressBar.style.strokeDashoffset = strokeOffset;
+
+      // 最後 10 秒視覺警示
+      if (appState.isRunning && appState.remainingSeconds <= 10 && appState.remainingSeconds > 0) {
+        dom.timerWrapper.classList.add('warning-pulse');
+      } else {
+        dom.timerWrapper.classList.remove('warning-pulse');
+      }
+    }
+
+    function startTimer() {
+      if (appState.isRunning) return;
+      if (appState.remainingSeconds <= 0) {
+        appState.remainingSeconds = appState.totalSeconds;
+      }
+      appState.isRunning = true;
+      dom.timerWrapper.classList.add('running');
+      dom.completionBanner.classList.remove('show');
+      dom.startIcon.textContent = '❚❚';
+      dom.startText.textContent = 'Pause';
+
+      appState.timerInterval = setInterval(() => {
+        if (appState.remainingSeconds > 0) {
+          appState.remainingSeconds--;
+          renderDisplay();
+
+          if (appState.remainingSeconds === 0) {
+            handleComplete();
+          }
+        }
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      if (!appState.isRunning) return;
+      appState.isRunning = false;
+      clearInterval(appState.timerInterval);
+      dom.timerWrapper.classList.remove('running', 'warning-pulse');
+      dom.startIcon.textContent = '▶';
+      dom.startText.textContent = 'Start';
+    }
+
+    function resetTimer() {
+      pauseTimer();
+      appState.remainingSeconds = appState.totalSeconds;
+      dom.completionBanner.classList.remove('show');
+      renderDisplay();
+    }
+
+    function setDuration(minutes) {
+      pauseTimer();
+      appState.totalSeconds = minutes * 60;
+      appState.remainingSeconds = appState.totalSeconds;
+      dom.completionBanner.classList.remove('show');
+      renderDisplay();
+      renderPresetChips();
+    }
+
+    /* 倒數完成慶祝效果 */
+    function handleComplete() {
+      pauseTimer();
+      dom.completionBanner.textContent = appState.completionMsg;
+      dom.completionBanner.classList.add('show');
+
+      // 觸發全螢幕繽紛紙花
+      if (typeof confetti === 'function') {
+        const count = 220;
+        const defaults = { origin: { y: 0.65 } };
+        function fire(particleRatio, opts) {
+          confetti(Object.assign({}, defaults, opts, {
+            particleCount: Math.floor(count * particleRatio)
+          }));
+        }
+        fire(0.25, { spread: 26, startVelocity: 55 });
+        fire(0.2, { spread: 60 });
+        fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+        fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+        fire(0.1, { spread: 120, startVelocity: 45 });
+      }
+    }
+
+    /* ========== 預設時間標籤渲染 ========== */
+    function renderPresetChips() {
+      dom.presetChipsContainer.innerHTML = '';
+      appState.presets.forEach(minutes => {
+        const chip = document.createElement('button');
+        chip.className = 'preset-chip';
+        if (appState.totalSeconds === minutes * 60) {
+          chip.classList.add('active');
+        }
+        chip.textContent = `${minutes} 分鐘`;
+        chip.addEventListener('click', () => {
+          setDuration(minutes);
+        });
+        dom.presetChipsContainer.appendChild(chip);
+      });
+    }
+
+    /* ========== 正能量句子輪播 ========== */
+    function startQuoteRotation() {
+      if (appState.quoteInterval) clearInterval(appState.quoteInterval);
+      appState.quoteInterval = setInterval(() => {
+        if (!appState.quotes || appState.quotes.length === 0) return;
+        dom.displayQuote.classList.add('fade-out');
+        setTimeout(() => {
+          appState.currentQuoteIndex = (appState.currentQuoteIndex + 1) % appState.quotes.length;
+          dom.displayQuote.textContent = appState.quotes[appState.currentQuoteIndex];
+          dom.displayQuote.classList.remove('fade-out');
+          dom.displayQuote.classList.add('fade-in');
+          setTimeout(() => {
+            dom.displayQuote.classList.remove('fade-in');
+          }, 300);
+        }, 500);
+      }, 7000); // 每 7 秒平滑切換
+    }
+
+    /* ========== 背景圖片混合輪播系統 ========== */
+    function getAllEnabledBackgrounds() {
+      // 預設與自訂圖片共同輪播，不覆蓋
+      const defaultEnabled = DEFAULT_BACKGROUNDS.filter(b => b.enabled);
+      const customEnabled = appState.customBackgrounds.filter(b => b.enabled && b.url && b.url.trim() !== '');
+      return [...defaultEnabled, ...customEnabled];
+    }
+
+    function setBackground(url) {
+      if (!url) return;
+      // 雙圖層 cross-fade 避免白屏閃爍
+      const currentLayer = appState.activeBgLayer === 1 ? dom.bgLayer1 : dom.bgLayer2;
+      const nextLayer = appState.activeBgLayer === 1 ? dom.bgLayer2 : dom.bgLayer1;
+
+      // 預先載入圖片
+      const img = new Image();
+      img.onload = () => {
+        nextLayer.style.backgroundImage = `url('${url}')`;
+        nextLayer.style.opacity = '1';
+        currentLayer.style.opacity = '0';
+        appState.activeBgLayer = appState.activeBgLayer === 1 ? 2 : 1;
+      };
+      img.onerror = () => {
+        console.warn('圖片載入失敗，略過此張：', url);
+      };
+      img.src = url;
+    }
+
+    function rotateBackground() {
+      const activeList = getAllEnabledBackgrounds();
+      if (activeList.length === 0) return;
+      appState.currentBgIndex = (appState.currentBgIndex + 1) % activeList.length;
+      setBackground(activeList[appState.currentBgIndex].url);
+    }
+
+    function initBackgroundSystem() {
+      const activeList = getAllEnabledBackgrounds();
+      if (activeList.length > 0) {
+        setBackground(activeList[0].url);
+      }
+      if (appState.bgInterval) clearInterval(appState.bgInterval);
+      if (appState.bgRotate) {
+        appState.bgInterval = setInterval(rotateBackground, 14000); // 每 14 秒自動過渡
+      }
+    }
+
+    /* ========== 設定抽屜邏輯與管理 ========== */
+    function openDrawer() {
+      // 同步數值至抽屜輸入框
+      dom.inputTitle.value = appState.title;
+      dom.inputCompletionMsg.value = appState.completionMsg;
+      dom.selectTheme.value = appState.theme;
+      dom.selectDigitScale.value = appState.digitScale;
+      dom.toggleBgRotate.checked = appState.bgRotate;
+
+      renderDrawerQuotes();
+      renderDrawerPresets();
+      renderDrawerBackgrounds();
+
+      dom.drawerBackdrop.classList.add('open');
+      dom.settingsDrawer.classList.add('open');
+    }
+
+    function closeDrawer() {
+      dom.drawerBackdrop.classList.remove('open');
+      dom.settingsDrawer.classList.remove('open');
+      saveStorage();
+    }
+
+    /* 渲染抽屜：正能量文字管理 */
+    function renderDrawerQuotes() {
+      dom.quotesListContainer.innerHTML = '';
+      appState.quotes.forEach((q, idx) => {
+        const row = document.createElement('div');
+        row.className = 'quote-item-row';
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'form-input';
+        input.value = q;
+        input.addEventListener('change', (e) => {
+          appState.quotes[idx] = e.target.value.trim() || '保持微笑，專注當下';
+          saveStorage();
+        });
+
+        const btnDel = document.createElement('button');
+        btnDel.className = 'btn-icon-del';
+        btnDel.textContent = '✕';
+        btnDel.title = '刪除此金句';
+        btnDel.addEventListener('click', () => {
+          if (appState.quotes.length <= 1) {
+            alert('至少保留一句正能量金句哦！');
+            return;
+          }
+          appState.quotes.splice(idx, 1);
+          renderDrawerQuotes();
+          saveStorage();
+        });
+
+        row.appendChild(input);
+        row.appendChild(btnDel);
+        dom.quotesListContainer.appendChild(row);
+      });
+    }
+
+    /* 渲染抽屜：預設時間標籤管理 */
+    function renderDrawerPresets() {
+      dom.presetsListContainer.innerHTML = '';
+      appState.presets.forEach((min, idx) => {
+        const row = document.createElement('div');
+        row.className = 'preset-item-row';
+
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.min = '1';
+        input.max = '999';
+        input.className = 'form-input';
+        input.value = min;
+        input.addEventListener('change', (e) => {
+          const val = parseInt(e.target.value, 10);
+          if (!isNaN(val) && val > 0) {
+            appState.presets[idx] = val;
+            renderPresetChips();
+            saveStorage();
+          }
+        });
+
+        const btnDel = document.createElement('button');
+        btnDel.className = 'btn-icon-del';
+        btnDel.textContent = '✕';
+        btnDel.title = '刪除此時間選項';
+        btnDel.addEventListener('click', () => {
+          if (appState.presets.length <= 1) {
+            alert('請至少保留一個時間選項');
+            return;
+          }
+          appState.presets.splice(idx, 1);
+          renderDrawerPresets();
+          renderPresetChips();
+          saveStorage();
+        });
+
+        row.appendChild(input);
+        row.appendChild(btnDel);
+        dom.presetsListContainer.appendChild(row);
+      });
+    }
+
+    /* 渲染抽屜：背景圖清單（預設 + 最多 10 張自訂） */
+    function renderDrawerBackgrounds() {
+      dom.bgItemsContainer.innerHTML = '';
+
+      // 1. 預設 4 張
+      DEFAULT_BACKGROUNDS.forEach((item, index) => {
+        const card = createBgItemRow(item, `預設風景 ${index + 1}`, false);
+        dom.bgItemsContainer.appendChild(card);
+      });
+
+      // 2. 使用者自訂 (最多 10 張)
+      appState.customBackgrounds.forEach((item, index) => {
+        const card = createBgItemRow(item, `自訂圖片 ${index + 1}`, true, index);
+        dom.bgItemsContainer.appendChild(card);
+      });
+
+      // 自訂圖片數量滿 10 張時隱藏新增按鈕
+      dom.btnAddBgUrl.style.display = appState.customBackgrounds.length >= 10 ? 'none' : 'block';
+    }
+
+    function createBgItemRow(item, labelText, isCustom, customIndex = null) {
+      const card = document.createElement('div');
+      card.className = 'bg-item-card';
+
+      // 勾選是否輪播
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = !!item.enabled;
+      checkbox.title = '勾選以納入輪播';
+      checkbox.addEventListener('change', (e) => {
+        item.enabled = e.target.checked;
+        saveStorage();
+      });
+
+      // 縮圖預覽
+      const thumb = document.createElement('img');
+      thumb.className = 'bg-thumb-preview';
+      thumb.src = item.url;
+      thumb.alt = '背景預覽';
+      thumb.onerror = () => {
+        thumb.src = 'https://placehold.co/80x50/334155/ffffff?text=No+Img';
+      };
+
+      if (!isCustom) {
+        // 預設圖片只讀顯示
+        const label = document.createElement('span');
+        label.style.flex = '1';
+        label.style.fontSize = '0.85rem';
+        label.style.color = '#cbd5e1';
+        label.textContent = labelText;
+        card.appendChild(checkbox);
+        card.appendChild(thumb);
+        card.appendChild(label);
+      } else {
+        // 自訂圖片支援編輯 URL 與刪除
+        const inputUrl = document.createElement('input');
+        inputUrl.type = 'url';
+        inputUrl.className = 'form-input bg-input-field';
+        inputUrl.value = item.url;
+        inputUrl.placeholder = '貼上圖片網址 https://...';
+        inputUrl.addEventListener('change', (e) => {
+          item.url = e.target.value.trim();
+          thumb.src = item.url;
+          saveStorage();
+        });
+
+        const btnDel = document.createElement('button');
+        btnDel.className = 'btn-icon-del';
+        btnDel.textContent = '✕';
+        btnDel.title = '刪除此圖片';
+        btnDel.addEventListener('click', () => {
+          appState.customBackgrounds.splice(customIndex, 1);
+          renderDrawerBackgrounds();
+          saveStorage();
+        });
+
+        card.appendChild(checkbox);
+        card.appendChild(thumb);
+        card.appendChild(inputUrl);
+        card.appendChild(btnDel);
+      }
+
+      return card;
+    }
+
+    /* ========== 事件綁定與監聽 ========== */
+    function attachEventListeners() {
+      // Start / Pause 按鈕
+      dom.btnStartPause.addEventListener('click', () => {
+        if (appState.isRunning) {
+          pauseTimer();
+        } else {
+          startTimer();
+        }
+      });
+
+      // Reset 按鈕
+      dom.btnReset.addEventListener('click', resetTimer);
+
+      // 設定抽屜開關
+      dom.btnOpenSettings.addEventListener('click', openDrawer);
+      dom.btnCloseSettings.addEventListener('click', closeDrawer);
+      dom.drawerBackdrop.addEventListener('click', closeDrawer);
+
+      // 即時修改標題
+      dom.inputTitle.addEventListener('input', (e) => {
+        appState.title = e.target.value || 'Grace 的計時器';
+        dom.displayTitle.textContent = appState.title;
+        saveStorage();
+      });
+
+      // 即時修改完成提示語
+      dom.inputCompletionMsg.addEventListener('input', (e) => {
+        appState.completionMsg = e.target.value || '時光漫步結束，太棒了！ ✨';
+        saveStorage();
+      });
+
+      // 切換主題 (休閒 / 時尚 / 古典)
+      dom.selectTheme.addEventListener('change', (e) => {
+        const theme = e.target.value;
+        appState.theme = theme;
+        dom.body.className = theme;
+        saveStorage();
+      });
+
+      // 切換數字大小
+      dom.selectDigitScale.addEventListener('change', (e) => {
+        const scale = e.target.value;
+        appState.digitScale = scale;
+        document.documentElement.style.setProperty('--scale-digits', scale);
+        saveStorage();
+      });
+
+      // 新增正能量金句
+      dom.btnAddQuote.addEventListener('click', () => {
+        appState.quotes.push('願你專注的時光，都被歲月溫柔以待');
+        renderDrawerQuotes();
+        saveStorage();
+      });
+
+      // 新增預設時間
+      dom.btnAddPreset.addEventListener('click', () => {
+        const last = appState.presets[appState.presets.length - 1] || 10;
+        appState.presets.push(last + 5);
+        renderDrawerPresets();
+        renderPresetChips();
+        saveStorage();
+      });
+
+      // 切換背景輪播開關
+      dom.toggleBgRotate.addEventListener('change', (e) => {
+        appState.bgRotate = e.target.checked;
+        saveStorage();
+        if (appState.bgRotate) {
+          if (appState.bgInterval) clearInterval(appState.bgInterval);
+          appState.bgInterval = setInterval(rotateBackground, 14000);
+        } else {
+          if (appState.bgInterval) clearInterval(appState.bgInterval);
+        }
+      });
+
+      // 新增自訂背景圖片 (最多 10 張)
+      dom.btnAddBgUrl.addEventListener('click', () => {
+        if (appState.customBackgrounds.length >= 10) {
+          return;
+        }
+        appState.customBackgrounds.push({
+          id: 'custom_' + Date.now(),
+          url: '',
+          enabled: true
+        });
+        renderDrawerBackgrounds();
+        saveStorage();
+      });
+
+      // 監聽鍵盤空白鍵快速切換 Start / Pause
+      window.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'SELECT') {
+          e.preventDefault();
+          if (appState.isRunning) {
+            pauseTimer();
+          } else {
+            startTimer();
+          }
+        }
+      });
+    }
+
+    /* ========== 初始化應用程式 ========== */
+    function initApp() {
+      loadStorage();
+
+      // 套用設定到畫面
+      dom.displayTitle.textContent = appState.title;
+      dom.body.className = appState.theme;
+      document.documentElement.style.setProperty('--scale-digits', appState.digitScale);
+      
+      if (appState.quotes.length > 0) {
+        dom.displayQuote.textContent = appState.quotes[0];
+      }
+
+      // 初始化時間與元件
+      renderPresetChips();
+      renderDisplay();
+      startQuoteRotation();
+      initBackgroundSystem();
+      attachEventListeners();
+    }
+
+    // 頁面載入完成後啟動
+    window.onload = function () {
+      initApp();
+    };
+  </script>
+</body>
+</html>

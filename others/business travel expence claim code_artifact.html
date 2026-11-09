@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>企業差旅費報支申請系統</title>
+    <!-- 引入 Tailwind CSS 進行現代化排版 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 ExcelJS 與 FileSaver 以支援帶有格式的 Excel 匯出 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        body {
+            font-family: "微軟正黑體", "Microsoft JhengHei", -apple-system, sans-serif;
+            background-color: #f1f5f9; /* Slate 100 */
+        }
+        /* 自訂日曆圖示顏色與輸入框樣式 */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            opacity: 0.6;
+            transition: 0.2s;
+        }
+        input[type="date"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            border: 1px solid #cbd5e1;
+            background-color: #ffffff;
+            font-size: 0.875rem;
+            color: #1e293b;
+            transition: all 0.15s ease;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .table-input {
+            width: 100%;
+            padding: 0.375rem;
+            border-radius: 0.25rem;
+            border: 1px solid transparent;
+            background-color: transparent;
+            font-size: 0.875rem;
+        }
+        .table-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background-color: #ffffff;
+        }
+        /* 隱藏數字輸入框的上下箭頭 */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
+</head>
+<body class="text-slate-800 p-4 md:p-8">
+
+    <!-- 主容器 -->
+    <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+        
+        <!-- 頁首 -->
+        <div class="bg-slate-900 text-white px-8 py-6 text-center">
+            <h1 class="text-2xl font-bold tracking-wider">差旅費報支申請單</h1>
+            <p class="text-slate-400 text-sm mt-1 uppercase tracking-widest">Business Travel Expense Claim Form</p>
+        </div>
+
+        <div class="p-8">
+            <!-- 基本資料區塊 -->
+            <div class="mb-8">
+                <h2 class="text-lg font-bold text-slate-900 border-l-4 border-blue-600 pl-3 mb-4">一、申請者資料</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50 p-5 rounded-lg border border-slate-100">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">申請單號 (自動產生)</label>
+                        <input type="text" id="appNo" class="form-input bg-slate-100 cursor-not-allowed" readonly>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">申請日期</label>
+                        <input type="date" id="appDate" class="form-input">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">出差人員姓名</label>
+                        <input type="text" id="empName" class="form-input" placeholder="請輸入姓名">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">員工工號</label>
+                        <input type="text" id="empId" class="form-input" placeholder="例：EMP-001">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">所屬部門</label>
+                        <input type="text" id="dept" class="form-input" placeholder="例：專案管理部">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">出差地點</label>
+                        <input type="text" id="dest" class="form-input" placeholder="例：台中 / 新竹">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">出差起日</label>
+                        <input type="date" id="startDate" class="form-input">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">出差迄日</label>
+                        <input type="date" id="endDate" class="form-input">
+                    </div>
+                    <div class="md:col-span-4">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">出差事由與任務說明</label>
+                        <input type="text" id="reason" class="form-input" placeholder="請填寫出差目的、廠商拜訪或專案名稱">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 費用明細區塊 -->
+            <div class="mb-8">
+                <div class="flex justify-between items-end mb-4">
+                    <h2 class="text-lg font-bold text-slate-900 border-l-4 border-blue-600 pl-3">二、費用申報明細</h2>
+                    <button onclick="addRow()" class="bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-4 py-2 rounded font-semibold text-sm transition flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        新增費用項目
+                    </button>
+                </div>
+                
+                <div class="overflow-x-auto rounded-lg border border-slate-200 shadow-sm">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-800 text-white text-sm">
+                                <th class="p-3 font-semibold text-center w-12 border-r border-slate-700">項次</th>
+                                <th class="p-3 font-semibold w-32 border-r border-slate-700">費用日期</th>
+                                <th class="p-3 font-semibold w-28 border-r border-slate-700">幣別</th>
+                                <th class="p-3 font-semibold w-36 border-r border-slate-700">費用類別</th>
+                                <th class="p-3 font-semibold min-w-[18rem] w-auto border-r border-slate-700">事由說明 / 商家名稱</th>
+                                <th class="p-3 font-semibold w-32 border-r border-slate-700">發票號碼</th>
+                                <th class="p-3 font-semibold text-right w-32 border-r border-slate-700">報支金額</th>
+                                <th class="p-3 font-semibold text-center w-16">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expenseBody" class="bg-white divide-y divide-slate-200">
+                            <!-- JS 動態插入列 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 結算區塊 -->
+            <div class="bg-slate-50 border border-slate-200 rounded-lg p-6 mb-8 w-full md:w-1/2 ml-auto shadow-sm">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="text-sm font-semibold text-slate-600">費用申報總額：</span>
+                    <span id="subTotalText" class="text-base font-bold text-slate-900">0</span>
+                </div>
+                <div class="flex justify-between items-center mb-4 pb-4 border-b border-slate-200">
+                    <span class="text-sm font-semibold text-slate-600">扣除：預借差旅款：</span>
+                    <div class="flex items-center">
+                        <input type="number" id="advanceAmount" value="0" min="0" class="form-input w-28 text-right font-bold" oninput="calcTotals()">
+                    </div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-lg font-bold text-red-700">實付 / (應繳回) 淨額：</span>
+                    <span id="netAmountText" class="text-xl font-black text-red-700 tracking-tight">0</span>
+                </div>
+            </div>
+
+            <!-- 匯出按鈕 -->
+            <div class="text-center mt-10 border-t border-slate-200 pt-8">
+                <button onclick="exportToExcel()" class="bg-slate-900 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5 text-lg">
+                    匯出 Excel 報支單 (.xlsx)
+                </button>
+                <p class="text-xs text-slate-400 mt-3">點擊後將會自動下載格式化完成的 Excel 檔案供列印與簽核</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 自訂訊息彈跳視窗 (取代 alert) -->
+    <div id="customModal" class="fixed inset-0 bg-slate-900 bg-opacity-50 hidden flex items-center justify-center z-50 transition-opacity">
+        <div class="bg-white rounded-lg p-6 max-w-sm w-full shadow-2xl transform scale-95 transition-transform" id="modalContent">
+            <h3 class="text-lg font-bold text-slate-900 mb-2" id="modalTitle">提示</h3>
+            <p class="text-sm text-slate-600 mb-6" id="modalMessage">訊息內容</p>
+            <div class="text-right">
+                <button onclick="closeModal()" class="bg-slate-800 hover:bg-slate-700 text-white px-5 py-2 rounded font-semibold text-sm transition">
+                    確定
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 常數設定
+        const categories = [
+            "交通費 - 高鐵/火車",
+            "交通費 - 機票",
+            "交通費 - 計程車/客運",
+            "交通費 - 自行開車油資/過路費",
+            "住宿費",
+            "膳雜費 / 誤餐費",
+            "交際應酬費",
+            "公務雜支 / 其他"
+        ];
+
+        // 頁面初始化
+        document.addEventListener("DOMContentLoaded", () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('appDate').value = today;
+            document.getElementById('startDate').value = today;
+            document.getElementById('endDate').value = today;
+            
+            // 產生隨機單號 (EXP-YYYYMMDD-RND)
+            const randomCode = Math.floor(100 + Math.random() * 900);
+            document.getElementById('appNo').value = `EXP-${today.replace(/-/g, '')}-${randomCode}`;
+
+            // 預設新增一筆空白列
+            addRow();
+        });
+
+        // 產生類別下拉選單 HTML
+        function getCategoryOptions() {
+            return categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        }
+
+        const currencies = ["新台幣 (TWD)", "美金 (USD)", "日元 (JPY)", "韓元 (KRW)", "港幣 (HKD)", "人民幣 (CNY)"];
+        function getCurrencyOptions() {
+            return currencies.map(c => `<option value="${c}">${c}</option>`).join('');
+        }
+
+        // 新增一列明細
+        function addRow() {
+            const tbody = document.getElementById('expenseBody');
+            const rowIdx = tbody.children.length + 1;
+            const today = new Date().toISOString().split('T')[0];
+            
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-slate-50 transition-colors";
+            tr.innerHTML = `
+                <td class="p-2 border-r border-slate-200 text-center text-slate-500 font-semibold row-num bg-slate-50">${rowIdx}</td>
+                <td class="p-2 border-r border-slate-200">
+                    <input type="date" class="table-input item-date" value="${today}">
+                </td>
+                <td class="p-2 border-r border-slate-200">
+                    <select class="table-input item-currency text-sm cursor-pointer">${getCurrencyOptions()}</select>
+                </td>
+                <td class="p-2 border-r border-slate-200">
+                    <select class="table-input item-cat text-sm cursor-pointer">${getCategoryOptions()}</select>
+                </td>
+                <td class="p-2 border-r border-slate-200">
+                    <input type="text" class="table-input item-desc" placeholder="事由 / 起訖點 / 商家">
+                </td>
+                <td class="p-2 border-r border-slate-200">
+                    <input type="text" class="table-input item-inv" placeholder="發票號碼">
+                </td>
+                <td class="p-2 border-r border-slate-200">
+                    <input type="number" class="table-input item-amt text-right font-bold text-slate-800" min="0" value="0" oninput="calcTotals()">
+                </td>
+                <td class="p-2 text-center">
+                    <button onclick="deleteRow(this)" class="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+            calcTotals();
+        }
+
+        // 刪除一列明細
+        function deleteRow(btn) {
+            const tbody = document.getElementById('expenseBody');
+            if (tbody.children.length <= 1) {
+                showModal("操作限制", "報支單至少需保留一筆明細項目。");
+                return;
+            }
+            btn.closest('tr').remove();
+            
+            // 重新計算項次
+            const rows = document.querySelectorAll('#expenseBody tr');
+            rows.forEach((r, idx) => {
+                r.querySelector('.row-num').textContent = idx + 1;
+            });
+            
+            calcTotals();
+        }
+
+        // 計算小計與總額
+        function calcTotals() {
+            let subTotal = 0;
+            document.querySelectorAll('.item-amt').forEach(inp => {
+                subTotal += Number(inp.value) || 0;
+            });
+            
+            const advance = Number(document.getElementById('advanceAmount').value) || 0;
+            const net = subTotal - advance;
+
+            document.getElementById('subTotalText').textContent = subTotal.toLocaleString();
+            document.getElementById('netAmountText').textContent = net.toLocaleString();
+            
+            return { subTotal, advance, net };
+        }
+
+        // 顯示自訂訊息框
+        function showModal(title, message) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMessage').textContent = message;
+            const modal = document.getElementById('customModal');
+            const content = document.getElementById('modalContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 10);
+        }
+
+        // 關閉自訂訊息框
+        function closeModal() {
+            const modal = document.getElementById('customModal');
+            const content = document.getElementById('modalContent');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 150);
+        }
+
+        // 匯出至帶有美化格式的 Excel (使用 ExcelJS)
+        async function exportToExcel() {
+            const { subTotal, advance, net } = calcTotals();
+            const appNo = document.getElementById('appNo').value;
+            const empName = document.getElementById('empName').value || '未填寫';
+
+            // 建立工作簿與工作表
+            const workbook = new ExcelJS.Workbook();
+            const sheet = workbook.addWorksheet('差旅費報支申請單');
+
+            // --- 樣式設定 ---
+            const borderThin = {
+                top: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+                left: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+                bottom: { style: 'thin', color: { argb: 'FFCBD5E1' } },
+                right: { style: 'thin', color: { argb: 'FFCBD5E1' } }
+            };
+            const borderDouble = { ...borderThin, bottom: { style: 'double', color: { argb: 'FF1E293B' } } };
+            
+            const fontTitle = { name: '微軟正黑體', size: 16, bold: true, color: { argb: 'FF1E293B' } };
+            const fontSub = { name: '微軟正黑體', size: 10, color: { argb: 'FF64748B' } };
+            const fontNormal = { name: '微軟正黑體', size: 10, color: { argb: 'FF1E293B' } };
+            const fontBold = { name: '微軟正黑體', size: 10, bold: true, color: { argb: 'FF1E293B' } };
+            const fontWhite = { name: '微軟正黑體', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
+            const fontNet = { name: '微軟正黑體', size: 11, bold: true, color: { argb: 'FFB91C1C' } };
+
+            const fillHeader = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E293B' } };
+            const fillLabel = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } };
+            const fillZebra = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } };
+            const fillTotal = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE2E8F0' } };
+            const fillNet = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFEE2E2' } };
+
+            const alignCenter = { horizontal: 'center', vertical: 'middle' };
+            const alignLeft = { horizontal: 'left', vertical: 'middle' };
+            const alignRight = { horizontal: 'right', vertical: 'middle' };
+
+            // 設定欄寬 (A 到 H)
+            sheet.columns = [
+                { width: 6 },   // A: 項次
+                { width: 14 },  // B: 費用日期
+                { width: 14 },  // C: 幣別
+                { width: 22 },  // D: 費用類別
+                { width: 38 },  // E: 事由說明 / 商家名稱
+                { width: 16 },  // F: 發票號碼
+                { width: 16 },  // G: 報支金額
+                { width: 12 }   // H: 備註
+            ];
+
+            // --- 標題區 ---
+            sheet.mergeCells('A1:H1');
+            const titleCell = sheet.getCell('A1');
+            titleCell.value = '差旅費報支申請單';
+            titleCell.font = fontTitle;
+            titleCell.alignment = alignCenter;
+
+            sheet.mergeCells('A2:H2');
+            const subTitleCell = sheet.getCell('A2');
+            subTitleCell.value = 'BUSINESS TRAVEL EXPENSE CLAIM FORM';
+            subTitleCell.font = fontSub;
+            subTitleCell.alignment = alignCenter;
+
+            sheet.getRow(1).height = 26;
+            sheet.getRow(2).height = 18;
+
+            // --- 基本資料區 ---
+            const infoData = [
+                ['申請單號', appNo, '申請日期', document.getElementById('appDate').value],
+                ['出差人員', empName, '員工工號', document.getElementById('empId').value],
+                ['所屬部門', document.getElementById('dept').value, '出差地點', document.getElementById('dest').value],
+                ['出差期間', `${document.getElementById('startDate').value} 至 ${document.getElementById('endDate').value}`, '出差事由', document.getElementById('reason').value]
+            ];
+
+            let rIdx = 4;
+            infoData.forEach(row => {
+                // 左側標籤與數值
+                const c1 = sheet.getCell(`A${rIdx}`);
+                c1.value = row[0]; c1.font = fontBold; c1.fill = fillLabel; c1.border = borderThin; c1.alignment = alignCenter;
+                sheet.mergeCells(`B${rIdx}:D${rIdx}`);
+                const v1 = sheet.getCell(`B${rIdx}`);
+                v1.value = row[1]; v1.font = fontNormal; v1.border = borderThin; v1.alignment = alignLeft;
+                sheet.getCell(`C${rIdx}`).border = borderThin; sheet.getCell(`D${rIdx}`).border = borderThin;
+
+                // 右側標籤與數值
+                const c2 = sheet.getCell(`E${rIdx}`);
+                c2.value = row[2]; c2.font = fontBold; c2.fill = fillLabel; c2.border = borderThin; c2.alignment = alignCenter;
+                sheet.mergeCells(`F${rIdx}:H${rIdx}`);
+                const v2 = sheet.getCell(`F${rIdx}`);
+                v2.value = row[3]; v2.font = fontNormal; v2.border = borderThin; v2.alignment = alignLeft;
+                sheet.getCell(`G${rIdx}`).border = borderThin; sheet.getCell(`H${rIdx}`).border = borderThin;
+
+                sheet.getRow(rIdx).height = 22;
+                rIdx++;
+            });
+
+            rIdx++; // 空出一行
+
+            // --- 明細表頭 ---
+            const headers = ['項次', '費用日期', '幣別', '費用類別', '事由說明 / 商家名稱', '發票號碼', '報支金額', '備註'];
+            const headerRow = sheet.getRow(rIdx);
+            headers.forEach((h, i) => {
+                const cell = headerRow.getCell(i + 1);
+                cell.value = h; cell.font = fontWhite; cell.fill = fillHeader; 
+                cell.border = borderThin; cell.alignment = alignCenter;
+            });
+            headerRow.height = 24;
+            rIdx++;
+
+            // --- 明細資料 ---
+            let rowCount = 1;
+            document.querySelectorAll('#expenseBody tr').forEach(tr => {
+                const data = [
+                    rowCount,
+                    tr.querySelector('.item-date').value,
+                    tr.querySelector('.item-currency').value,
+                    tr.querySelector('.item-cat').value,
+                    tr.querySelector('.item-desc').value,
+                    tr.querySelector('.item-inv').value,
+                    Number(tr.querySelector('.item-amt').value) || 0,
+                    ""
+                ];
+                
+                const dRow = sheet.getRow(rIdx);
+                data.forEach((val, i) => {
+                    const cell = dRow.getCell(i + 1);
+                    cell.value = val;
+                    cell.font = fontNormal;
+                    cell.border = borderThin;
+                    if (rowCount % 2 === 0) cell.fill = fillZebra;
+                    
+                    if (i < 4) cell.alignment = alignCenter;
+                    else if (i === 6) { cell.alignment = alignRight; cell.numFmt = '#,##0'; }
+                    else cell.alignment = alignLeft;
+                });
+                dRow.height = 20;
+                rIdx++;
+                rowCount++;
+            });
+
+            // --- 總額結算 (取消小計列，直接顯示總計) ---
+            sheet.mergeCells(`A${rIdx}:F${rIdx}`);
+            const tLabel = sheet.getCell(`A${rIdx}`);
+            tLabel.value = '費用申報總計 (Total Expenses)';
+            tLabel.font = fontBold; tLabel.fill = fillTotal; tLabel.alignment = alignRight;
+            for(let c=1; c<=6; c++) sheet.getCell(rIdx, c).border = borderThin;
+
+            const tVal = sheet.getCell(`G${rIdx}`);
+            tVal.value = subTotal;
+            tVal.font = fontBold; tVal.fill = fillTotal; tVal.border = borderThin; tVal.alignment = alignRight; tVal.numFmt = '#,##0';
+            const tRem = sheet.getCell(`H${rIdx}`);
+            tRem.fill = fillTotal; tRem.border = borderThin;
+            sheet.getRow(rIdx).height = 24;
+            rIdx++;
+
+            // 預借款
+            sheet.mergeCells(`A${rIdx}:F${rIdx}`);
+            const aLabel = sheet.getCell(`A${rIdx}`);
+            aLabel.value = '扣除：出差前預借差旅款 (Advance Payment)';
+            aLabel.font = fontNormal; aLabel.alignment = alignRight;
+            for(let c=1; c<=6; c++) sheet.getCell(rIdx, c).border = borderThin;
+
+            const aVal = sheet.getCell(`G${rIdx}`);
+            aVal.value = advance;
+            aVal.font = fontNormal; aVal.border = borderThin; aVal.alignment = alignRight; aVal.numFmt = '#,##0';
+            const aRem = sheet.getCell(`H${rIdx}`);
+            aRem.border = borderThin;
+            sheet.getRow(rIdx).height = 22;
+            rIdx++;
+
+            // 淨額
+            sheet.mergeCells(`A${rIdx}:F${rIdx}`);
+            const nLabel = sheet.getCell(`A${rIdx}`);
+            nLabel.value = '實付 / (應繳回) 差旅費淨額 (Net Payable)';
+            nLabel.font = fontBold; nLabel.fill = fillLabel; nLabel.alignment = alignRight;
+            for(let c=1; c<=6; c++) sheet.getCell(rIdx, c).border = borderDouble;
+
+            const nVal = sheet.getCell(`G${rIdx}`);
+            nVal.value = net;
+            nVal.font = fontNet; nVal.fill = fillNet; nVal.border = borderDouble; nVal.alignment = alignRight; nVal.numFmt = '#,##0';
+            const nRem = sheet.getCell(`H${rIdx}`);
+            nRem.border = borderDouble;
+            sheet.getRow(rIdx).height = 26;
+            rIdx += 2;
+
+            // --- 簽核流程 ---
+            sheet.mergeCells(`A${rIdx}:H${rIdx}`);
+            const sigTitle = sheet.getCell(`A${rIdx}`);
+            sigTitle.value = '簽核流程 (Approval Workflow)';
+            sigTitle.font = fontWhite; sigTitle.fill = fillHeader; sigTitle.alignment = alignLeft;
+            sigTitle.border = borderThin;
+            sheet.getRow(rIdx).height = 22;
+            rIdx++;
+
+            const roles = ['申請同仁', '部門主管', '會計/財務複核', '總經理/核決主管'];
+            const rTitleIdx = rIdx;
+            const rBoxIdx = rIdx + 1;
+            const rDateIdx = rIdx + 2;
+
+            roles.forEach((role, i) => {
+                const startCol = i * 2 + 1;
+                const endCol = startCol + 1;
+                
+                // 標題
+                sheet.mergeCells(rTitleIdx, startCol, rTitleIdx, endCol);
+                const tc = sheet.getCell(rTitleIdx, startCol);
+                tc.value = role; tc.font = fontBold; tc.fill = fillLabel; tc.alignment = alignCenter;
+                sheet.getCell(rTitleIdx, startCol).border = borderThin; sheet.getCell(rTitleIdx, endCol).border = borderThin;
+                
+                // 簽名區塊
+                sheet.mergeCells(rBoxIdx, startCol, rBoxIdx, endCol);
+                sheet.getCell(rBoxIdx, startCol).border = borderThin; sheet.getCell(rBoxIdx, endCol).border = borderThin;
+
+                // 日期
+                sheet.mergeCells(rDateIdx, startCol, rDateIdx, endCol);
+                const dc = sheet.getCell(rDateIdx, startCol);
+                dc.value = '日期：   年   月   日'; dc.font = fontSub; dc.alignment = alignCenter;
+                sheet.getCell(rDateIdx, startCol).border = borderThin; sheet.getCell(rDateIdx, endCol).border = borderThin;
+            });
+
+            sheet.getRow(rTitleIdx).height = 22;
+            sheet.getRow(rBoxIdx).height = 45;
+            sheet.getRow(rDateIdx).height = 20;
+
+            // --- 輸出檔案 ---
+            const buffer = await workbook.xlsx.writeBuffer();
+            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            saveAs(blob, `差旅費報支申請單_${empName}_${appNo}.xlsx`);
+        }
+    </script>
+</body>
+</html>

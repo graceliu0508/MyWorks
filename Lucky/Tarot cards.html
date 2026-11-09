@@ -1,0 +1,737 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>月影塔羅</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Serif+TC:wght@400;600;700&display=swap');
+/* 版面概念：羊皮紙底的單欄占卜流程（選方向 → 洗牌翻牌 → 解牌），夜藍與金色只用在牌背與重點按鈕 */
+:root{
+  --bg:#E9DABA; --glow:rgba(255,248,226,.8); --stain:rgba(150,110,55,.16);
+  --ink:#3A2A1E; --muted:#6B5540; --gold:#7A5518; --line:#B8913F;
+  --wine:#6B2D3A; --on-wine:#F6ECD3;
+  --btn-bg:#1F1B3A; --btn-fg:#E3C27A;
+  --panel:#EFE3C8; --tip-bg:rgba(184,145,63,.18); --input-bg:rgba(255,248,226,.65);
+  --night-a:#3A3270; --night-b:#1F1B3A;
+  --face-a:#F7EDD2; --face-b:#E8D6AE; --face-ink:#3A2A1E; --face-gold:#7A5518; --art-fill:#E3C27A;
+  --band:#1F1B3A; --on-band:#F6ECD3; --band-gold:#E3C27A;
+  --serif:'Noto Serif TC','Songti TC','PMingLiU',serif;
+  --display:'Cinzel','Times New Roman',serif;
+  --cw:108px; --dw:78px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#13112A; --glow:rgba(90,80,170,.35); --stain:rgba(0,0,0,.25);
+    --ink:#F0E6CC; --muted:#BDB190; --gold:#E3C27A; --line:#B8913F;
+    --wine:#8A3F52; --on-wine:#F6ECD3;
+    --btn-bg:#E3C27A; --btn-fg:#1F1B3A;
+    --panel:#1F1B3F; --tip-bg:rgba(227,194,122,.12); --input-bg:rgba(246,236,211,.07);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#13112A; --glow:rgba(90,80,170,.35); --stain:rgba(0,0,0,.25);
+  --ink:#F0E6CC; --muted:#BDB190; --gold:#E3C27A; --line:#B8913F;
+  --wine:#8A3F52; --on-wine:#F6ECD3;
+  --btn-bg:#E3C27A; --btn-fg:#1F1B3A;
+  --panel:#1F1B3F; --tip-bg:rgba(227,194,122,.12); --input-bg:rgba(246,236,211,.07);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; font-family:var(--serif); color:var(--ink); line-height:1.8;
+  background-color:var(--bg);
+  background-image:radial-gradient(ellipse at 15% 0%,var(--glow),transparent 45%),radial-gradient(ellipse at 90% 55%,var(--stain),transparent 45%);
+  background-attachment:fixed;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:20px 40px;
+  font-size:16px;
+}
+button,input{font-family:var(--serif)}
+.wrap{max-width:1080px;margin:0 auto}
+h1,h2,h3,h4,p{margin:0}
+h1,h2,h3{text-wrap:balance}
+
+.top{display:flex;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+.top .name{font-size:20px;font-weight:700;letter-spacing:.14em;line-height:1.2}
+.top .en{font-family:var(--display);font-size:10px;letter-spacing:.3em;color:var(--gold)}
+
+.screen{padding-top:32px}
+.hero{text-align:center;padding:12px 0 8px}
+.hero h1{font-size:clamp(40px,10vw,68px);letter-spacing:.16em;margin-top:14px;line-height:1.2}
+.hero .en{font-family:var(--display);letter-spacing:.35em;color:var(--gold);font-size:13px;margin-top:6px}
+.hero p{max-width:34em;margin:20px auto 0;font-size:17px;line-height:2}
+.step{font-family:var(--display);font-size:12px;letter-spacing:.35em;color:var(--gold)}
+h2.title{font-size:clamp(24px,5.5vw,32px);letter-spacing:.1em;margin:6px 0 6px;line-height:1.4}
+.sub{color:var(--muted);font-size:15px}
+
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.chip{min-height:46px;padding:0 22px;font-size:16px;letter-spacing:.1em;color:var(--ink);background:transparent;border:1.5px solid var(--gold);border-radius:999px;cursor:pointer}
+.chip[aria-checked="true"]{background:var(--wine);border-color:var(--wine);color:var(--on-wine);box-shadow:0 4px 12px rgba(107,45,58,.3)}
+.picked{margin-top:18px;font-size:16px;color:var(--ink);min-height:1.8em}
+.picked b{color:var(--wine);letter-spacing:.1em}
+:root[data-theme="dark"] .picked b{color:#E8A5B2}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .picked b{color:#E8A5B2}}
+
+.btn{min-height:50px;padding:0 34px;font-size:17px;letter-spacing:.2em;color:var(--btn-fg);background:var(--btn-bg);border:2px solid var(--line);border-radius:6px;cursor:pointer;box-shadow:0 6px 16px rgba(31,27,58,.25)}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--gold);box-shadow:none;letter-spacing:.12em}
+.btn:disabled{opacity:.5;cursor:default}
+.btn:focus-visible,.chip:focus-visible,.card:focus-visible,input.q:focus-visible,.tab:focus-visible{outline:3px solid var(--wine);outline-offset:3px}
+:root[data-theme="dark"] .btn:focus-visible,:root[data-theme="dark"] .chip:focus-visible,:root[data-theme="dark"] .card:focus-visible,:root[data-theme="dark"] .tab:focus-visible{outline-color:var(--band-gold)}
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.center{justify-content:center}
+
+/* 牌桌 */
+.stage{display:flex;flex-direction:column;align-items:center;gap:30px;margin-top:28px}
+.deck{position:relative;width:calc(var(--dw) + 18px);height:calc(var(--dw)*1.64 + 12px);flex:none}
+.dcard{position:absolute;top:0;width:var(--dw);height:calc(var(--dw)*1.64);border-radius:9px;border:2px solid var(--line);background:radial-gradient(circle at 50% 45%,var(--night-a),var(--night-b) 70%);box-shadow:0 6px 14px rgba(0,0,0,.35),inset 0 0 0 4px var(--night-b),inset 0 0 0 5px var(--line)}
+.dcard:nth-child(1){left:0;top:12px}.dcard:nth-child(2){left:5px;top:9px}.dcard:nth-child(3){left:9px;top:6px}.dcard:nth-child(4){left:14px;top:3px}.dcard:nth-child(5){left:18px;top:0}
+.deck.shuffling .dcard:nth-child(odd){animation:riffleL 1.5s ease-in-out}
+.deck.shuffling .dcard:nth-child(even){animation:riffleR 1.5s ease-in-out}
+@keyframes riffleL{0%{transform:none}25%{transform:translate(-110%,-6%) rotate(-9deg)}50%{transform:translate(70%,4%) rotate(6deg)}75%{transform:translate(-50%,0) rotate(-4deg)}100%{transform:none}}
+@keyframes riffleR{0%{transform:none}25%{transform:translate(110%,4%) rotate(9deg)}50%{transform:translate(-70%,-4%) rotate(-6deg)}75%{transform:translate(50%,0) rotate(4deg)}100%{transform:none}}
+.slots{display:flex;gap:12px;justify-content:center;width:100%}
+.slot{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0}
+.pos{text-align:center;font-weight:700;letter-spacing:.25em;font-size:15px;line-height:1.3}
+.pos small{display:block;font-family:var(--display);font-weight:500;font-size:10px;letter-spacing:.25em;color:var(--gold)}
+.cardwrap{width:var(--cw);height:calc(var(--cw)*1.64);border-radius:10px;border:1.5px dashed var(--line)}
+.cardwrap.filled{border-color:transparent}
+.state{min-height:24px;font-size:14px;color:var(--muted);text-align:center;line-height:1.4}
+.state b{color:var(--wine);letter-spacing:.1em}
+:root[data-theme="dark"] .state b{color:#E8A5B2}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .state b{color:#E8A5B2}}
+
+/* 牌 */
+.card{display:block;position:relative;width:var(--cw);height:calc(var(--cw)*1.64);padding:0;border:0;background:none;perspective:900px;cursor:pointer;animation:deal .55s ease-out both;animation-delay:var(--d,0s)}
+.card.mini{cursor:default;animation:none}
+@keyframes deal{from{opacity:0;transform:translateY(-24px) scale(.9)}to{opacity:1;transform:none}}
+.inner{position:absolute;inset:0;display:block;transition:transform .85s cubic-bezier(.3,.7,.2,1);transform-style:preserve-3d}
+.card.flipped .inner{transform:rotateY(180deg)}
+.back,.face{position:absolute;inset:0;display:flex;border-radius:10px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.back{align-items:center;justify-content:center;border:2px solid var(--line);background:radial-gradient(circle at 50% 45%,var(--night-a),var(--night-b) 70%);box-shadow:0 8px 18px rgba(0,0,0,.35),inset 0 0 0 5px var(--night-b),inset 0 0 0 6px var(--line)}
+.back svg{width:52%;height:auto}
+.face{transform:rotateY(180deg);flex-direction:column;align-items:center;justify-content:space-between;padding:calc(var(--cw)*.08) calc(var(--cw)*.06);background:linear-gradient(160deg,var(--face-a),var(--face-b));border:2px solid var(--line);box-shadow:0 8px 18px rgba(0,0,0,.3),inset 0 0 0 3px var(--face-a),inset 0 0 0 4px var(--line);color:var(--face-ink)}
+.card.rev .face{transform:rotateY(180deg) rotateZ(180deg)}
+.f-top{font-family:var(--display);font-size:calc(var(--cw)*.1);letter-spacing:.15em;color:var(--face-gold);line-height:1.2;white-space:nowrap}
+.face svg{width:52%;height:auto}
+.f-name{text-align:center;line-height:1.25}
+.f-name b{display:block;font-size:calc(var(--cw)*.135);letter-spacing:.12em}
+.f-name i{display:block;font-style:normal;font-family:var(--display);font-size:calc(var(--cw)*.062);letter-spacing:.08em;color:var(--face-gold);margin-top:2px}
+.card.mini{--cw:84px}
+
+/* 解牌 */
+.tabs{display:flex;margin-top:22px;border-bottom:1.5px solid var(--line)}
+.tab{flex:1;min-height:48px;font-size:16px;letter-spacing:.2em;color:var(--muted);background:transparent;border:0;border-bottom:3px solid transparent;cursor:pointer}
+.tab[aria-selected="true"]{color:var(--wine);font-weight:700;border-bottom-color:var(--wine)}
+:root[data-theme="dark"] .tab[aria-selected="true"]{color:var(--band-gold);border-bottom-color:var(--band-gold)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tab[aria-selected="true"]{color:var(--band-gold);border-bottom-color:var(--band-gold)}}
+.rgrid{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;margin-top:20px}
+.rcard{display:none;padding:26px 22px;background:var(--panel);border:2px solid var(--line);border-radius:10px;box-shadow:inset 0 0 0 4px var(--panel),inset 0 0 0 5px var(--line)}
+.rcard.active{display:block}
+.rhead{display:flex;gap:16px;align-items:center}
+.rhead .t{min-width:0}
+.pos-l{font-size:13px;letter-spacing:.3em;color:var(--gold)}
+.rcard h3{font-size:26px;letter-spacing:.14em;margin:2px 0 6px;line-height:1.3}
+.badge{display:inline-block;padding:1px 12px;font-size:13px;color:var(--on-wine);background:var(--wine);border-radius:999px}
+.badge.rv{background:var(--band);color:var(--band-gold)}
+.kws{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
+.kws span{padding:2px 11px;font-size:14px;color:var(--gold);border:1px solid var(--line);border-radius:4px}
+.rcard h4{font-size:15px;color:var(--wine);letter-spacing:.1em;margin:14px 0 4px}
+:root[data-theme="dark"] .rcard h4{color:#E8A5B2}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .rcard h4{color:#E8A5B2}}
+.rcard p{font-size:16px;line-height:1.95}
+.tip{margin-top:16px;padding:12px 14px;background:var(--tip-bg);border-radius:6px;font-size:15px;line-height:1.9}
+.tip b{color:var(--gold);margin-right:.5em}
+.overall{margin-top:24px;padding:26px 22px;background:radial-gradient(ellipse at 50% 0%,var(--night-a),var(--band) 70%);border:2px solid var(--line);border-radius:10px;text-align:center;color:var(--on-band)}
+.overall .lab2{font-size:13px;letter-spacing:.3em;color:var(--band-gold)}
+.overall p{margin:10px auto 0;max-width:40em;font-size:16px;line-height:2}
+.echo{font-size:14px;color:var(--muted);margin-top:4px}
+footer.note{margin-top:44px;padding-top:20px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);line-height:1.9;text-align:center}
+
+@media (min-width:721px){
+  :root{--cw:172px;--dw:96px}
+  .stage{flex-direction:row;align-items:flex-start;justify-content:center;gap:56px}
+  .deck{margin-top:calc(var(--cw)*.2)}
+  .slots{width:auto;gap:36px}
+  .tabs{display:none}
+  .rgrid{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}
+  .rcard{display:block}
+  .card.mini{--cw:96px}
+}
+@media (prefers-reduced-motion:reduce){
+  .inner{transition-duration:.01s}
+  .card{animation:none}
+  .deck.shuffling .dcard{animation:none}
+}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <svg viewBox="0 0 40 40" width="30" height="30" aria-hidden="true"><path d="M26 5 A16 16 0 1 0 26 35 A12 12 0 1 1 26 5 Z" fill="#B8913F" stroke="#7A5518" stroke-width="1.5"/></svg>
+    <div><div class="name">月影塔羅</div><div class="en">MOONLIT TAROT</div></div>
+  </header>
+
+  <section id="s-ask" class="screen">
+    <div class="hero">
+      <svg viewBox="0 0 200 24" width="160" height="19" aria-hidden="true"><line x1="0" y1="12" x2="78" y2="12" stroke="#B8913F" stroke-width="1.5"/><polygon points="100,2 105,10 114,12 105,14 100,22 95,14 86,12 95,10" fill="#B8913F"/><line x1="122" y1="12" x2="200" y2="12" stroke="#B8913F" stroke-width="1.5"/></svg>
+      <h1>月影塔羅</h1>
+      <div class="en">MOONLIT TAROT READING</div>
+      <p>靜下心，問一個問題，讓星光替你翻開三張牌。過去、現在、未來，每一張都附上溫柔而詳盡的解讀。</p>
+    </div>
+    <div style="margin-top:36px">
+      <div class="step">STEP 01</div>
+      <h2 class="title">你想問哪一方面？</h2>
+      <p class="sub">選一個方向，解牌會針對它說明。</p>
+      <div class="chips" role="radiogroup" aria-label="占卜方向" id="chips"></div>
+      <p class="picked" id="picked" aria-live="polite"></p>
+      <div class="actions"><button class="btn" id="go" type="button">開始洗牌</button></div>
+    </div>
+  </section>
+
+  <section id="s-draw" class="screen" hidden>
+    <div class="step">STEP 02</div>
+    <h2 class="title">靜下心，翻開三張牌</h2>
+    <p class="sub" id="draw-hint">深呼吸，專注在你的問題上，準備好了就按下洗牌。</p>
+    <div class="stage">
+      <div class="deck" id="deck" aria-hidden="true"><span class="dcard"></span><span class="dcard"></span><span class="dcard"></span><span class="dcard"></span><span class="dcard"></span></div>
+      <div class="slots" id="slots"></div>
+    </div>
+    <div class="actions center">
+      <button class="btn" id="shuffle" type="button">洗牌</button>
+      <button class="btn ghost" id="flipall" type="button" hidden>全部翻開</button>
+      <button class="btn" id="toread" type="button" hidden>查看解牌</button>
+    </div>
+  </section>
+
+  <section id="s-read" class="screen" hidden>
+    <div style="text-align:center">
+      <div class="step">STEP 03</div>
+      <h2 class="title">你的解牌</h2>
+      <p class="sub" id="read-meta"></p>
+    </div>
+    <div class="tabs" role="tablist" id="tabs" aria-label="過去現在未來"></div>
+    <div class="rgrid" id="rgrid"></div>
+    <div class="overall" id="overall"></div>
+    <div class="actions center">
+      <button class="btn" id="again" type="button">再抽一次</button>
+      <button class="btn ghost" id="change" type="button">換個方向</button>
+    </div>
+  </section>
+
+  <footer class="note">
+    塔羅是自我探索的工具，解讀僅供參考與娛樂，不構成對未來的預測，也不能取代醫療、法律或財務等專業建議。<br>
+    牌組名單取自開源 Tarot API 資料集（ekelen/tarot-api，78 張牌）；中文牌義與解讀為本站依傳統通行詮釋撰寫。
+  </footer>
+</div>
+<script>
+// 取自 ekelen/tarot-api 開源資料集（static/card_data.json）：[簡碼, 英文名, 類型, 花色, 數值]
+const API_CARDS=[["ar00","The Fool","major","",0],["ar01","The Magician","major","",1],["ar02","The High Priestess","major","",2],["ar03","The Empress","major","",3],["ar04","The Emperor","major","",4],["ar05","The Hierophant","major","",5],["ar06","The Lovers","major","",6],["ar07","The Chariot","major","",7],["ar08","Fortitude","major","",8],["ar09","The Hermit","major","",9],["ar10","Wheel Of Fortune","major","",10],["ar11","Justice","major","",11],["ar12","The Hanged Man","major","",12],["ar13","Death","major","",13],["ar14","Temperance","major","",14],["ar15","The Devil","major","",15],["ar16","The Tower","major","",16],["ar17","The Star","major","",17],["ar18","The Moon","major","",18],["ar19","The Sun","major","",19],["ar20","The Last Judgment","major","",20],["ar21","The World","major","",21],["cu02","Two of Cups","minor","cups",2],["cu03","Three of Cups","minor","cups",3],["cu04","Four of Cups","minor","cups",4],["cu05","Five of Cups","minor","cups",5],["cu06","Six of Cups","minor","cups",6],["cu07","Seven of Cups","minor","cups",7],["cu08","Eight of Cups","minor","cups",8],["cu09","Nine of Cups","minor","cups",9],["cu10","Ten of Cups","minor","cups",10],["cuac","Ace of Cups","minor","cups",1],["cuki","King of Cups","minor","cups",14],["cukn","Knight of Cups","minor","cups",12],["cupa","Page of Cups","minor","cups",11],["cuqu","Queen of Cups","minor","cups",13],["pe02","Two of Pentacles","minor","pentacles",2],["pe03","Three of Pentacles","minor","pentacles",3],["pe04","Four of Pentacles","minor","pentacles",4],["pe05","Five of Pentacles","minor","pentacles",5],["pe06","Six of Pentacles","minor","pentacles",6],["pe07","Seven of Pentacles","minor","pentacles",7],["pe08","Eight of Pentacles","minor","pentacles",8],["pe09","Nine of Pentacles","minor","pentacles",9],["pe10","Ten of Pentacles","minor","pentacles",10],["peac","Ace of Pentacles","minor","pentacles",1],["peki","King of Pentacles","minor","pentacles",14],["pekn","Knight of Pentacles","minor","pentacles",12],["pepa","Page of Pentacles","minor","pentacles",11],["pequ","Queen of Pentacles","minor","pentacles",13],["sw02","Two of Swords","minor","swords",2],["sw03","Three of Swords","minor","swords",3],["sw04","Four of Swords","minor","swords",4],["sw05","Five of Swords","minor","swords",5],["sw06","Six of Swords","minor","swords",6],["sw07","Seven of Swords","minor","swords",7],["sw08","Eight of Swords","minor","swords",8],["sw09","Nine of Swords","minor","swords",9],["sw10","Ten of Swords","minor","swords",10],["swac","Ace of Swords","minor","swords",1],["swki","King of Swords","minor","swords",14],["swkn","Knight of Swords","minor","swords",12],["swpa","Page of Swords","minor","swords",11],["swqu","Queen of Swords","minor","swords",13],["wa02","Two of Wands","minor","wands",2],["wa03","Three of Wands","minor","wands",3],["wa04","Four of Wands","minor","wands",4],["wa05","Five of Wands","minor","wands",5],["wa06","Six of Wands","minor","wands",6],["wa07","Seven of Wands","minor","wands",7],["wa08","Eight of Wands","minor","wands",8],["wa09","Nine of Wands","minor","wands",9],["wa10","Ten of Wands","minor","wands",10],["waac","Ace of Wands","minor","wands",1],["waki","King of Wands","minor","wands",14],["wakn","Knight of Wands","minor","wands",12],["wapa","Page of Wands","minor","wands",11],["waqu","Queen of Wands","minor","wands",13]];
+// 大阿爾克那 22 張：[簡碼, 中文名, 正位關鍵字, 逆位關鍵字, 正位牌義, 逆位牌義, 綜合(正,逆), 愛情(正,逆), 事業(正,逆), 學業(正,逆), 內在(正,逆), 提醒(正,逆)]
+const MAJOR_ZH=[
+["ar00","愚者","新的開始·自由·勇氣","衝動·猶豫·不切實際",
+"愚者帶著輕便的行囊望向遠方，象徵純真的信任與一段全新的起點。",
+"逆位提醒你，熱情若缺少準備，容易變成衝動；也可能是你因為害怕出錯而遲遲不敢出發。",
+"一個新階段正在敞開，保持好奇與開放，會讓你遇見意想不到的機會。","先停一下，確認方向與基本準備，再往前走會更穩。",
+"你對關係抱著單純的期待，不妨放下過多預設，真誠地認識對方。","可能有一點衝動或逃避承諾的傾向，先釐清自己真正想要什麼。",
+"適合嘗試新方向、新專案，願意從零學起會帶來突破。","別因一時興起而貿然換跑道，先把風險和資源盤點清楚。",
+"用探索的心態接觸新領域，不必急著求完美。","學習計畫容易東學一點、西學一點，先選定一個重點。",
+"允許自己重新開始，不必被過去的樣子定義。","你可能在逃避某個決定，溫柔地問問自己在怕什麼。",
+"帶著勇氣出發，也記得檢查一下行囊。","在跳下去之前，先看清楚腳下的路。"],
+["ar01","魔術師","創造力·行動·專注","分心·欺瞞·潛力未發揮",
+"魔術師面前擺著四種元素的工具，代表你已具備需要的資源，關鍵在於專注與行動。",
+"逆位時，才能可能被分散或用錯方向，也提醒你留意話術與不夠誠實的承諾。",
+"你手上的條件比自己以為的更完整，現在是把想法落實的好時機。","能量分散在太多事情上，先挑一件事做好。",
+"主動表達、展現真實的自己，有助於拉近彼此的距離。","溝通上可能有包裝或誇大，坦誠一點反而更有力量。",
+"適合提案、談判與開啟新計畫，你的表達很有說服力。","留意計畫過於花俏卻缺少落實，也要小心不明確的承諾。",
+"把所學立刻動手實作，會學得更快、更牢。","工具很多卻遲遲不開始，先完成一個小成果。",
+"相信自己有能力改變現況，從一個小行動開始。","檢視自己是否低估了自己，或用忙碌逃避真正想做的事。",
+"想到就做一小步，讓想法有形狀。","先收攏注意力，一次只做一件事。"],
+["ar02","女祭司","直覺·內在智慧·沉靜","直覺受阻·未說出口·壓抑",
+"女祭司端坐在兩根柱子之間，守護著內在的智慧，象徵直覺與靜默中的答案。",
+"逆位時，你可能暫時聽不清自己的直覺，或有些話與感受還沒說出口。",
+"答案不一定來自外界，安靜下來聆聽內心的聲音。","資訊或感受尚未清晰，不急著下結論，給自己多一點時間。",
+"相處中的默契與直覺很重要，用心感受比急著追問更有收穫。","此刻或許有些感受，你還沒有對自己或對方坦白，需要多一點時間梳理。",
+"暫時觀察、蒐集資訊勝過急著行動，直覺會提供線索。","可能有未公開的資訊或隱藏的考量，記得查證，不要只憑猜測。",
+"適合靜心研究、深入思考，不必急著發表。","學習時容易分心或不敢提問，找個安靜的時段重新整理。",
+"留一段獨處的時間，寫日記或冥想，會讓你更清楚自己的需要。","你可能習慣忽視自己的感受，試著慢慢重新信任它們。",
+"每天留十分鐘的安靜給自己。","找一個安靜的十分鐘，把真正的感受寫下來，不必給任何人看。"],
+["ar03","皇后","豐盛·滋養·感官","過度依賴·停滯·忽略自己",
+"皇后坐在豐饒的自然之中，象徵滋養、創造力與接納美好的能力。",
+"逆位時，可能付出過多而忽略自己，或過度享受而停滯不前。",
+"這是適合滋養自己與身邊人的時期，美好的事物正在成長。","留意是否耗盡自己去照顧他人，也別讓舒適變成停滯。",
+"溫暖、柔軟的相處讓關係更有安全感，愛在細節裡。","可能過度付出或過度依賴，重新找回彼此間的平衡。",
+"創意與合作的環境能帶來好成果，耐心栽培會有收成。","工作可能陷入舒適圈或創意枯竭，給自己一點新鮮的刺激。",
+"以愉快的方式學習，把興趣與生活結合。","拖延或缺乏動力時，先把環境整理得舒服一些再開始。",
+"好好照顧身體與感官，吃好、睡好、親近自然。","你也需要被照顧，允許自己休息，不必凡事都扛著。",
+"今天為自己做一件讓身體舒服的小事。","先照顧好自己，才有餘力照顧別人。"],
+["ar04","皇帝","秩序·責任·穩固","僵化·控制·權威壓力",
+"皇帝端坐王座，象徵結構、紀律與可靠的領導力。",
+"逆位時，可能過於僵化或控制慾強，也可能是缺乏紀律與界線。",
+"建立清楚的規則與計畫，會讓你的生活更穩定踏實。","留意固執或失序，讓結構保持彈性，也守住必要的底線。",
+"穩定、負責的承諾讓關係有安全感，也需要清楚的界線與默契。","關係中可能有控制或固執的拉扯，試著多傾聽對方。",
+"適合制定制度、承擔領導責任，可靠的表現會被看見。","與權威的關係可能緊繃，也要避免過於專斷或拖延決策。",
+"訂出明確的進度與時間表，穩紮穩打。","計畫鬆散或過度苛求自己，找到適合自己的節奏。",
+"為生活建立規律，讓自己更有安全感。","看看是否對自己太嚴格，或對某些責任一直逃避。",
+"寫下今天最重要的三件事，一一完成。","規則是用來支持你的，不是用來綁住你的。"],
+["ar05","教皇","傳統·學習·指引","打破常規·盲從·僵化信念",
+"教皇傳遞既有的智慧與價值，象徵傳統、導師與共同的信念。",
+"逆位時，可能正在質疑既有規範，或過度盲從而忽略自己的想法。",
+"向有經驗的人請教、遵循已驗證的方法，會讓你少走彎路。","是否有哪些規矩已不適合現在的你？也留意盲目跟從。",
+"重視共同價值觀與承諾，傳統的儀式感能加深連結。","對關係的期待可能受到外界標準影響，問問自己真正想要的樣子。",
+"遵循制度、尋求前輩指導，穩定累積專業。","不必被既有框架限制，但改變之前請先了解規則。",
+"適合跟隨良師、系統化學習，打好基礎。","學習方法或許需要調整，別只照本宣科，加入自己的思考。",
+"回到讓你安心的價值與信念，它們是你的錨。","重新檢視從小被灌輸的想法，保留適合的，放下不合的。",
+"請教一位你信任的前輩。","保有自己的判斷，不必全盤接受。"],
+["ar06","戀人","選擇·連結·價值一致","失衡·猶豫·價值衝突",
+"戀人牌談的不只是愛情，也是依照內心價值做出真誠的選擇。",
+"逆位時，可能在選擇前猶豫不決，或關係中出現失衡與價值分歧。",
+"面臨重要抉擇時，選擇與你價值觀一致的那一個。","猶豫與拉扯讓你耗損，先釐清自己真正在乎的是什麼。",
+"彼此真誠相待、價值契合的連結，值得珍惜與用心經營。","可能有溝通不清或期待落差，坦誠討論比猜測更有幫助。",
+"與合作夥伴建立互信，選擇符合你價值的機會。","合作關係中有分歧或搖擺，先釐清彼此的期待。",
+"選擇真正感興趣的方向，與志同道合的人一起學。","在選項之間徘徊時，列出優缺點，再給自己一個期限。",
+"對自己誠實，是最重要的承諾。","內在的不同聲音互相拉扯，不妨一一聽聽它們想說什麼。",
+"依照心裡的聲音做選擇，再為它負責。","先聽清楚自己要什麼，再去看選項。"],
+["ar07","戰車","意志·前進·自律","失控·方向不明·過度用力",
+"戰車象徵靠意志力駕馭相反的力量，朝目標穩定前進。",
+"逆位時，可能方向分歧、動力失控，或者用力過猛反而卡住。",
+"目標明確、全力以赴，你有推進事情的力量。","先停下來校準方向，再出發會省下許多力氣。",
+"主動積極地經營關係，但記得兼顧對方的步調。","太急著推進或控制局面，可能讓彼此疲憊，放慢一點。",
+"適合衝刺目標、克服挑戰，你的決心會被看見。","工作節奏混亂，或與團隊方向不一致，先重新對焦。",
+"設定明確的目標並持續練習，考試與證照的準備很有力。","動力忽冷忽熱，把大目標切成小步驟。",
+"相信自己能掌握方向，用自律替自己創造自由。","內心有互相拉扯的力量，先找出是哪一股讓你失速。",
+"選定一個目標，今天就前進一步。","放慢一點，不是為了停下，而是為了走得更準。"],
+["ar08","力量","溫柔的勇氣·耐心·自我掌控","自我懷疑·情緒失控·缺乏信心",
+"力量牌描繪溫柔地安撫猛獸的人，象徵以耐心與慈悲化解內在的野性。",
+"逆位時，你可能對自己失去信心，或情緒起伏較大、難以安撫。",
+"真正的力量來自柔軟與堅持，用耐心面對眼前的挑戰。","你比自己以為的更有力量，先安撫情緒，再重新找回信心。",
+"用溫柔與包容經營關係，信任會慢慢累積。","不安或嫉妒的情緒可能浮現，先接納它，再坦誠表達。",
+"面對壓力時保持冷靜與耐心，用柔軟化解衝突。","對自己的能力有些懷疑，記得回顧自己做成過的事。",
+"保持耐心，持續累積，難題會逐漸鬆動。","挫折感容易放大，把目標調小一點，先累積成功經驗。",
+"練習溫柔地對待自己的恐懼與脆弱。","別苛責自己的情緒，它們只是需要被聽見。",
+"對自己說一句溫柔的話。","情緒來了，先深呼吸三次。"],
+["ar09","隱者","獨處·內省·尋找智慧","孤立·逃避·過度封閉",
+"隱者提著一盞燈走在山頂，象徵靜下心來向內探索，找到屬於自己的光。",
+"逆位時，獨處可能變成孤立，或是你在逃避面對內心的某些問題。",
+"適合放慢腳步、整理思緒，答案會在安靜中浮現。","避免把自己關得太緊，適度向信任的人求助。",
+"給彼此與自己一些空間，反思你對關係真正的需要。","可能因為退縮而拉開距離，試著用一句話讓對方知道你的狀態。",
+"專注深入的研究或獨立作業，會帶來專業上的突破。","與團隊疏離或過度孤軍奮戰，適度分享你的進度。",
+"適合沉澱、深度閱讀與獨立研究。","一個人悶頭苦讀效率不彰，找人討論看看。",
+"一段獨處的時間，會讓你更認識自己。","若孤單感變重，主動聯絡一位讓你安心的人。",
+"關掉通知，給自己一小時的安靜。","獨處可以是休息，但別讓它變成躲藏。"],
+["ar10","命運之輪","轉機·循環·契機","低潮期·抗拒改變·時機未到",
+"命運之輪不停轉動，象徵事物起落有時，轉機正在靠近。",
+"逆位時，可能正逢不順的階段，或是你正抗拒必要的改變。",
+"局勢出現轉折，抓住適合的時機，順勢而為。","低潮是循環的一部分，把力氣放在你能掌控的事情上。",
+"緣分有可能在意想不到的時刻出現，保持開放。","關係可能進入調整期，耐心等待時機，不必急著下定論。",
+"工作上可能有新機會或轉換，留意身邊的契機。","計畫或許遇到延遲，把它當作重新調整的機會。",
+"學習出現突破或新的機會，把握轉機。","進度暫時停滯，回顧方法，等待下一個上升期。",
+"接受生命的起伏，你正走向新的階段。","感到無力時，提醒自己這只是循環的一段。",
+"留意眼前出現的小機會，勇敢伸手。","把注意力放在今天能做的小事上。"],
+["ar11","正義","公平·因果·誠實","偏見·不公·逃避責任",
+"正義手持天秤與劍，象徵公平、理性判斷與為自己的選擇負責。",
+"逆位時，可能出現不公平的感受、偏見，或是不願面對自己的責任。",
+"事情會依你所做的選擇逐步顯現結果，誠實面對是關鍵。","資訊或判斷可能有偏差，讓自己多看幾個角度再決定。",
+"以平等、坦誠的方式溝通，關係才會平衡。","付出與回報可能不太對等，坦白說出你的感受與界線。",
+"合約、決策與評價都需要公正清楚，細讀條款有益。","留意不公平的對待或文件上的疏漏，保留書面紀錄。",
+"努力與成果有清楚的對應，認真準備會得到相稱的回報。","對成績或評價感到不公時，先冷靜檢視自己能調整的部分。",
+"誠實地盤點自己的行為與價值，做出負責的選擇。","避免過度自責或推卸責任，兩者都會讓你停在原地。",
+"做決定前，問自己：這對所有人都公平嗎？","把事實和情緒分開寫下來看。"],
+["ar12","倒吊人","換個角度·暫停·放下","拖延·無謂犧牲·停滯",
+"倒吊人以不同的視角看世界，象徵暫時的停頓、放下與新的領悟。",
+"逆位時，可能是無意義的等待或犧牲，或遲遲不願放手。",
+"現在不宜強求，換個角度看事情，會有新的發現。","停滯太久就該行動了，看看是什麼讓你卡住。",
+"暫時放下自己的堅持，站在對方的角度想一想。","你可能付出了太多卻沒有回應，重新評估這段關係的平衡。",
+"計畫暫時擱置也是一種策略，耐心等待最佳時機。","別為了不明確的目標一再犧牲，重新釐清優先順序。",
+"遇到瓶頸時換個學習方式，反而會有新突破。","在同一個方法上空轉太久，大膽換一條路。",
+"允許自己暫停，不必一直趕路。","找出你在執著什麼，試著慢慢放手。",
+"今天換個角度，重新看待一件煩惱的事。","不必再等了，邁出一小步吧。"],
+["ar13","死神","結束與新生·轉化·釋放","抗拒改變·難以放手·停滯",
+"死神牌很少代表字面上的死亡，而是象徵一個階段的結束與轉化的開始。",
+"逆位時，可能不願結束某些已經走完的事，因而延遲了新的開始。",
+"有些事需要畫下句點，放下舊的，才能迎接新的。","抗拒只會拉長過渡期，試著一步步接受正在發生的改變。",
+"一段關係或舊有的相處模式可能正在轉變，這是重新定位的契機。","難以放手過去，給自己時間悼念，再慢慢往前。",
+"工作型態或角色可能轉換，把握重新出發的機會。","不要硬撐已經走不下去的做法，及早調整比拖延更好。",
+"結束一個階段的學習，準備迎接新的挑戰。","對舊方法依依不捨，勇敢嘗試新的做法。",
+"放下不再適合你的習慣與想法，讓出新的空間。","對失去的感受是真實的，允許自己慢慢走過。",
+"列出一件可以放下的事，今天就放下。","改變不必一次完成，一小步就夠了。"],
+["ar14","節制","平衡·調和·耐心","失衡·過度·缺乏節奏",
+"節制天使將水在兩個杯子之間倒來倒去，象徵調和、節奏與循序漸進。",
+"逆位時，生活可能失去平衡，或是容易走向極端與過度。",
+"找到適合你的節奏，一步一步調和，結果會更穩定。","留意作息、情緒或事務的失衡，先從最容易調整的地方著手。",
+"在關係中彼此調適，找到舒服的相處節奏。","付出與索取可能失衡，坦誠討論彼此的需求。",
+"協調各方資源，穩定而有耐心地推進計畫。","工作量或步調失衡，避免過度勞累，適度分配。",
+"規律且循序漸進的學習，效果最好。","突然用力過猛或完全停擺，找回穩定的小節奏。",
+"照顧身心的平衡，讓生活有張有弛。","你可能過度偏向某一邊，試著把另一端補回來。",
+"找一個你能長期維持的小習慣。","先把睡眠和飲食穩定下來。"],
+["ar15","惡魔","束縛·誘惑·慾望","掙脫束縛·覺醒·重獲自由",
+"惡魔牌的鎖鏈其實鬆鬆地掛著，提醒你許多束縛來自習慣、慾望或恐懼。",
+"逆位時，象徵你開始看見並想掙脫某些束縛，重新取回主導權。",
+"看清是什麼讓你放不開，意識到它，就是鬆綁的第一步。","你正在鬆開舊有的綑綁，一步步取回自己的主導權。",
+"留意關係中的依賴、占有或不健康的吸引，誠實檢視。","開始走出不適合的模式，值得為自己的自由感到驕傲。",
+"留意被金錢、地位或壓力綁住的狀態，重新思考你要的是什麼。","準備離開讓你消耗的環境或習慣，循序漸進地調整。",
+"檢視是否被拖延、手機或壓力綁住，找出具體的小改變。","開始擺脫不良的學習習慣，保持這份覺察。",
+"承認自己的執著不需羞愧，覺察之後才能慢慢選擇。","你正在奪回自己的選擇權，繼續溫柔而堅定地走。",
+"找出一個你想改變的習慣，寫下它。","給自己的每一次掙脫一點肯定。"],
+["ar16","高塔","突變·崩解·真相","延遲的震盪·逃避·重建中",
+"高塔象徵突然的變動與假象的崩解，雖然震撼，卻能帶來真實的重建。",
+"逆位時，可能是在避開必要的改變，或是正處於崩解後的重建階段。",
+"意料之外的變化可能出現，穩住自己，之後再重新整理。","變動的力道減緩，但問題若沒處理，仍可能再度浮現。",
+"關係中隱藏的問題可能被揭開，坦誠面對才能重建信任。","勉強維持表面和平不會長久，鼓起勇氣說出真正的感受。",
+"計畫或制度可能突然調整，先做好備案，保持彈性。","提前檢查隱藏的風險，以免小問題拖成大危機。",
+"學習計畫被打亂也沒關係，重新安排，反而可能更貼合現況。","逃避問題只會讓壓力累積，先面對最小的那一個。",
+"當舊有的信念崩塌，你有機會建立更真實的自己。","你正在重建，慢慢來，不用急著恢復原樣。",
+"先穩住呼吸，再決定下一步。","一件一件處理，不必一次解決。"],
+["ar17","星星","希望·療癒·信心","失去信心·悲觀·暫時看不見光",
+"星星牌描繪夜空下傾倒水瓶的人，象徵風暴後的平靜與重新亮起的希望。",
+"逆位時，可能暫時對未來感到悲觀，覺得看不見方向。",
+"情勢逐漸好轉，保持信念，慢慢療癒與恢復。","信心有些低落，從一件小小的好事開始，重新看見希望。",
+"未來有機會迎來更輕盈、更真誠的相處，前提是你願意好好照顧自己。","對感情或對自己有些失望，先給自己溫柔，再談期待。",
+"目標逐漸清晰，持續努力的方向是對的。","一時的低潮不代表全部，回顧自己已完成的成果。",
+"學習的熱忱被重新點燃，朝夢想一步步靠近。","對成果沒有信心時，記錄每天的小進步。",
+"允許自己相信美好的事，持續做讓你感覺被療癒的事。","看不到光的夜晚也會過去，先好好休息。",
+"希望需要日常的小行動澆灌，一天做一件讓自己安心的事就好。","寫下三件今天還不錯的小事。"],
+["ar18","月亮","直覺·不安·潛意識","迷霧散去·釐清恐懼·真相浮現",
+"月亮照亮朦朧的小徑，象徵夢境、不確定感與尚未看清的情緒。",
+"逆位時，迷霧逐漸散去，隱藏的情緒或真相正慢慢浮現。",
+"情況尚未明朗，不要在迷霧中急著下判斷，多觀察再行動。","事情逐漸清晰，你開始分得出恐懼與事實。",
+"對關係的不安感可能被放大，先分辨哪些是事實，哪些是想像。","先前的疑惑慢慢有答案，用平靜的心與對方確認。",
+"資訊不完整時，延後重大決定，多方確認。","隱藏的細節浮現，趁機修正計畫。",
+"內容有點模糊難懂，慢慢釐清，找人討論會有幫助。","焦慮逐漸減輕，重新抓回學習的節奏。",
+"留意夢境與情緒，記錄下來，它們會替你說話。","你正在走出一段不安的時期，慢慢來就好。",
+"把擔心寫下來，區分事實與想像。","給自己一點時間，答案會漸漸清楚。"],
+["ar19","太陽","喜悅·成功·活力","暫時黯淡·過度樂觀·延遲的喜悅",
+"太陽照耀孩子與向日葵，象徵純粹的喜悅、成就與清晰的能量。",
+"逆位時，喜悅可能暫時蒙上陰影，或過度樂觀而忽略細節。",
+"事情朝著明朗的方向發展，享受成果並與人分享。","好事只是稍微延遲，別因暫時的不順而否定自己。",
+"開朗、真誠的相處讓關係充滿活力與溫暖。","留意期待過高或忽略細節，用耐心補上小縫隙。",
+"成果被看見，團隊氣氛正向，適合發表與展現。","別因為樂觀而略過檢查，再確認一次最保險。",
+"學習順利、表現亮眼，保持穩定的熱情。","信心有些起伏，記得好好休息，補充能量。",
+"放心地做你自己，享受簡單的快樂。","即使今天不太明亮，你的光並沒有消失。",
+"把好消息分享給一個在乎你的人。","去曬曬太陽，散散步也很好。"],
+["ar20","審判","覺醒·召喚·重新評估","自我懷疑·逃避反省·錯過召喚",
+"審判牌的號角響起，象徵回顧過去、原諒與迎接新的使命。",
+"逆位時，可能自責過深或不願回頭面對，因而錯過了前進的契機。",
+"回顧來時路，整合經驗，你正準備進入新的階段。","別讓過去的遺憾拖住你，帶著學到的往前走。",
+"這是重新檢視關係、真誠和解的好時機。","對過去的情感放不下，允許自己原諒，也原諒對方。",
+"重新評估職涯方向，聽見內心真正的召喚。","對自己的職涯有些猶豫，先蒐集資訊，再做決定。",
+"回顧學習成果，準備以更清晰的目標往前。","不要用過去的失敗定義現在的自己。",
+"接納所有過往的自己，並整合成新的力量。","練習對自己溫柔，減少自責，多一些理解。",
+"為過去的自己說聲謝謝。","原諒是一個過程，慢慢來就好。"],
+["ar21","世界","完成·圓滿·整合","未完成·最後一哩路·遲遲不結束",
+"世界牌象徵一個週期的圓滿完成，所有努力匯聚成整體。",
+"逆位時，事情可能差最後一步，或你遲遲不願結束、不敢迎接下一階段。",
+"階段性成就達成，好好慶祝，同時迎向下一個旅程。","收尾還需要一點耐心，把最後的細節補齊。",
+"關係達到穩定圓滿，或你終於與自己和解。","關係中尚有一些未說完的話或未完成的課題，需要耐心完成。",
+"專案或階段完成、獲得肯定，也為下一步鋪路。","離完成只差一小步，列出剩餘事項逐一完成。",
+"學習目標達成，統整所學，展望下一個挑戰。","臨門一腳別放棄，把最後的複習做完。",
+"肯定自己一路走來的所有努力，你已經很完整。","完成需要時間，允許自己按照自己的步調收尾。",
+"慶祝一下，你值得。","列出最後三件待辦，一件件完成。"]
+];
+// 小阿爾克那 56 張：花色與數字的組合說明
+const SUIT_ZH={wa:"權杖",cu:"聖杯",sw:"寶劍",pe:"錢幣"};
+const RANK_ZH={ac:"王牌","02":"二","03":"三","04":"四","05":"五","06":"六","07":"七","08":"八","09":"九","10":"十",pa:"侍者",kn:"騎士",qu:"王后",ki:"國王"};
+// 花色在五個方向的解讀：[綜合正,綜合逆, 愛情正,愛情逆, 事業正,事業逆, 學業正,學業逆, 內在正,內在逆, 提醒正,提醒逆]
+const SUIT_CAT={
+wa:["權杖帶來熱情與行動的能量，你的生活正需要這股往前衝的火花。","權杖的火焰有些失衡，熱情可能燒得太急，或暫時熄滅。",
+"愛情上帶著熱情與主動，真誠地表達喜歡會有很好的回應。","感情中的熱度忽高忽低，留意衝動的言行，也別讓冷淡累積。",
+"事業上充滿動能與創意，適合主動出擊、嘗試新點子。","工作上的動力不穩，或是點子很多卻缺少落實。",
+"學習熱忱高昂，勇於嘗試新的領域與方法。","學習的熱情容易分散或倦怠，先找回最初的好奇心。",
+"內在的火花正在燃起，跟著興趣與熱情走。","你可能有些疲憊或失去熱情，先休息，再慢慢點燃。",
+"跟著熱情，採取一個小行動。","讓火慢慢燒，別一次耗盡。"],
+cu:["聖杯帶來情感的滋養，人際與內心都有柔軟流動的空間。","聖杯的水流有些阻塞，情緒可能被壓抑，或是過於氾濫。",
+"感情上有溫柔的連結與深度的交流，用心感受彼此。","感情中可能有失落、期待落差或情緒起伏，先照顧自己的感受。",
+"工作中的人際與合作順暢，用同理心帶來好成果。","職場上的情緒容易被牽動，留意界線，避免把情緒帶進決策。",
+"以有感的方式學習，與同伴交流會讓你更有動力。","情緒影響了專注力，先安頓心情，再回到課業。",
+"傾聽內心的感受，讓情感自然流動，會帶來療癒。","你的情緒需要被好好看見，試著用文字或藝術表達。",
+"傾聽心裡的感受，並對它說聲謝謝。","先陪伴自己的情緒，再處理事情。"],
+sw:["寶劍帶來清晰的思考，適合釐清問題、說出真話。","寶劍的鋒芒有些混亂，思緒可能過度反覆，或言語不小心傷人。",
+"感情上需要清楚且誠實的溝通，把話說清楚能避免誤會。","感情中可能有誤解、冷戰或過度分析，先放下防備再溝通。",
+"工作上憑邏輯與判斷力解決問題，條理清楚會讓你更有說服力。","工作溝通容易有誤差或壓力，重要事項請多確認一次。",
+"思路清晰，適合分析、整理與寫作。","焦慮與雜念干擾學習，先把煩惱寫下來，再專心。",
+"看清楚事實，會幫助你做出理性的選擇。","腦中的批評聲太吵，試著用善意的語氣和自己說話。",
+"說話前先想清楚，說得清楚也要說得溫和。","把腦中的念頭寫下來，讓它們慢下來。"],
+pe:["錢幣帶來穩定與務實的成長，累積會逐漸成形。","錢幣的穩定感受到干擾，財務或生活節奏可能需要調整。",
+"感情上以踏實、長久的方式相處，行動勝過言語。","感情中可能過度現實或缺乏安全感，重新溝通彼此的期待。",
+"工作與財務穩健累積，腳踏實地的努力會被肯定。","工作或金錢上有些不穩，檢視預算與資源配置。",
+"以務實的方法循序漸進，打好基礎。","進度停滯或缺乏實作，從最小的練習開始。",
+"照顧身體與生活作息，穩穩的日常就是你的力量。","身體或生活節奏有些失衡，先從睡眠與飲食調整。",
+"把今天的日常照顧好。","檢視一下預算與作息。"]
+};
+// 數字或宮廷牌的階段說明：[正位, 逆位]
+const RANK_STAGE={
+ac:["王牌代表嶄新的種子，現在是開始的好時機。","王牌逆位，種子尚未發芽，可能需要多一點準備與耐心。"],
+"02":["數字二象徵選擇與平衡，需要在兩者之間找到協調。","數字二逆位，猶豫或失衡讓你難以決定，先釐清重點。"],
+"03":["數字三象徵初步的成果與合作，事情開始擴展。","數字三逆位，合作或進展稍有阻礙，檢視溝通是否到位。"],
+"04":["數字四象徵穩定與休息，適合整頓與鞏固。","數字四逆位，可能過於停滯或不安於穩定，需要調整節奏。"],
+"05":["數字五象徵挑戰與摩擦，從衝突中學習成長。","數字五逆位，衝突逐漸平息，也是修復與和解的契機。"],
+"06":["數字六象徵和諧與流動，付出開始得到回應。","數字六逆位，往來有些不平衡，或需要放下過往。"],
+"07":["數字七象徵評估與堅持，需要策略與耐心。","數字七逆位，可能出現疲憊或迷惘，重新確認你的目標。"],
+"08":["數字八象徵專注與行動，持續投入會有進展。","數字八逆位，進度受阻或分心，先找出卡住的原因。"],
+"09":["數字九象徵接近完成，收穫與考驗並存。","數字九逆位，可能過度擔憂或疲憊，記得給自己休息。"],
+"10":["數字十象徵一個週期的完成，也是新循環的起點。","數字十逆位，負擔或結束帶來壓力，學著放下不必要的重量。"],
+pa:["侍者象徵學習與好奇，新消息或新的嘗試正在靠近。","侍者逆位，可能缺乏耐心或不夠成熟，需要更多練習。"],
+kn:["騎士象徵行動力與追求，朝目標積極推進。","騎士逆位，行動過急或停滯不前，調整節奏更重要。"],
+qu:["王后象徵成熟、同理與內在力量，以柔韌的方式帶領。","王后逆位，可能情緒化或過度操心，先回到自己的中心。"],
+ki:["國王象徵掌握與責任，以穩健的判斷帶來影響力。","國王逆位，可能過於強勢或失去掌控，回到初衷。"]
+};
+// 每張牌自己的牌義：[正位關鍵字, 逆位關鍵字, 正位牌義, 逆位牌義]
+const MINOR_ZH={
+waac:["新靈感·熱情·起點","延遲·動力不足·熄火","一團火焰從雲中伸出，象徵靈感乍現與創造的起點。","靈感似乎被卡住，或熱情尚未找到出口。"],
+wa02:["規劃·決定·展望","猶豫·害怕離開舒適圈·計畫受阻","手握地球儀的人望向遠方，正在計畫下一步與更大的版圖。","你可能被眼前的安穩綁住，遲遲不敢踏出計畫的第一步。"],
+wa03:["擴展·等待成果·遠見","延遲·阻礙·計畫落空","站在高處眺望船隻，象徵你的努力正在遠方展開，需要耐心等候。","預期的回音延遲，需要重新確認路線與溝通。"],
+wa04:["慶祝·穩定·歸屬","不安穩·家庭緊張·慶祝受阻","花環與人們一起歡慶，象徵階段性的喜悅與穩定的歸屬。","場面雖在，內心卻不太踏實，需要關注身邊人的感受。"],
+wa05:["競爭·摩擦·磨練","避免衝突·和解·內耗","多人揮舞木杖，象徵各方想法碰撞，從競爭中磨練。","衝突漸漸緩和，或是你一直在內耗，找到共識會更省力。"],
+wa06:["勝利·被認可·自信","自負·未獲認可·挫折","騎士戴著桂冠凱旋，象徵努力被看見與自信的建立。","掌聲可能還沒來，或你過於在意他人的評價。"],
+wa07:["守住立場·勇敢捍衛·堅持","疲憊·退縮·壓力過大","站在高地的人抵擋來自四面的木杖，象徵為自己的立場堅持到底。","你可能感覺被壓得喘不過氣，適度退一步並不丟臉。"],
+wa08:["快速進展·消息·行動","延遲·混亂·急躁","八根權杖凌空飛行，象徵事情快速推進與訊息到來。","節奏太快或溝通不順，先放慢確認。"],
+wa09:["堅持·韌性·最後防線","疲憊·防備過度·瀕臨極限","帶傷的人仍扶杖而立，象徵歷經考驗後仍堅持的韌性。","你已很疲憊，也許不必再獨自硬撐，向外求助。"],
+wa10:["重擔·責任·接近終點","放下負擔·過勞·分擔","男人扛著十根木杖前行，象徵肩上的責任與接近終點的辛苦。","是時候卸下一些重擔，學習分工與求助。"],
+wapa:["好奇·新消息·探索","三分鐘熱度·消息延遲·缺乏方向","年輕人注視手中的杖，象徵充滿好奇的探索與熱情的新消息。","熱情容易退得很快，給自己一個可持續的小目標。"],
+wakn:["行動·冒險·衝勁","魯莽·急躁·半途而廢","騎士駕馬疾馳，象徵熱情與勇於冒險的行動力。","衝勁過猛或三分鐘熱度，三思而後行。"],
+waqu:["自信·魅力·溫暖","嫉妒·情緒起伏·缺乏安全感","王后端坐，身旁有一隻黑貓，象徵自信、魅力與溫暖的領導。","自信可能有些動搖，避免與他人比較。"],
+waki:["願景·領導·魄力","專橫·急躁·高壓","國王持杖坐鎮，象徵有遠見、有魄力的領導。","領導上過於強勢或急躁，多聽聽不同意見。"],
+cuac:["新感情·直覺·滿溢的愛","情緒壓抑·空虛·錯過","聖杯自雲中湧出水流，象徵嶄新的情感與滿溢的愛。","感受被壓住了，或你還沒準備好接收他人的好意。"],
+cu02:["互相吸引·平等·連結","失衡·溝通不良·疏離","兩人舉杯相敬，象徵雙方平等的尊重與真誠的連結。","彼此的付出可能不對等，需要坦誠的對話。"],
+cu03:["友誼·慶祝·分享","過度放縱·閒話·孤立","三位女子舉杯共舞，象徵友誼、慶祝與被支持的喜悅。","社交可能過度，或是感到被排除在外。"],
+cu04:["倦怠·沉思·錯過機會","重新振作·看見機會·走出冷漠","男人坐在樹下，對遞來的杯子視而不見，象徵厭倦與內向的沉思。","你正開始醒來，注意到身邊被忽略的機會。"],
+cu05:["失落·遺憾·看見剩下的","接受·走出悲傷·重新振作","他望著翻倒的杯子，卻忽略身後仍有兩杯，象徵悲傷與遺憾。","你開始轉身，看見仍然存在的支持，慢慢走出失落。"],
+cu06:["懷舊·純真·重逢","困在過去·成長·放下回憶","孩子將花朵遞給另一個孩子，象徵童年回憶、純真與舊友重逢。","沉浸在過去太久，是時候帶著回憶往前走。"],
+cu07:["幻想·選擇太多·白日夢","回到現實·做出決定·釐清","雲中浮現許多杯子，象徵想像力豐富，卻也容易迷失在選項裡。","迷霧散去，你開始看清哪些願望是真實可行的。"],
+cu08:["離開·追尋更多·放下","徘徊·害怕改變·不願離開","他背對八個杯子走向遠方，象徵為了更深層的滿足而選擇離開。","你可能在離開與留下之間徘徊，先釐清真正想要什麼。"],
+cu09:["滿足·願望成真·享受","貪心·表面滿足·空虛","男人滿足地坐在九個杯子前，象徵願望實現與自我滿足。","擁有的很多，卻仍感覺空缺，問問什麼才是真正重要的。"],
+cu10:["家庭幸福·圓滿·和諧","關係緊張·期待落差·家庭失和","彩虹下全家人歡聚，象徵情感上的圓滿與和諧。","理想與現實有落差，需要面對並溝通家人間的期待。"],
+cupa:["溫柔消息·創意·敏感","情緒不成熟·逃避·創意受阻","年輕人注視杯中的魚，象徵溫柔的訊息與豐富的感受力。","情緒起伏較大，或逃避表達，慢慢學習面對。"],
+cukn:["浪漫·邀請·追隨內心","不切實際·情緒化·空談","騎士穩穩捧著杯子前進，象徵浪漫的提議與追隨內心的行動。","承諾與行動可能不太一致，留意只說不做。"],
+cuqu:["同理·直覺·溫柔包容","情緒依賴·界線模糊·過度敏感","王后凝視聖杯，象徵深刻的同理心與直覺。","容易被他人情緒影響，記得守住自己的界線。"],
+cuki:["情緒成熟·包容·平穩","情緒壓抑·操控·冷漠","國王端坐在水面上，象徵能駕馭情緒、平穩而寬容的人。","把情緒藏得太深，或對關係顯得疏離，試著適度表達。"],
+swac:["清晰·真相·突破","混亂·誤解·思緒不清","劍從雲中舉起並戴著花冠，象徵真理的清晰與突破。","思緒混亂或資訊不全，先不要急著下結論。"],
+sw02:["兩難·暫時的僵局·迴避","選擇困難·資訊浮現·被迫決定","蒙眼女子交叉雙劍，象徵暫時閉上眼睛，面對兩難的局面。","逃避不再有效，你需要面對事實並做出決定。"],
+sw03:["心痛·悲傷·釋放","療癒·慢慢走出·壓抑悲傷","三把劍刺穿一顆心，象徵悲傷與分離的痛楚，需要被承認。","傷口正在癒合，或你仍壓抑著痛，允許自己慢慢好起來。"],
+sw04:["休息·靜養·恢復","不安·過度勞累·重新出發","雕像般躺著休息，象徵暫停、靜養與恢復精力。","是時候從休息中站起來，或你其實沒有真正休息到。"],
+sw05:["衝突·勝負·代價","和解·餘波·後悔","撿起劍的人看著離去的對手，象徵爭執與贏了卻失去的代價。","衝突的餘波仍在，是時候放下輸贏、尋求和解。"],
+sw06:["過渡·離開困境·平靜","受阻·難以前進·情緒包袱","船載著人駛向平靜的水域，象徵逐漸遠離困境的過渡期。","過渡期遇到阻力，或你帶著太多包袱，慢慢整理。"],
+sw07:["策略·隱瞞·獨自行動","坦白·被發現·良心不安","他悄悄帶走劍，象徵避開正面衝突、使用策略或有所隱瞞。","祕密可能被揭開，誠實面對會比偷偷摸摸更輕鬆。"],
+sw08:["受困·自我限制·無力感","掙脫·看見出路·重新選擇","被蒙眼綁住的女子被劍圍繞，象徵看似無路，其實許多限制來自想法。","你開始看見出口，鬆開限制自己的想法。"],
+sw09:["焦慮·失眠·擔憂","走出憂慮·求助·逐漸好轉","坐起身掩面的人，象徵夜裡反覆的焦慮與沉重的想法。","焦慮漸漸鬆動，向信任的人傾訴會有幫助。"],
+sw10:["谷底·結束·痛苦的終點","回升·復原·拒絕放手","背上插著十把劍的人伏地，象徵痛苦走到盡頭，天邊也已有曙光。","最糟的時刻已過，慢慢站起來，不要再讓舊傷困住自己。"],
+swpa:["好奇·觀察·學習溝通","閒話·多話·衝動","年輕人高舉劍望向四周，象徵求知慾與警覺的觀察。","說話或行動可能欠缺思考，先聽再說。"],
+swkn:["果斷·直接·快速行動","魯莽·言語傷人·衝動","騎士持劍疾馳，象徵目標明確、行動果斷的力量。","太急著表態或批評，可能傷到別人，放慢再說。"],
+swqu:["獨立·清晰·誠實","冷漠·尖銳·封閉","王后舉劍沉靜地坐著，象徵獨立的思考與直率的誠實。","過度自我保護或語氣過於尖銳，試著柔和一些。"],
+swki:["理性·公正·權威","冷酷·專斷·濫用權力","國王持劍端坐，象徵理性、公正與清晰的判斷。","過於冷硬或固執己見，記得把同理心帶回來。"],
+peac:["新機會·豐盛的起點·穩健","錯失機會·計畫不周·財務疑慮","一隻手捧出錢幣，象徵實際的機會與穩健的開始。","機會可能被忽略，或計畫仍不夠周全，再確認細節。"],
+pe02:["平衡·靈活·多工","失衡·手忙腳亂·財務混亂","他一邊拋接兩枚錢幣，象徵在變動中靈活取得平衡。","事情太多而顧此失彼，先排出優先順序。"],
+pe03:["合作·技藝·被肯定","缺乏團隊合作·品質不佳·被忽視","工匠與夥伴共同討論作品，象徵專業與合作的成果。","團隊溝通不順，或對品質的要求不一致，需要重新協調。"],
+pe04:["守成·安全感·執著","吝嗇·放開·財務不安","緊抱錢幣的人，象徵守護資源與追求安全感。","抓得太緊，或開始學習放手，流動才會帶來更多。"],
+pe05:["匱乏·困難·孤立感","好轉·接受幫助·走出困境","兩人在雪中走過明亮的教堂窗，象徵困頓時別忘了身旁仍有支援。","最艱難的時期逐漸過去，願意接受幫助會更輕鬆。"],
+pe06:["給予與接受·慷慨·互助","不對等·債務·附帶條件","富人施捨並秤量給予，象徵慷慨與資源的流動。","往來不太平衡，確認彼此的期待與界線。"],
+pe07:["耐心等待·評估成果·投資","急躁·努力白費感·重新評估","農夫停下腳步，審視自己栽種的作物，象徵耐心等待收成。","覺得努力沒有回報，先檢視方法是否需要調整。"],
+pe08:["專注學習·精進技藝·勤奮","完美主義·敷衍·缺乏熱情","工匠專心雕刻錢幣，象徵持續練習與精益求精。","過度挑剔或失去熱情，回到最基本的樂趣。"],
+pe09:["獨立·自給自足·享受成果","過度依賴·財務不穩·孤單","在花園中優雅獨處的女子，象徵自立與努力後的享受。","安穩的背後可能有不安，檢視你是否太依賴外在條件。"],
+pe10:["傳承·長久富足·家庭","財務壓力·家庭糾紛·基礎不穩","家族與寵物聚集在拱門前，象徵世代累積的穩定與富足。","資源或家庭關係出現裂縫，需要坦誠討論與規劃。"],
+pepa:["學習·務實的計畫·新機會","缺乏專注·拖延·不切實際","年輕人專注地端詳手中的錢幣，象徵腳踏實地的學習。","計畫停在想像，缺少落實，先踏出一小步。"],
+pekn:["勤勉·可靠·穩步前進","停滯·過度謹慎·固執","騎士騎著穩健的馬，象徵踏實、有耐心的前進。","太過保守或一成不變，適度嘗試新方法。"],
+pequ:["務實·滋養·照顧","過度操心·物質依賴·忽略自己","王后抱著錢幣，身邊盛開花園，象徵務實又溫暖的照顧。","過度操勞，記得留點時間給自己。"],
+peki:["穩固·財富·可靠","貪婪·固執·過度物質","國王端坐在豐饒的庭園，象徵穩健與豐厚的成就。","過度重視金錢或地位，找回真正重要的價值。"]
+};
+(function(){
+"use strict";
+const CATS=[["gen","綜合運勢"],["love","愛情關係"],["work","事業工作"],["study","學業成長"],["self","內在探索"]];
+const POS=[["過去","PAST"],["現在","PRESENT"],["未來","FUTURE"]];
+const ROMAN=["0","I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV","XVI","XVII","XVIII","XIX","XX","XXI"];
+const MAJOR_ART=["sun","infinity","moon","star","square","key","rings","wheel","infinity","lamp","wheel","scales","compass","compass","rings","key","tower","star","moon","sun","star","wheel"];
+
+/* ---------- 圖形 ---------- */
+const S='stroke="#7A5518" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"';
+const F="#E3C27A";
+function spokes(r1,r2,n){let o="";for(let i=0;i<n;i++){const a=Math.PI*2*i/n;o+=`<line x1="${(50+r1*Math.cos(a)).toFixed(1)}" y1="${(50+r1*Math.sin(a)).toFixed(1)}" x2="${(50+r2*Math.cos(a)).toFixed(1)}" y2="${(50+r2*Math.sin(a)).toFixed(1)}" ${S}/>`;}return o;}
+const ART={
+  sun:`<circle cx="50" cy="50" r="15" fill="${F}" ${S}/>`+spokes(24,38,8),
+  moon:`<path d="M60 14 A36 36 0 1 0 60 86 A28 28 0 1 1 60 14 Z" fill="${F}" ${S}/>`,
+  star:`<polygon points="50,8 58,42 92,50 58,58 50,92 42,58 8,50 42,42" fill="${F}" ${S}/><polygon points="50,28 54,46 72,50 54,54 50,72 46,54 28,50 46,46" transform="rotate(45 50 50)" fill="none" ${S}/>`,
+  compass:`<circle cx="50" cy="50" r="38" fill="none" ${S}/><polygon points="50,16 57,43 84,50 57,57 50,84 43,57 16,50 43,43" fill="${F}" ${S}/>`,
+  wheel:`<circle cx="50" cy="50" r="34" fill="none" ${S}/>`+spokes(8,34,8)+`<circle cx="50" cy="50" r="8" fill="${F}" ${S}/>`,
+  scales:`<line x1="50" y1="14" x2="50" y2="86" ${S}/><line x1="20" y1="28" x2="80" y2="28" ${S}/><path d="M20 28 L10 56 H30 Z M80 28 L70 56 H90 Z" fill="${F}" ${S}/><line x1="34" y1="86" x2="66" y2="86" ${S}/>`,
+  infinity:`<path d="M50 50 C38 30 12 30 12 50 C12 70 38 70 50 50 C62 30 88 30 88 50 C88 70 62 70 50 50 Z" fill="none" ${S}/>`,
+  rings:`<circle cx="38" cy="50" r="24" fill="none" ${S}/><circle cx="62" cy="50" r="24" fill="none" ${S}/>`,
+  tower:`<path d="M34 88 L38 32 H62 L66 88 Z" fill="${F}" ${S}/><path d="M34 32 H66 L58 16 H42 Z" fill="none" ${S}/><path d="M78 10 L66 40 H78 L68 66" fill="none" ${S}/>`,
+  key:`<circle cx="50" cy="26" r="14" fill="${F}" ${S}/><line x1="50" y1="40" x2="50" y2="88" ${S}/><line x1="50" y1="70" x2="64" y2="70" ${S}/><line x1="50" y1="82" x2="62" y2="82" ${S}/>`,
+  lamp:`<path d="M38 38 H62 L66 82 H34 Z" fill="none" ${S}/><path d="M50 76 C42 64 46 56 50 50 C54 56 58 64 50 76 Z" fill="${F}" ${S}/><path d="M42 38 C42 24 58 24 58 38" fill="none" ${S}/>`,
+  square:`<rect x="24" y="24" width="52" height="52" fill="none" ${S}/><rect x="38" y="38" width="24" height="24" fill="${F}" ${S}/>`,
+  wand:`<line x1="50" y1="12" x2="50" y2="90" ${S}/><path d="M50 30 C34 26 28 38 36 46 C44 50 50 40 50 30 Z M50 48 C66 44 72 56 64 64 C56 68 50 58 50 48 Z" fill="${F}" ${S}/>`,
+  cup:`<path d="M26 22 H74 C74 52 64 62 50 62 C36 62 26 52 26 22 Z" fill="${F}" ${S}/><line x1="50" y1="62" x2="50" y2="80" ${S}/><line x1="34" y1="84" x2="66" y2="84" ${S}/>`,
+  sword:`<path d="M50 8 L58 56 H42 Z" fill="${F}" ${S}/><line x1="30" y1="62" x2="70" y2="62" ${S}/><line x1="50" y1="62" x2="50" y2="90" ${S}/>`,
+  coin:`<circle cx="50" cy="50" r="34" fill="${F}" ${S}/><polygon points="50,24 57,44 78,44 61,56 68,76 50,64 32,76 39,56 22,44 43,44" fill="none" ${S}/>`
+};
+const SUIT_ART={wa:"wand",cu:"cup",sw:"sword",pe:"coin"};
+const svg=k=>`<svg viewBox="0 0 100 100" aria-hidden="true">${ART[k]}</svg>`;
+const BACK=`<svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="44" fill="none" stroke="#B8913F" stroke-width="1.6"/><circle cx="50" cy="50" r="36" fill="none" stroke="#B8913F" stroke-width="1" stroke-dasharray="2 4"/><polygon points="50,12 58,42 88,50 58,58 50,88 42,58 12,50 42,42" fill="#E3C27A"/><circle cx="50" cy="50" r="6" fill="#1F1B3A"/></svg>`;
+
+/* ---------- 牌組 ---------- */
+const MAJOR={};MAJOR_ZH.forEach(r=>{MAJOR[r[0]]=r;});
+const DECK=API_CARDS.map(([id,en,type,suit,val])=>{
+  if(type==="major"){
+    const r=MAJOR[id];
+    return {id,en,type,zh:r[1],top:ROMAN[val],art:MAJOR_ART[val]};
+  }
+  const p=id.slice(0,2),code=id.slice(2);
+  return {id,en,type,p,code,zh:SUIT_ZH[p]+RANK_ZH[code],top:SUIT_ZH[p],art:SUIT_ART[p]};
+});
+function rdata(c,rev,cat){
+  const o=rev?1:0,ci=CATS.findIndex(x=>x[0]===cat);
+  if(c.type==="major"){
+    const r=MAJOR[c.id];
+    return {kw:r[2+o].split("·"),mean:r[4+o],text:r[6+ci*2+o],tip:r[16+o]};
+  }
+  const m=MINOR_ZH[c.id],sc=SUIT_CAT[c.p];
+  return {kw:m[o].split("·"),mean:m[2+o],text:sc[ci*2+o]+RANK_STAGE[c.code][o],tip:sc[10+o]};
+}
+
+/* ---------- 隨機 ---------- */
+function rnd(n){
+  try{
+    const a=new Uint32Array(1),lim=Math.floor(4294967296/n)*n;let x;
+    do{crypto.getRandomValues(a);x=a[0];}while(x>=lim);
+    return x%n;
+  }catch(e){return Math.floor(Math.random()*n);}
+}
+function pick3(){
+  const a=DECK.slice();
+  for(let i=a.length-1;i>0;i--){const j=rnd(i+1);const t=a[i];a[i]=a[j];a[j]=t;}
+  return a.slice(0,3).map(c=>({c,rev:rnd(2)===1}));
+}
+
+/* ---------- 介面 ---------- */
+const $=id=>document.getElementById(id);
+const reduced=()=>window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+let cat="gen",drawn=[],flipped=[false,false,false],busy=false,activeTab=0;
+
+function show(id){
+  ["s-ask","s-draw","s-read"].forEach(s=>{$(s).hidden=(s!==id);});
+  window.scrollTo(0,0);
+}
+const faceHTML=c=>`<span class="face"><span class="f-top">${c.top}</span>${svg(c.art)}<span class="f-name"><b>${c.zh}</b><i>${c.en}</i></span></span>`;
+
+/* 方向選擇 */
+const chips=$("chips");
+const catLabel=()=>CATS.find(x=>x[0]===cat)[1];
+function pickCat(k){
+  cat=k;
+  chips.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-checked",x.dataset.cat===k?"true":"false"));
+  $("picked").innerHTML="目前選擇：<b>"+catLabel()+"</b>";
+}
+CATS.forEach(([k,label])=>{
+  const b=document.createElement("button");
+  b.type="button";b.className="chip";b.setAttribute("role","radio");b.dataset.cat=k;b.textContent=label;
+  b.setAttribute("aria-checked",k===cat?"true":"false");
+  b.addEventListener("click",()=>pickCat(k));
+  chips.appendChild(b);
+});
+pickCat(cat);
+
+/* 牌桌 */
+const slotsEl=$("slots"),deckEl=$("deck"),hint=$("draw-hint");
+const shuffleBtn=$("shuffle"),flipAllBtn=$("flipall"),toReadBtn=$("toread");
+function resetSlots(){
+  drawn=[];flipped=[false,false,false];
+  slotsEl.innerHTML="";
+  POS.forEach(([zh,en],i)=>{
+    const s=document.createElement("div");s.className="slot";
+    s.innerHTML=`<div class="pos">${zh}<small>${en}</small></div><div class="cardwrap" id="cw${i}"></div><div class="state" id="st${i}"></div>`;
+    slotsEl.appendChild(s);
+  });
+  flipAllBtn.hidden=true;toReadBtn.hidden=true;
+}
+function flip(i){
+  if(flipped[i]||!drawn[i])return;
+  flipped[i]=true;
+  const el=$("cw"+i).firstChild;el.classList.add("flipped");
+  const {c,rev}=drawn[i];
+  setTimeout(()=>{$("st"+i).innerHTML=`<b>${c.zh}</b><br>${rev?"逆位":"正位"}`;},reduced()?0:450);
+  if(flipped.every(Boolean)){
+    hint.textContent="三張牌都翻開了，準備好就看解牌。";
+    flipAllBtn.hidden=true;toReadBtn.hidden=false;
+  }
+}
+async function doShuffle(){
+  if(busy)return;busy=true;
+  shuffleBtn.disabled=true;resetSlots();
+  hint.textContent="洗牌中，請在心裡默念你的問題。";
+  deckEl.classList.add("shuffling");
+  await wait(reduced()?200:1500);
+  deckEl.classList.remove("shuffling");
+  drawn=pick3();
+  drawn.forEach(({c,rev},i)=>{
+    const w=$("cw"+i);w.classList.add("filled");
+    const b=document.createElement("button");
+    b.type="button";b.className="card"+(rev?" rev":"");b.style.setProperty("--d",(i*0.15)+"s");
+    b.setAttribute("aria-label",`${POS[i][0]}的牌，點擊翻開`);
+    b.innerHTML=`<span class="inner"><span class="back">${BACK}</span>${faceHTML(c)}</span>`;
+    b.addEventListener("click",()=>flip(i));
+    w.appendChild(b);
+  });
+  hint.textContent="憑直覺，依序輕點牌背翻開，或按「全部翻開」。";
+  shuffleBtn.textContent="重新洗牌";shuffleBtn.disabled=false;flipAllBtn.hidden=false;
+  busy=false;
+}
+async function flipAll(){
+  flipAllBtn.hidden=true;
+  for(let i=0;i<3;i++){flip(i);await wait(reduced()?0:300);}
+}
+
+/* 解牌 */
+function overallText(){
+  const kw=drawn.map(d=>rdata(d.c,d.rev,cat).kw[0]);
+  const n=drawn.filter(d=>d.rev).length;
+  const flow=`以「${catLabel()}」來看，過去帶著「${kw[0]}」的色彩，現在正處於「${kw[1]}」，接下來的方向與「${kw[2]}」有關。`;
+  const tone=n===0?"三張牌都是正位，整體能量相對順暢，適合把想法化為行動。"
+    :n===3?"三張牌都是逆位，提醒你這段時間需要多一點停頓與自我整理，不必急著推進。"
+    :`三張牌中有 ${n} 張逆位，代表有些地方正在調整，先照顧好那一部分，其餘會更順。`;
+  return `${flow}${tone}塔羅不會替你決定未來，真正的選擇，始終在你手中。`;
+}
+function setTab(i){
+  activeTab=i;
+  $("tabs").querySelectorAll(".tab").forEach((t,k)=>t.setAttribute("aria-selected",k===i?"true":"false"));
+  $("rgrid").querySelectorAll(".rcard").forEach((r,k)=>r.classList.toggle("active",k===i));
+}
+function showReading(){
+  $("read-meta").textContent="方向："+catLabel();
+  const tabs=$("tabs"),grid=$("rgrid");tabs.innerHTML="";grid.innerHTML="";
+  drawn.forEach(({c,rev},i)=>{
+    const t=document.createElement("button");
+    t.type="button";t.className="tab";t.setAttribute("role","tab");t.textContent=POS[i][0];
+    t.addEventListener("click",()=>setTab(i));tabs.appendChild(t);
+    const d=rdata(c,rev,cat);
+    const a=document.createElement("article");a.className="rcard";
+    a.innerHTML=`<div class="rhead"><div class="card mini flipped${rev?" rev":""}" aria-hidden="true"><span class="inner"><span class="back"></span>${faceHTML(c)}</span></div><div class="t"><div class="pos-l">${POS[i][0]} · ${POS[i][1]}</div><h3>${c.zh}</h3><span class="badge${rev?" rv":""}">${rev?"逆位":"正位"}</span></div></div>`
+      +`<div class="kws">${d.kw.map(k=>`<span>${k}</span>`).join("")}</div>`
+      +`<h4>牌義</h4><p>${d.mean}</p><h4>${catLabel()}解讀</h4><p>${d.text}</p>`
+      +`<div class="tip"><b>給你的小提醒</b>${d.tip}</div>`;
+    grid.appendChild(a);
+  });
+  $("overall").innerHTML=`<div class="lab2">三張牌的整體訊息</div><p>${overallText()}</p>`;
+  setTab(0);
+  show("s-read");
+}
+
+/* 事件 */
+$("go").addEventListener("click",()=>{
+  resetSlots();
+  hint.textContent="深呼吸，專注在你的問題上，準備好了就按下洗牌。";
+  shuffleBtn.textContent="洗牌";shuffleBtn.disabled=false;
+  show("s-draw");
+});
+shuffleBtn.addEventListener("click",doShuffle);
+flipAllBtn.addEventListener("click",flipAll);
+toReadBtn.addEventListener("click",showReading);
+$("again").addEventListener("click",()=>{
+  resetSlots();
+  hint.textContent="深呼吸，專注在你的問題上，準備好了就按下洗牌。";
+  shuffleBtn.textContent="洗牌";shuffleBtn.disabled=false;
+  show("s-draw");
+});
+$("change").addEventListener("click",()=>show("s-ask"));
+resetSlots();
+})();
+</script>
+
+</body></html>

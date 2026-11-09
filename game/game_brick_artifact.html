@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>《打磚塊大作戰》- 賽博航海</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #090D16;
+            touch-action: none;
+            font-family: 'Zen Maru Gothic', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        #game-canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+        .text-neon-cyan {
+            color: #0ff;
+            text-shadow: 0 0 5px #0ff, 0 0 10px #0ff;
+        }
+        .text-neon-red {
+            color: #f00;
+            text-shadow: 0 0 5px #f00, 0 0 10px #f00;
+        }
+        .text-neon-gold {
+            color: #ffd700;
+            text-shadow: 0 0 5px #ffd700, 0 0 10px #ffd700;
+        }
+        /* Hide UI initially */
+        .ui-hidden {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .ui-visible {
+            opacity: 1;
+            pointer-events: auto;
+            transition: opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body class="text-white">
+
+    <!-- 頂部 HUD 看板 -->
+    <div id="hud" class="fixed top-2 left-2 right-2 z-10 glass-panel rounded-xl px-4 py-2 flex justify-between items-center text-sm sm:text-base">
+        <div class="flex items-center space-x-4">
+            <div>Lv: <span id="hud-level" class="text-neon-cyan font-black">1</span></div>
+            <div>Score: <span id="hud-score" class="font-black text-yellow-300">0</span></div>
+            <div class="hidden sm:block">High: <span id="hud-highscore" class="text-gray-400">0</span></div>
+        </div>
+        <div class="flex items-center space-x-2 sm:space-x-4">
+            <div id="hud-lives" class="text-neon-red tracking-widest text-lg">❤️❤️❤️</div>
+            <button id="btn-bgm" class="p-1 sm:p-2 rounded bg-white/10 hover:bg-white/20 transition">🎵 ON</button>
+            <button id="btn-sfx" class="p-1 sm:p-2 rounded bg-white/10 hover:bg-white/20 transition">🔊 ON</button>
+        </div>
+    </div>
+
+    <!-- 遊戲主畫布 -->
+    <canvas id="game-canvas"></canvas>
+
+    <!-- 主選單 Modal -->
+    <div id="modal-start" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm ui-visible">
+        <div class="glass-panel p-8 rounded-2xl flex flex-col items-center max-w-md w-full mx-4 text-center border-t-4 border-t-[#ffd700]">
+            <h1 class="text-4xl sm:text-5xl font-black mb-2 text-neon-gold">打磚塊大作戰</h1>
+            <h2 class="text-xl text-neon-cyan mb-6">~ 賽博航海篇 ~</h2>
+            
+            <div class="text-left text-sm text-gray-300 mb-8 space-y-2 w-full bg-black/30 p-4 rounded-lg">
+                <p>🕹️ <b>操作：</b>拖曳滑鼠/手指移動擋板，點擊發射。</p>
+                <p>⚡ <b>強化：</b><br>
+                   🟢 多重果實 (分身)<br>
+                   💙 橡膠果實 (變寬)<br>
+                   🔴 武裝色霸氣 (貫穿)<br>
+                   💛 霸王色護盾 (防護網)
+                </p>
+                <p>💣 <b>炸彈磚：</b>紅色閃爍，擊碎引爆周圍。</p>
+            </div>
+
+            <button id="btn-start" class="px-8 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-black font-black text-xl rounded-full shadow-[0_0_15px_rgba(255,215,0,0.6)] transform transition hover:scale-105 active:scale-95">
+                出航 (START)
+            </button>
+        </div>
+    </div>
+
+    <!-- 結算 Modal (Game Over / Victory) -->
+    <div id="modal-end" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md ui-hidden">
+        <div class="glass-panel p-8 rounded-2xl flex flex-col items-center max-w-sm w-full mx-4 text-center">
+            <h1 id="end-title" class="text-4xl font-black mb-4">GAME OVER</h1>
+            <div class="text-2xl mb-2">得分: <span id="end-score" class="text-yellow-400 font-black">0</span></div>
+            <div class="text-lg text-gray-400 mb-8">最高: <span id="end-highscore">0</span></div>
+            
+            <button id="btn-restart" class="px-8 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-black text-xl rounded-full shadow-[0_0_15px_rgba(0,255,255,0.5)] transform transition hover:scale-105 active:scale-95">
+                重新挑戰
+            </button>
+        </div>
+    </div>
+
+<script>
+/**
+ * 《打磚塊大作戰》- 賽博航海篇
+ * 單一檔案架構，Vanilla JS + Canvas + Web Audio API
+ */
+
+// ==========================================
+// 1. 全域變數與系統設定
+// ==========================================
+const canvas = document.getElementById('game-canvas');
+const ctx = canvas.getContext('2d', { alpha: false }); // 優化效能
+
+let dpr = window.devicePixelRatio || 1;
+let width, height;
+let logicW, logicH;
+
+// DOM 元素
+const hudScore = document.getElementById('hud-score');
+const hudHighScore = document.getElementById('hud-highscore');
+const hudLevel = document.getElementById('hud-level');
+const hudLives = document.getElementById('hud-lives');
+const btnBgm = document.getElementById('btn-bgm');
+const btnSfx = document.getElementById('btn-sfx');
+const modalStart = document.getElementById('modal-start');
+const modalEnd = document.getElementById('modal-end');
+const endTitle = document.getElementById('end-title');
+const endScore = document.getElementById('end-score');
+const endHighScore = document.getElementById('end-highscore');
+const btnStart = document.getElementById('btn-start');
+const btnRestart = document.getElementById('btn-restart');
+
+// 遊戲狀態
+let gameState = 'START'; // START, PLAYING, GAMEOVER, LEVEL_TRANSITION
+let score = 0;
+let highScore = parseInt(localStorage.getItem('breakout_highscore')) || 0;
+hudHighScore.innerText = highScore;
+let level = 1;
+let lives = 3;
+let lastTime = 0;
+let animationId;
+let shakeTime = 0;
+let game = null;
+
+// 設定
+let settings = {
+    bgm: localStorage.getItem('breakout_bgm') !== 'false',
+    sfx: localStorage.getItem('breakout_sfx') !== 'false'
+};
+updateAudioButtons();
+
+// ==========================================
+// 2. 音效引擎 (Web Audio API)
+// ==========================================
+const audio = {
+    ctx: null,
+    masterGain: null,
+    bgmOsc: null,
+    bgmGain: null,
+    bgmInterval: null,
+    bgmStep: 0,
+    initialized: false,
+
+    init() {
+        if (this.initialized) return;
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        this.ctx = new AudioContext();
+        
+        this.masterGain = this.ctx.createGain();
+        this.masterGain.gain.value = 0.6;
+        this.masterGain.connect(this.ctx.destination);
+        
+        this.initialized = true;
+        
+        if (this.ctx.state === 'suspended') {
+            this.ctx.resume();
+        }
+        
+        if (settings.bgm) this.playBGM();
+    },
+
+    resumeContext() {
+        if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume();
+        }
+    },
+
+    playTone(freq, type, duration, vol = 1) {
+        if (!settings.sfx || !this.initialized) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+        
+        gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+        
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+        
+        osc.start();
+        osc.stop(this.ctx.currentTime + duration);
+    },
+
+    playNoise(duration, vol = 1) {
+        if (!settings.sfx || !this.initialized) return;
+        const bufferSize = this.ctx.sampleRate * duration;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+        }
+        
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+        
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+        
+        noise.connect(gain);
+        gain.connect(this.masterGain);
+        
+        noise.start();
+    },
+
+    sfx: {
+        hitPaddle: () => audio.playTone(400, 'triangle', 0.1, 0.8),
+        hitWall: () => audio.playTone(600, 'sine', 0.05, 0.5),
+        breakNormal: () => { audio.playTone(800, 'square', 0.1, 0.5); audio.playNoise(0.1, 0.3); },
+        breakTough: () => audio.playTone(300, 'sawtooth', 0.1, 0.8),
+        explode: () => { audio.playNoise(0.5, 1.5); audio.playTone(100, 'sawtooth', 0.5, 1); },
+        powerup: () => { audio.playTone(600, 'sine', 0.1, 0.5); setTimeout(()=>audio.playTone(800, 'sine', 0.2, 0.5), 100); },
+        loseLife: () => audio.playTone(150, 'sawtooth', 0.5, 1),
+        winLevel: () => { audio.playTone(400, 'sine', 0.2); setTimeout(()=>audio.playTone(600, 'sine', 0.2), 200); setTimeout(()=>audio.playTone(800, 'sine', 0.4), 400); }
+    },
+
+    playBGM() {
+        if (!this.initialized || !settings.bgm) return;
+        this.stopBGM();
+        
+        // 賽博龐克風格 8-bit Bassline
+        const bassNotes = [65.41, 65.41, 77.78, 65.41, 98.00, 77.78, 65.41, 49.00]; // C2, C2, D#2, C2, G2, D#2, C2, G1
+        this.bgmStep = 0;
+        
+        this.bgmInterval = setInterval(() => {
+            if (!settings.bgm) { this.stopBGM(); return; }
+            const freq = bassNotes[this.bgmStep % bassNotes.length];
+            
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+            
+            // 濾波器製造 Synthwave 感
+            const filter = this.ctx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(200, this.ctx.currentTime);
+            filter.frequency.linearRampToValueAtTime(800, this.ctx.currentTime + 0.1);
+            filter.frequency.linearRampToValueAtTime(200, this.ctx.currentTime + 0.2);
+            
+            gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
+            
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(this.masterGain);
+            
+            osc.start();
+            osc.stop(this.ctx.currentTime + 0.2);
+            
+            this.bgmStep++;
+        }, 250);
+    },
+
+    stopBGM() {
+        if (this.bgmInterval) {
+            clearInterval(this.bgmInterval);
+            this.bgmInterval = null;
+        }
+    }
+};
+
+// ==========================================
+// 3. 畫面縮放與 RWD
+// ==========================================
+function resize() {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    
+    // 設定高解析度畫布
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    
+    ctx.scale(dpr, dpr);
+    
+    // 邏輯尺寸等同於視窗尺寸
+    logicW = width;
+    logicH = height;
+
+    // 若遊戲進行中，確保擋板不超出邊界
+    if (game && game.paddle) {
+        game.paddle.y = logicH - 50;
+    }
+}
+window.addEventListener('resize', resize);
+resize();
+
+// ==========================================
+// 4. 遊戲物件定義 (Classes)
+// ==========================================
+
+class Paddle {
+    constructor() {
+        this.baseWidth = Math.min(logicW * 0.25, 150); // 自適應寬度
+        this.width = this.baseWidth;
+        this.height = 16;
+        this.x = logicW / 2 - this.width / 2;
+        this.y = logicH - 50;
+        this.color = '#ffd700'; // 航海王金/草帽黃
+        this.targetX = this.x;
+        this.wideTimer = 0;
+    }
+
+    update(dt) {
+        // 平滑跟隨目標
+        this.x += (this.targetX - this.x) * 15 * dt;
+        
+        // 限制邊界
+        if (this.x < 0) this.x = 0;
+        if (this.x + this.width > logicW) this.x = logicW - this.width;
+
+        // 狀態計時器
+        if (this.wideTimer > 0) {
+            this.wideTimer -= dt;
+            this.width = this.baseWidth * 1.5;
+            this.color = '#00ffff'; // 變寬時發藍光
+            if (this.wideTimer <= 0) {
+                this.width = this.baseWidth;
+                this.color = '#ffd700';
+            }
+        }
+    }
+
+    draw(ctx) {
+        ctx.save();
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = this.color;
+        ctx.fillStyle = this.color;
+        
+        // 繪製圓角矩形 (類似船體)
+        ctx.beginPath();
+        ctx.roundRect(this.x, this.y, this.width, this.height, 8);
+        ctx.fill();
+        
+        // 內發光細節
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowBlur = 0;
+        ctx.beginPath();
+        ctx.roundRect(this.x + 5, this.y + 2, this.width - 10, this.height - 8, 4);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+class Ball {
+    constructor(x, y) {
+        this.radius = Math.max(logicW * 0.015, 6);
+        this.x = x;
+        this.y = y;
+        this.baseSpeed = logicH * 0.6; // 基於螢幕高度的速度
+        this.speed = this.baseSpeed + (level * 20);
+        this.dx = 0;
+        this.dy = 0;
+        this.attached = true;
+        this.color = '#ffffff';
+        this.fireTimer = 0;
+        this.trail = [];
+    }
+
+    launch(paddle) {
+        this.attached = false;
+        let angle = -Math.PI / 2 + (Math.random() * 0.2 - 0.1); // 向上，帶點隨機角度
+        this.dx = Math.cos(angle) * this.speed;
+        this.dy = Math.sin(angle) * this.speed;
+    }
+
+    update(dt, paddle) {
+        if (this.attached) {
+            this.x = paddle.x + paddle.width / 2;
+            this.y = paddle.y - this.radius - 1;
+            return;
+        }
+
+        // 記錄拖尾
+        this.trail.push({x: this.x, y: this.y});
+        if (this.trail.length > 10) this.trail.shift();
+
+        // 更新狀態
+        if (this.fireTimer > 0) {
+            this.fireTimer -= dt;
+            this.color = '#ff3333'; // 武裝色/火球
+            if (this.fireTimer <= 0) this.color = '#ffffff';
+        }
+
+        // 實際速度隨等級增加
+        let currentSpeed = this.speed;
+        
+        // 移動
+        this.x += this.dx * dt;
+        this.y += this.dy * dt;
+
+        // 牆壁反彈
+        if (this.x - this.radius < 0) {
+            this.x = this.radius;
+            this.dx *= -1;
+            audio.sfx.hitWall();
+        } else if (this.x + this.radius > logicW) {
+            this.x = logicW - this.radius;
+            this.dx *= -1;
+            audio.sfx.hitWall();
+        }
+
+        if (this.y - this.radius < 0) {
+            this.y = this.radius;
+            this.dy *= -1;
+            audio.sfx.hitWall();
+        }
+    }
+
+    draw(ctx) {
+        ctx.save();
+        
+        // 畫拖尾
+        if (!this.attached) {
+            for (let i = 0; i < this.trail.length; i++) {
+                let point = this.trail[i];
+                let alpha = i / this.trail.length;
+                ctx.globalAlpha = alpha * 0.5;
+                ctx.fillStyle = this.fireTimer > 0 ? '#ff0000' : '#00ffff';
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, this.radius * alpha, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        ctx.globalAlpha = 1;
+
+        // 畫本體
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = this.fireTimer > 0 ? '#ff0000' : '#00ffff';
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.restore();
+    }
+}
+
+class Brick {
+    constructor(x, y, w, h, type) {
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+        this.type = type; // 1: normal, 2: tough, 3: bomb
+        this.active = true;
+        
+        if (type === 1) { this.hp = 1; this.score = 100; this.color = '#00ffcc'; }
+        else if (type === 2) { this.hp = 3; this.score = 250; this.color = '#33cc33'; } // 索隆綠
+        else if (type === 3) { this.hp = 1; this.score = 150; this.color = '#ff0044'; } // 魯夫紅
+        
+        this.blinkTime = 0;
+    }
+
+    draw(ctx, time) {
+        if (!this.active) return;
+        
+        ctx.save();
+        
+        if (this.type === 3) {
+            // 炸彈磚閃爍
+            let pulse = (Math.sin(time * 10) + 1) / 2;
+            ctx.shadowBlur = 10 + pulse * 10;
+            ctx.shadowColor = '#ff0000';
+            ctx.fillStyle = `rgb(255, ${Math.floor(100*pulse)}, ${Math.floor(100*pulse)})`;
+        } else {
+            ctx.shadowBlur = 5;
+            ctx.shadowColor = this.color;
+            ctx.fillStyle = this.color;
+            if (this.type === 2) {
+                // 強化磚隨 HP 變暗
+                let alpha = this.hp / 3;
+                ctx.globalAlpha = 0.5 + alpha * 0.5;
+            }
+        }
+
+        ctx.beginPath();
+        ctx.roundRect(this.x, this.y, this.w, this.h, 4);
+        ctx.fill();
+        
+        // 金屬質感邊框
+        ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // 裂痕 (針對強化磚)
+        if (this.type === 2 && this.hp < 3) {
+            ctx.strokeStyle = '#000';
+            ctx.beginPath();
+            ctx.moveTo(this.x + this.w * 0.2, this.y + this.h * 0.1);
+            ctx.lineTo(this.x + this.w * 0.5, this.y + this.h * 0.8);
+            if (this.hp === 1) {
+                ctx.moveTo(this.x + this.w * 0.8, this.y + this.h * 0.2);
+                ctx.lineTo(this.x + this.w * 0.4, this.y + this.h * 0.9);
+            }
+            ctx.stroke();
+        }
+
+        ctx.restore();
+    }
+}
+
+class PowerUp {
+    constructor(x, y, type) {
+        this.x = x;
+        this.y = y;
+        this.w = 30;
+        this.h = 15;
+        this.dy = logicH * 0.2; // 掉落速度
+        this.type = type; // 0: multi, 1: wide, 2: fire, 3: shield
+        this.active = true;
+        
+        const colors = ['#00ff00', '#0088ff', '#ff0000', '#ffff00'];
+        const labels = ['分', '寬', '火', '盾'];
+        this.color = colors[type];
+        this.label = labels[type];
+    }
+
+    update(dt) {
+        this.y += this.dy * dt;
+        if (this.y > logicH) this.active = false;
+    }
+
+    draw(ctx) {
+        if (!this.active) return;
+        ctx.save();
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = this.color;
+        ctx.fillStyle = this.color;
+        
+        // 繪製膠囊形狀 (惡魔果實意象)
+        ctx.beginPath();
+        ctx.roundRect(this.x - this.w/2, this.y - this.h/2, this.w, this.h, 10);
+        ctx.fill();
+        
+        ctx.fillStyle = '#fff';
+        ctx.font = '10px "Zen Maru Gothic"';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowBlur = 0;
+        ctx.fillText(this.label, this.x, this.y);
+        
+        ctx.restore();
+    }
+}
+
+class Particle {
+    constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        let angle = Math.random() * Math.PI * 2;
+        let speed = Math.random() * 200 + 50;
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed;
+        this.life = 1.0;
+        this.decay = Math.random() * 0.02 + 0.02;
+        this.color = color;
+        this.size = Math.random() * 4 + 2;
+    }
+    update(dt) {
+        this.x += this.vx * dt;
+        this.y += this.vy * dt;
+        this.life -= this.decay * (dt * 60); // normalization
+    }
+    draw(ctx) {
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, this.life);
+        ctx.fillStyle = this.color;
+        ctx.shadowBlur = 5;
+        ctx.shadowColor = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+// ==========================================
+// 5. 遊戲核心邏輯 (Game Manager)
+// ==========================================
+game = {
+    paddle: null,
+    balls: [],
+    bricks: [],
+    powerups: [],
+    particles: [],
+    shieldTimer: 0,
+    
+    init() {
+        this.paddle = new Paddle();
+        this.balls = [new Ball(this.paddle.x, this.paddle.y)];
+        this.powerups = [];
+        this.particles = [];
+        this.shieldTimer = 0;
+        this.buildLevel();
+    },
+
+    buildLevel() {
+        this.bricks = [];
+        // 動態計算列與行，避開頂部 HUD (y = 80開始)
+        const startY = 80;
+        const cols = Math.floor(logicW / 70);
+        const brickW = 60;
+        const brickH = 25;
+        const padding = (logicW - (cols * brickW)) / (cols + 1);
+        
+        const rows = Math.min(3 + Math.floor(level / 2), 8); // 隨等級增加行數，最多8行
+
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                let x = padding + c * (brickW + padding);
+                let y = startY + r * (brickH + 10);
+                
+                // 決定磚塊類型
+                let type = 1; 
+                let rand = Math.random();
+                if (rand < 0.15) type = 3; // 15% 炸彈
+                else if (rand < 0.3) type = 2; // 15% 強化
+
+                this.bricks.push(new Brick(x, y, brickW, brickH, type));
+            }
+        }
+    },
+
+    spawnParticles(x, y, color, count=15) {
+        for(let i=0; i<count; i++) {
+            this.particles.push(new Particle(x, y, color));
+        }
+    },
+
+    spawnPowerup(x, y) {
+        if (Math.random() < 0.2) { // 20% 掉落率
+            let type = Math.floor(Math.random() * 4);
+            this.powerups.push(new PowerUp(x, y, type));
+        }
+    },
+
+    triggerExplosion(bx, by) {
+        audio.sfx.explode();
+        shakeTime = 0.3; // 畫面震動
+        this.spawnParticles(bx, by, '#ff0000', 30);
+        
+        const radius = 100;
+        this.bricks.forEach(brick => {
+            if (brick.active) {
+                let cx = brick.x + brick.w/2;
+                let cy = brick.y + brick.h/2;
+                let dist = Math.hypot(cx - bx, cy - by);
+                if (dist < radius) {
+                    brick.active = false;
+                    this.spawnParticles(cx, cy, brick.color, 10);
+                    addScore(brick.score);
+                    this.spawnPowerup(cx, cy);
+                }
+            }
+        });
+    },
+
+    handleCollisions() {
+        for (let i = this.balls.length - 1; i >= 0; i--) {
+            let ball = this.balls[i];
+            if (ball.attached) continue;
+
+            // 擋板碰撞
+            if (ball.dy > 0 && ball.y + ball.radius > this.paddle.y && ball.y - ball.radius < this.paddle.y + this.paddle.height) {
+                if (ball.x + ball.radius > this.paddle.x && ball.x - ball.radius < this.paddle.x + this.paddle.width) {
+                    // 反彈邏輯：依據擊中位置計算反彈角度 (打磚塊經典機制)
+                    let hitPoint = ball.x - (this.paddle.x + this.paddle.width / 2);
+                    let normalizedHit = hitPoint / (this.paddle.width / 2); // -1 到 1
+                    
+                    // 限制最大反彈角度 (例如 60 度)
+                    let bounceAngle = normalizedHit * (Math.PI / 3); 
+                    
+                    // 保持速度，改變方向
+                    let speed = Math.hypot(ball.dx, ball.dy);
+                    ball.dx = speed * Math.sin(bounceAngle);
+                    ball.dy = -speed * Math.cos(bounceAngle);
+                    
+                    ball.y = this.paddle.y - ball.radius; // 防卡住
+                    audio.sfx.hitPaddle();
+                }
+            }
+
+            // 底部碰撞
+            if (ball.y - ball.radius > logicH) {
+                if (this.shieldTimer > 0) {
+                    ball.dy *= -1;
+                    ball.y = logicH - ball.radius - 5;
+                    this.shieldTimer = 0; // 消耗護盾
+                    audio.sfx.hitWall();
+                    this.spawnParticles(ball.x, logicH, '#ffff00', 20);
+                } else {
+                    this.balls.splice(i, 1);
+                    if (this.balls.length === 0) {
+                        loseLife();
+                    }
+                }
+                continue;
+            }
+
+            // 磚塊碰撞 (AABB vs Circle 簡化版)
+            let ballRow = Math.floor(ball.y / 35); // 粗略過濾優化
+            for (let brick of this.bricks) {
+                if (!brick.active) continue;
+                
+                // 邊界檢查
+                let testX = ball.x;
+                let testY = ball.y;
+                
+                if (ball.x < brick.x) testX = brick.x;
+                else if (ball.x > brick.x + brick.w) testX = brick.x + brick.w;
+                
+                if (ball.y < brick.y) testY = brick.y;
+                else if (ball.y > brick.y + brick.h) testY = brick.y + brick.h;
+                
+                let distX = ball.x - testX;
+                let distY = ball.y - testY;
+                let distance = Math.hypot(distX, distY);
+                
+                if (distance <= ball.radius) {
+                    // 命中!
+                    let broken = false;
+                    
+                    if (ball.fireTimer > 0) {
+                        brick.active = false; // 火球貫穿
+                        broken = true;
+                    } else {
+                        brick.hp--;
+                        if (brick.hp <= 0) {
+                            brick.active = false;
+                            broken = true;
+                        }
+                        
+                        // 計算反彈法線
+                        if (!broken || ball.fireTimer <= 0) {
+                            // 判斷撞擊面
+                            let overlapLeft = ball.x + ball.radius - brick.x;
+                            let overlapRight = brick.x + brick.w - (ball.x - ball.radius);
+                            let overlapTop = ball.y + ball.radius - brick.y;
+                            let overlapBottom = brick.y + brick.h - (ball.y - ball.radius);
+                            
+                            let minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+                            
+                            if (minOverlap === overlapTop || minOverlap === overlapBottom) {
+                                ball.dy *= -1;
+                            } else {
+                                ball.dx *= -1;
+                            }
+                        }
+                    }
+
+                    if (broken) {
+                        addScore(brick.score);
+                        this.spawnParticles(brick.x + brick.w/2, brick.y + brick.h/2, brick.color);
+                        this.spawnPowerup(brick.x + brick.w/2, brick.y + brick.h/2);
+                        
+                        if (brick.type === 3) {
+                            this.triggerExplosion(brick.x + brick.w/2, brick.y + brick.h/2);
+                        } else {
+                            audio.sfx.breakNormal();
+                        }
+                    } else {
+                        audio.sfx.breakTough();
+                    }
+                    
+                    break; // 每次 frame 只處理一顆磚塊碰撞避免黏球
+                }
+            }
+        }
+
+        // 寶物與擋板碰撞
+        for (let i = this.powerups.length - 1; i >= 0; i--) {
+            let p = this.powerups[i];
+            if (!p.active) continue;
+            
+            if (p.y + p.h/2 > this.paddle.y && p.y - p.h/2 < this.paddle.y + this.paddle.height &&
+                p.x + p.w/2 > this.paddle.x && p.x - p.w/2 < this.paddle.x + this.paddle.width) {
+                
+                p.active = false;
+                audio.sfx.powerup();
+                addScore(50);
+                
+                // 套用效果
+                switch(p.type) {
+                    case 0: // Multi
+                        if (this.balls.length > 0) {
+                            let source = this.balls[0];
+                            let b1 = new Ball(source.x, source.y); b1.attached=false; b1.dx = source.dx * 0.8 - 50; b1.dy = source.dy; b1.fireTimer = source.fireTimer;
+                            let b2 = new Ball(source.x, source.y); b2.attached=false; b2.dx = source.dx * 0.8 + 50; b2.dy = source.dy; b2.fireTimer = source.fireTimer;
+                            this.balls.push(b1, b2);
+                        }
+                        break;
+                    case 1: // Wide
+                        this.paddle.wideTimer = 10;
+                        break;
+                    case 2: // Fire
+                        this.balls.forEach(b => b.fireTimer = 8);
+                        break;
+                    case 3: // Shield
+                        this.shieldTimer = 15;
+                        break;
+                }
+            }
+        }
+    },
+
+    update(dt) {
+        if (gameState !== 'PLAYING') return;
+
+        this.paddle.update(dt);
+        this.balls.forEach(b => b.update(dt, this.paddle));
+        this.powerups.forEach(p => p.update(dt));
+        this.particles.forEach(p => p.update(dt));
+
+        // 清理無效物件
+        this.powerups = this.powerups.filter(p => p.active);
+        this.particles = this.particles.filter(p => p.life > 0);
+
+        if (this.shieldTimer > 0) {
+            this.shieldTimer -= dt;
+        }
+
+        this.handleCollisions();
+
+        // 檢查過關
+        let activeBricks = this.bricks.filter(b => b.active);
+        if (activeBricks.length === 0) {
+            levelComplete();
+        }
+    },
+
+    draw(ctx, time) {
+        // 背景特效 (賽博網格與移動)
+        ctx.fillStyle = 'rgba(9, 13, 22, 0.5)'; // 拖尾清除法
+        ctx.fillRect(0, 0, logicW, logicH);
+        
+        ctx.save();
+        // 畫面震動
+        if (shakeTime > 0) {
+            let dx = (Math.random() - 0.5) * 10;
+            let dy = (Math.random() - 0.5) * 10;
+            ctx.translate(dx, dy);
+        }
+
+        // 繪製背景網格
+        ctx.strokeStyle = 'rgba(0, 255, 255, 0.05)';
+        ctx.lineWidth = 1;
+        let offset = (time * 50) % 50;
+        ctx.beginPath();
+        for(let i=0; i<logicW; i+=50) { ctx.moveTo(i, 0); ctx.lineTo(i, logicH); }
+        for(let j=offset; j<logicH; j+=50) { ctx.moveTo(0, j); ctx.lineTo(logicW, j); }
+        ctx.stroke();
+
+        this.bricks.forEach(b => b.draw(ctx, time));
+        this.powerups.forEach(p => p.draw(ctx));
+        this.particles.forEach(p => p.draw(ctx));
+        this.paddle.draw(ctx);
+        this.balls.forEach(b => b.draw(ctx));
+
+        // 繪製護盾
+        if (this.shieldTimer > 0) {
+            ctx.fillStyle = 'rgba(255, 255, 0, 0.2)';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#ffff00';
+            ctx.fillRect(0, logicH - 10, logicW, 10);
+            ctx.shadowBlur = 0;
+        }
+
+        ctx.restore();
+    }
+};
+
+// ==========================================
+// 6. 遊戲流程控制
+// ==========================================
+
+function updateHUD() {
+    hudScore.innerText = score;
+    hudLevel.innerText = level;
+    let hearts = '';
+    for(let i=0; i<lives; i++) hearts += '❤️';
+    hudLives.innerText = hearts;
+}
+
+function addScore(pts) {
+    score += pts;
+    if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('breakout_highscore', highScore);
+        hudHighScore.innerText = highScore;
+    }
+    updateHUD();
+}
+
+function loseLife() {
+    lives--;
+    audio.sfx.loseLife();
+    updateHUD();
+    
+    if (lives <= 0) {
+        gameOver();
+    } else {
+        // 重置彈珠狀態
+        game.paddle.wideTimer = 0;
+        game.paddle.width = game.paddle.baseWidth;
+        game.balls = [new Ball(game.paddle.x, game.paddle.y)];
+        game.shieldTimer = 0;
+    }
+}
+
+function startGame() {
+    audio.init();
+    audio.resumeContext();
+    
+    score = 0;
+    level = 1;
+    lives = 3;
+    updateHUD();
+    
+    modalStart.classList.replace('ui-visible', 'ui-hidden');
+    modalEnd.classList.replace('ui-visible', 'ui-hidden');
+    
+    game.init();
+    gameState = 'PLAYING';
+    
+    if (!animationId) {
+        lastTime = performance.now();
+        loop(lastTime);
+    }
+}
+
+function gameOver() {
+    gameState = 'GAMEOVER';
+    audio.stopBGM();
+    
+    endTitle.innerText = "GAME OVER";
+    endTitle.className = "text-4xl font-black mb-4 text-neon-red";
+    endScore.innerText = score;
+    endHighScore.innerText = highScore;
+    
+    setTimeout(() => {
+        modalEnd.classList.replace('ui-hidden', 'ui-visible');
+    }, 500);
+}
+
+function levelComplete() {
+    gameState = 'LEVEL_TRANSITION';
+    audio.sfx.winLevel();
+    
+    setTimeout(() => {
+        level++;
+        updateHUD();
+        game.buildLevel();
+        game.paddle.wideTimer = 0;
+        game.paddle.width = game.paddle.baseWidth;
+        game.balls = [new Ball(game.paddle.x, game.paddle.y)];
+        gameState = 'PLAYING';
+    }, 2000);
+}
+
+// 主迴圈
+function loop(timestamp) {
+    let dt = (timestamp - lastTime) / 1000;
+    // 限制最大 dt 防止跳轉過大
+    if (dt > 0.1) dt = 0.1; 
+    lastTime = timestamp;
+
+    let timeSec = timestamp / 1000;
+
+    if (shakeTime > 0) shakeTime -= dt;
+
+    if (gameState === 'PLAYING') {
+        game.update(dt);
+    }
+    
+    // 就算暫停或轉場也繪製背景
+    game.draw(ctx, timeSec);
+    
+    // 轉場提示文字
+    if (gameState === 'LEVEL_TRANSITION') {
+        ctx.save();
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.fillRect(0,0,logicW,logicH);
+        ctx.fillStyle = '#0ff';
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#0ff';
+        ctx.font = '40px "Zen Maru Gothic"';
+        ctx.textAlign = 'center';
+        ctx.fillText(`LEVEL ${level} CLEAR!`, logicW/2, logicH/2);
+        ctx.restore();
+    }
+
+    animationId = requestAnimationFrame(loop);
+}
+
+// ==========================================
+// 7. 輸入處理 (滑鼠/觸控/鍵盤)
+// ==========================================
+
+function handleMove(clientX) {
+    if (gameState !== 'PLAYING') return;
+    // 將滑鼠座標轉換為 canvas 內的邏輯座標
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width / dpr;
+    let x = (clientX - rect.left) * scaleX;
+    
+    // 更新目標X位置，讓擋板中心對齊鼠標
+    if (game && game.paddle) {
+        game.paddle.targetX = x - game.paddle.width / 2;
+    }
+}
+
+function handleAction() {
+    audio.resumeContext(); // 強制喚醒音效
+    if (gameState === 'PLAYING' && game.balls.length > 0) {
+        if (game.balls[0].attached) {
+            game.balls[0].launch(game.paddle);
+        }
+    }
+}
+
+// 滑鼠
+window.addEventListener('mousemove', (e) => handleMove(e.clientX));
+window.addEventListener('mousedown', handleAction);
+
+// 觸控
+window.addEventListener('touchmove', (e) => {
+    e.preventDefault(); // 防止下拉更新
+    handleMove(e.touches[0].clientX);
+}, { passive: false });
+window.addEventListener('touchstart', (e) => {
+    audio.resumeContext();
+    if(gameState === 'PLAYING') handleAction();
+}, { passive: false });
+
+// 鍵盤備用
+const keys = { a: false, d: false, ArrowLeft: false, ArrowRight: false };
+window.addEventListener('keydown', (e) => {
+    if (keys.hasOwnProperty(e.key)) keys[e.key] = true;
+    if (e.code === 'Space') {
+        e.preventDefault();
+        handleAction();
+    }
+});
+window.addEventListener('keyup', (e) => {
+    if (keys.hasOwnProperty(e.key)) keys[e.key] = false;
+});
+
+// 處理鍵盤移動邏輯 (放在獨立的 setInterval 或 update 內)
+setInterval(() => {
+    if (gameState === 'PLAYING' && game.paddle) {
+        const speed = 10;
+        if (keys.a || keys.ArrowLeft) game.paddle.targetX -= speed;
+        if (keys.d || keys.ArrowRight) game.paddle.targetX += speed;
+    }
+}, 16);
+
+
+// ==========================================
+// 8. UI 按鈕綁定與初始化
+// ==========================================
+
+function updateAudioButtons() {
+    btnBgm.innerText = settings.bgm ? '🎵 ON' : '🎵 OFF';
+    btnBgm.className = settings.bgm ? 'p-1 sm:p-2 rounded bg-cyan-600 hover:bg-cyan-500 transition text-white' : 'p-1 sm:p-2 rounded bg-white/10 hover:bg-white/20 transition text-gray-400';
+    
+    btnSfx.innerText = settings.sfx ? '🔊 ON' : '🔊 OFF';
+    btnSfx.className = settings.sfx ? 'p-1 sm:p-2 rounded bg-cyan-600 hover:bg-cyan-500 transition text-white' : 'p-1 sm:p-2 rounded bg-white/10 hover:bg-white/20 transition text-gray-400';
+}
+
+btnBgm.addEventListener('click', (e) => {
+    e.stopPropagation();
+    audio.init(); // 確保已初始化
+    settings.bgm = !settings.bgm;
+    localStorage.setItem('breakout_bgm', settings.bgm);
+    updateAudioButtons();
+    if (settings.bgm && gameState === 'PLAYING') audio.playBGM();
+    else audio.stopBGM();
+});
+
+btnSfx.addEventListener('click', (e) => {
+    e.stopPropagation();
+    audio.init();
+    settings.sfx = !settings.sfx;
+    localStorage.setItem('breakout_sfx', settings.sfx);
+    updateAudioButtons();
+});
+
+btnStart.addEventListener('click', startGame);
+btnRestart.addEventListener('click', startGame);
+
+// 全域解鎖 AudioContext
+document.body.addEventListener('click', () => { if(audio.ctx) audio.ctx.resume(); }, {once:true});
+document.body.addEventListener('touchstart', () => { if(audio.ctx) audio.ctx.resume(); }, {once:true});
+
+// 初始化畫面 (繪製靜態背景)
+ctx.fillStyle = '#090D16';
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+</script>
+</body>
+</html>

@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>招財喵吉發票對獎機 - 統一發票開運對獎</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Zen Maru Gothic & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Canvas Confetti for Celebration -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- html5-qrcode for QR code scanning -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            maru: ['"Zen Maru Gothic"', 'sans-serif'],
+          },
+          colors: {
+            cream: '#FFFDF9',
+            brand: {
+              yellow: '#FFD23F',
+              gold: '#F4A261',
+              red: '#E63946',
+              lightRed: '#FFEDED',
+              pink: '#FFAAA6',
+              mint: '#48CAE4',
+              brown: '#3D2B1F',
+              catGold: '#FFB703'
+            }
+          },
+          keyframes: {
+            bounceGentle: {
+              '0%, 100%': { transform: 'translateY(-5%)' },
+              '50%': { transform: 'translateY(0)' },
+            },
+            catPawWave: {
+              '0%, 100%': { transform: 'rotate(0deg)' },
+              '50%': { transform: 'rotate(-20deg)' },
+            },
+            wiggle: {
+              '0%, 100%': { transform: 'rotate(-3deg)' },
+              '50%': { transform: 'rotate(3deg)' },
+            }
+          },
+          animation: {
+            'bounce-gentle': 'bounceGentle 2s infinite ease-in-out',
+            'paw-wave': 'catPawWave 0.8s infinite ease-in-out',
+            'wiggle': 'wiggle 0.5s infinite ease-in-out',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      background-color: #FFF8F0;
+      background-image: radial-gradient(#FCE3D2 1.8px, transparent 1.8px);
+      background-size: 24px 24px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .custom-shadow {
+      box-shadow: 0 8px 0px #3D2B1F;
+    }
+    .btn-press {
+      transition: all 0.1s ease;
+      box-shadow: 0 5px 0px #3D2B1F;
+    }
+    .btn-press:active {
+      transform: translateY(4px);
+      box-shadow: 0 1px 0px #3D2B1F;
+    }
+    .tab-active {
+      background-color: #FFD23F !important;
+      color: #3D2B1F !important;
+      border-color: #3D2B1F !important;
+      font-weight: 900;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="text-brand-brown min-h-screen flex flex-col justify-between selection:bg-brand-yellow selection:text-brand-brown">
+
+  <!-- 頂部導覽列：幸運招財貓風格 -->
+  <header class="w-full bg-white border-b-4 border-brand-brown py-3 px-4 sticky top-0 z-40">
+    <div class="max-w-md mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-2.5">
+        <span class="text-3xl inline-block origin-bottom animate-paw-wave select-none">🐱</span>
+        <div>
+          <h1 class="text-xl font-black tracking-wide text-brand-brown flex items-center gap-1">
+            招財喵吉 <span class="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full border border-brand-brown font-black shadow-sm">開運對獎</span>
+          </h1>
+          <p class="text-[11px] text-gray-500 font-bold">喵～每張發票都有千萬希望！✨</p>
+        </div>
+      </div>
+      <button id="viewPrizeListBtn" class="flex items-center gap-1.5 px-3 py-1.5 bg-yellow-100 hover:bg-brand-yellow border-2 border-brand-brown rounded-full text-xs font-bold transition btn-press">
+        <span>📜</span>
+        <span>完整獎單</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 主內容容器 -->
+  <main class="max-w-md w-full mx-auto p-4 flex-1 flex flex-col gap-3.5">
+
+    <!-- 期別切換卡片 -->
+    <div class="bg-white rounded-3xl p-3.5 border-4 border-brand-brown custom-shadow flex items-center justify-between">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-10 h-10 rounded-2xl bg-amber-100 border-2 border-brand-brown flex items-center justify-center text-xl shadow-inner">
+          🪙
+        </div>
+        <div>
+          <div class="text-[11px] text-gray-500 font-bold">對獎期別（可切換）</div>
+          <select id="periodSelect" class="font-black text-sm md:text-base text-brand-brown bg-transparent focus:outline-none cursor-pointer">
+            <!-- 動態生成期別選項 -->
+          </select>
+        </div>
+      </div>
+      <div class="text-right">
+        <span id="periodBadge" class="inline-block text-[11px] bg-red-100 text-red-600 px-2.5 py-0.5 rounded-full border border-red-300 font-black">
+          最新開獎
+        </span>
+      </div>
+    </div>
+
+    <!-- 4 大模式切換頁籤（包含新增的 👀 眼睛對獎） -->
+    <div class="grid grid-cols-4 gap-1 bg-amber-200/50 p-1.5 rounded-2xl border-2 border-brand-brown text-center">
+      <button id="tabEyesBtn" class="tab-btn py-2 text-xs font-black rounded-xl transition border-2 border-transparent tab-active flex flex-col sm:flex-row items-center justify-center gap-1">
+        <span>👀</span> <span>眼睛對獎</span>
+      </button>
+      <button id="tabQuickBtn" class="tab-btn py-2 text-xs font-black rounded-xl transition border-2 border-transparent text-gray-700 hover:bg-white/60 flex flex-col sm:flex-row items-center justify-center gap-1">
+        <i class="fa-solid fa-bolt text-amber-600"></i> <span>末三碼</span>
+      </button>
+      <button id="tabFullBtn" class="tab-btn py-2 text-xs font-black rounded-xl transition border-2 border-transparent text-gray-700 hover:bg-white/60 flex flex-col sm:flex-row items-center justify-center gap-1">
+        <i class="fa-solid fa-keyboard text-blue-600"></i> <span>完整8碼</span>
+      </button>
+      <button id="tabScanBtn" class="tab-btn py-2 text-xs font-black rounded-xl transition border-2 border-transparent text-gray-700 hover:bg-white/60 flex flex-col sm:flex-row items-center justify-center gap-1">
+        <i class="fa-solid fa-qrcode text-emerald-600"></i> <span>掃碼對獎</span>
+      </button>
+    </div>
+
+    <!-- 模式 0：【全新】👀 眼睛直覺對獎看板 (免手打，直覺眼球比對) -->
+    <div id="eyesCheckSection" class="bg-white rounded-3xl p-4 md:p-5 border-4 border-brand-brown custom-shadow space-y-4">
+      <div class="flex items-center justify-between pb-2 border-b-2 border-amber-100">
+        <div>
+          <div class="flex items-center gap-1 text-xs font-black text-amber-700">
+            <span>🐾 招財貓大看板</span>
+            <span class="bg-red-500 text-white text-[10px] px-2 py-0.2 rounded-full font-bold">免打字</span>
+          </div>
+          <h2 class="text-lg font-black text-brand-brown">眼睛直接對獎區</h2>
+        </div>
+        <span class="text-3xl animate-bounce-gentle">🐱💰</span>
+      </div>
+
+      <!-- 末三碼速查特區 (最常用，六獎200元以上) -->
+      <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-3.5 border-3 border-brand-brown shadow-sm">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-black text-amber-900 flex items-center gap-1">
+            <span class="text-sm">🎯</span> 發票末三碼只要對中任一組即中獎！
+          </span>
+          <span class="text-[10px] bg-amber-200 text-amber-900 font-extrabold px-2 py-0.5 rounded-full">200元起跳</span>
+        </div>
+        <div id="quickEyesNumbers" class="grid grid-cols-3 gap-2 text-center">
+          <!-- 動態注入末三碼數字塊 -->
+        </div>
+        <p class="text-[11px] text-gray-500 mt-2 font-medium text-center">
+          👆 先拿發票看最後三位數，有在上面就至少中 200 元！再往左對前幾碼～
+        </p>
+      </div>
+
+      <!-- 千萬特別獎 & 特獎大字看板 -->
+      <div class="grid grid-cols-1 gap-2.5">
+        <div class="bg-red-50 rounded-2xl p-3 border-2 border-red-300 flex items-center justify-between">
+          <div>
+            <span class="text-[11px] font-black text-red-600 flex items-center gap-1">
+              <i class="fa-solid fa-crown text-amber-500"></i> 特別獎 1,000 萬元 (8碼全中)
+            </span>
+            <div id="eyesSpecialNum" class="text-2xl md:text-3xl font-black text-red-600 font-mono tracking-wider">
+              --------
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-xs font-bold text-gray-500 block">末3碼</span>
+            <span id="eyesSpecialTail" class="inline-block bg-red-600 text-white font-mono font-black text-base px-2 py-0.5 rounded-lg">---</span>
+          </div>
+        </div>
+
+        <div class="bg-orange-50 rounded-2xl p-3 border-2 border-orange-300 flex items-center justify-between">
+          <div>
+            <span class="text-[11px] font-black text-orange-700 flex items-center gap-1">
+              <i class="fa-solid fa-gem text-orange-500"></i> 特獎 200 萬元 (8碼全中)
+            </span>
+            <div id="eyesGrandNum" class="text-2xl md:text-3xl font-black text-orange-600 font-mono tracking-wider">
+              --------
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-xs font-bold text-gray-500 block">末3碼</span>
+            <span id="eyesGrandTail" class="inline-block bg-orange-500 text-white font-mono font-black text-base px-2 py-0.5 rounded-lg">---</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 招財貓小叮嚀 -->
+      <div class="bg-amber-100/60 rounded-2xl p-2.5 border border-amber-300 flex items-center gap-2 text-xs text-brand-brown font-bold">
+        <span class="text-xl">🐾</span>
+        <span>眼睛核對到末三碼有中？可點上方切換到「完整8碼」或「掃描」精確計算金額！</span>
+      </div>
+    </div>
+
+    <!-- 模式 1：末三碼快速核對 (按鍵式) -->
+    <div id="quickCheckSection" class="hidden bg-white rounded-3xl p-5 border-4 border-brand-brown custom-shadow space-y-4">
+      <div class="text-center">
+        <span class="inline-block px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-bold rounded-full border border-yellow-300 mb-1">
+          ⚡ 快速篩選．只要輸入發票最後 3 碼
+        </span>
+        <h2 class="text-lg font-black text-brand-brown">輸入末 3 碼</h2>
+        <p class="text-xs text-gray-500 font-medium">中了末三碼立刻進行全號複對！</p>
+      </div>
+
+      <!-- 末三碼輸入框展示 -->
+      <div class="flex justify-center items-center gap-3 my-2">
+        <div id="digit1" class="w-14 h-16 rounded-2xl border-4 border-brand-brown flex items-center justify-center text-3xl font-black bg-amber-50"></div>
+        <div id="digit2" class="w-14 h-16 rounded-2xl border-4 border-brand-brown flex items-center justify-center text-3xl font-black bg-amber-50"></div>
+        <div id="digit3" class="w-14 h-16 rounded-2xl border-4 border-brand-brown flex items-center justify-center text-3xl font-black bg-amber-50"></div>
+      </div>
+
+      <!-- 數字鍵盤 -->
+      <div class="grid grid-cols-3 gap-2 pt-1">
+        <button class="keypad-btn h-12 rounded-2xl bg-amber-50 hover:bg-amber-100 border-2 border-brand-brown text-xl font-black btn-press" data-val="1">1</button>
+        <button class="keypad-btn h-12 rounded-2xl bg-amber-50 hover:bg-amber-100 border-2 border-brand-brown text-xl font-black btn-press" data-val="2">2</button>
+        <button class="keypad-btn h-12 rounded-2xl bg-amber-50 hover:bg-amber-100 border-2 border-brand-brown text-xl font-black btn-press" data-val="3">3</button>
+        <button class="keypad-btn h-12 rounded-2xl bg-amber-50 hover:bg-amber-100 border-2 border-brand-brown text-xl font-black btn-press" data-val="4">4</button>
+        <button class="keypad-btn h-12 rounded-2xl bg-amber-50 hover:bg-amber-100 border-2 border-brand-brown text-xl font-black btn-press" data-val="5">5</button>
+        <button class="keypad-btn h-12 rounded-2xl bg-amber-50 hover:bg-amber-100 border-2 border-brand-brown text-xl font-black btn-press" data-val="6">6</button>
+        <button class="keypad-btn h-12 rounded-2xl bg-amber-50 hover:bg-amber-100 border-2 border-brand-brown text-xl font-black btn-press" data-val="7">7</button>
+        <button class="keypad-btn h-12 rounded-2xl bg-amber-50 hover:bg-amber-100 border-2 border-brand-brown text-xl font-black btn-press" data-val="8">8</button>
+        <button class="keypad-btn h-12 rounded-2xl bg-amber-50 hover:bg-amber-100 border-2 border-brand-brown text-xl font-black btn-press" data-val="9">9</button>
+        <button id="quickClearBtn" class="h-12 rounded-2xl bg-gray-100 hover:bg-gray-200 border-2 border-brand-brown text-sm font-bold text-gray-700 btn-press">清空</button>
+        <button class="keypad-btn h-12 rounded-2xl bg-amber-50 hover:bg-amber-100 border-2 border-brand-brown text-xl font-black btn-press" data-val="0">0</button>
+        <button id="quickBackBtn" class="h-12 rounded-2xl bg-rose-100 hover:bg-rose-200 border-2 border-brand-brown text-lg text-rose-700 btn-press">
+          <i class="fa-solid fa-delete-left"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- 模式 2：完整 8 碼輸入 -->
+    <div id="fullCheckSection" class="hidden bg-white rounded-3xl p-5 border-4 border-brand-brown custom-shadow space-y-4">
+      <div class="text-center">
+        <span class="inline-block px-3 py-1 bg-purple-100 text-purple-800 text-xs font-bold rounded-full border border-purple-300 mb-1">
+          🎯 完整核對．精準算出所有獎項
+        </span>
+        <h2 class="text-lg font-black text-brand-brown">輸入完整 8 碼發票號碼</h2>
+        <p class="text-xs text-gray-500 font-medium">連同千萬特別獎、特獎一次比對</p>
+      </div>
+
+      <div class="space-y-3">
+        <div class="relative">
+          <input type="text" id="fullInvoiceInput" maxlength="8" inputmode="numeric" placeholder="請輸入 8 位數字"
+            class="w-full text-center text-3xl font-black tracking-widest py-3.5 px-4 bg-amber-50 border-4 border-brand-brown rounded-2xl focus:outline-none focus:ring-4 focus:ring-brand-yellow placeholder-gray-300">
+        </div>
+        <div class="flex gap-2">
+          <button id="fullResetBtn" class="w-1/3 py-3 rounded-2xl bg-gray-100 border-2 border-brand-brown font-bold text-gray-600 btn-press">
+            清除
+          </button>
+          <button id="fullSubmitBtn" class="w-2/3 py-3 rounded-2xl bg-brand-yellow border-2 border-brand-brown font-black text-lg btn-press flex items-center justify-center gap-2">
+            <span>開始對獎</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-amber-50/80 rounded-2xl p-3 border-2 border-dashed border-amber-300 text-xs text-gray-600 flex items-start gap-2">
+        <span class="text-base">💡</span>
+        <span>發票號碼是英文代號後面的 <strong>8 碼數字</strong>（例如：AB-<strong>12345678</strong>，請輸入 12345678 即可）。</span>
+      </div>
+    </div>
+
+    <!-- 模式 3：相機掃碼對獎 -->
+    <div id="scanSection" class="hidden bg-white rounded-3xl p-5 border-4 border-brand-brown custom-shadow space-y-4">
+      <div class="text-center">
+        <span class="inline-block px-3 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-full border border-green-300 mb-1">
+          📷 鏡頭掃描．對準電子發票 QR Code
+        </span>
+        <h2 class="text-lg font-black text-brand-brown">發票 QR Code 掃描器</h2>
+        <p class="text-xs text-gray-500 font-medium">請對準紙本發票左側的二維條碼</p>
+      </div>
+
+      <!-- 掃描視窗容器 -->
+      <div class="relative bg-gray-900 rounded-2xl overflow-hidden border-4 border-brand-brown min-h-[260px] flex items-center justify-center">
+        <div id="qr-reader" class="w-full"></div>
+        <div id="scannerOverlay" class="absolute inset-0 pointer-events-none flex flex-col items-center justify-center p-4">
+          <div class="w-48 h-48 border-4 border-brand-yellow/80 rounded-2xl relative animate-pulse flex items-center justify-center">
+            <div class="w-full h-0.5 bg-red-500 absolute top-1/2 -translate-y-1/2 shadow-lg shadow-red-500"></div>
+          </div>
+          <span class="mt-3 text-xs bg-black/70 text-white font-bold px-3 py-1 rounded-full border border-white/20">
+            請將發票左側 QR Code 置於框內
+          </span>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <div class="flex gap-2">
+          <button id="startScanBtn" class="flex-1 py-3 bg-brand-mint border-2 border-brand-brown rounded-2xl font-black text-sm btn-press flex items-center justify-center gap-2">
+            <i class="fa-solid fa-camera"></i>
+            <span>開啟相機掃描</span>
+          </button>
+          <button id="stopScanBtn" class="hidden flex-1 py-3 bg-rose-200 border-2 border-brand-brown rounded-2xl font-black text-sm btn-press flex items-center justify-center gap-2">
+            <i class="fa-solid fa-stop"></i>
+            <span>停止相機</span>
+          </button>
+        </div>
+
+        <label class="w-full py-2.5 bg-amber-50 hover:bg-amber-100 border-2 border-brand-brown rounded-2xl font-bold text-xs text-center cursor-pointer btn-press flex items-center justify-center gap-2 text-gray-700">
+          <i class="fa-solid fa-image"></i>
+          <span>或選擇發票照片/圖片進行辨識</span>
+          <input type="file" id="qrFileInput" accept="image/*" class="hidden">
+        </label>
+      </div>
+
+      <div id="scanStatusMsg" class="text-xs text-center font-bold text-gray-500 min-h-[20px]">
+        準備就緒，點擊開啟相機
+      </div>
+    </div>
+
+    <!-- 歷史對獎小紀錄 -->
+    <div class="bg-white/90 rounded-2xl p-3 border-2 border-brand-brown/40">
+      <div class="flex items-center justify-between text-xs font-bold text-gray-600 mb-2">
+        <span class="flex items-center gap-1.5"><i class="fa-solid fa-clock-rotate-left"></i> 招財喵對獎小冊 (<span id="recordCount">0</span> 張)</span>
+        <button id="clearHistoryBtn" class="text-rose-500 hover:underline">清除紀錄</button>
+      </div>
+      <div id="historyList" class="flex gap-2 overflow-x-auto pb-1 no-scrollbar text-xs">
+        <span class="text-gray-400 italic text-xs py-1">尚未對過任何發票唷～拿一張試試看手氣吧！🐾</span>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- 頁尾 -->
+  <footer class="w-full text-center py-3 text-xs text-gray-500 font-bold border-t-2 border-amber-200/60 bg-white/50">
+    <p>🐱 招財喵吉 祝您開出千萬發票．荷包滿滿！🎉</p>
+    <p class="text-[10px] text-gray-400 mt-0.5">※ 中獎發票請妥善保存正本，實際獎號以財政部主管機關公告為準</p>
+  </footer>
+
+  <!-- ======================= 彈跳視窗：對獎結果 (大大的鼓勵 / 大大的宣告未中) ======================= -->
+  <div id="resultModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
+    <div id="resultCard" class="bg-white w-full max-w-sm rounded-[36px] border-4 border-brand-brown custom-shadow p-6 text-center transform transition-all duration-300 scale-95 opacity-0 relative overflow-hidden">
+      
+      <!-- 背景裝飾彩光 (中獎時顯示) -->
+      <div id="winBgGlow" class="absolute -top-24 -left-24 w-72 h-72 bg-yellow-200 rounded-full blur-3xl opacity-0 pointer-events-none"></div>
+
+      <!-- 關閉按鈕 -->
+      <button id="closeModalBtn" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 border-2 border-brand-brown flex items-center justify-center font-black text-gray-600 transition btn-press z-10">
+        ✕
+      </button>
+
+      <!-- 動態圖示 / 招財喵吉 -->
+      <div class="relative mb-3">
+        <div id="resultEmojiContainer" class="w-24 h-24 mx-auto rounded-full border-4 border-brand-brown flex items-center justify-center text-5xl shadow-inner bg-amber-50">
+          🐱
+        </div>
+        <div id="resultBadge" class="inline-block mt-2 px-3 py-1 rounded-full text-xs font-black border-2 border-brand-brown">
+          對獎結果
+        </div>
+      </div>
+
+      <!-- 大大的主標題 -->
+      <h3 id="resultTitle" class="text-3xl md:text-4xl font-black mb-1 leading-tight tracking-tight">
+        對獎結果
+      </h3>
+
+      <!-- 發票號碼 -->
+      <div class="text-sm font-bold text-gray-500 mb-3">
+        發票號碼：<span id="resultInvoiceNo" class="font-black text-brand-brown font-mono text-base tracking-wider">--</span>
+      </div>
+
+      <!-- 核心訊息展示區 (中獎金額或大大的未中說法) -->
+      <div id="resultContentBox" class="p-4 rounded-2xl border-3 border-brand-brown mb-4 text-center">
+        <!-- 內容動態注入 -->
+      </div>
+
+      <!-- 激勵金句 / 貼心叮嚀 -->
+      <p id="resultEncouragement" class="text-xs font-bold leading-relaxed mb-5">
+        喵吉拍拍你，下一張千萬大獎一定屬於你！
+      </p>
+
+      <!-- 動作按鈕 -->
+      <div class="flex gap-2">
+        <button id="continueCheckBtn" class="w-full py-3.5 rounded-2xl bg-brand-yellow hover:bg-amber-400 border-2 border-brand-brown font-black text-base text-brand-brown btn-press flex items-center justify-center gap-2">
+          <span>繼續對下一張！🐾</span>
+          <i class="fa-solid fa-arrow-rotate-right"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================= 彈跳視窗：當期開獎號碼清單 ======================= -->
+  <div id="prizeListModal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden backdrop-blur-sm">
+    <div class="bg-white w-full max-w-md max-h-[90vh] flex flex-col rounded-3xl border-4 border-brand-brown custom-shadow overflow-hidden">
+      <div class="p-4 bg-brand-yellow border-b-4 border-brand-brown flex items-center justify-between">
+        <h3 class="font-black text-lg text-brand-brown flex items-center gap-2">
+          <span>📜</span> <span id="prizeListTitle">統一發票中獎號碼單</span>
+        </h3>
+        <button id="closePrizeListBtn" class="w-8 h-8 rounded-full bg-white border-2 border-brand-brown flex items-center justify-center font-black btn-press">✕</button>
+      </div>
+
+      <div class="p-4 overflow-y-auto space-y-3 flex-1 text-sm">
+        
+        <!-- 特別獎 -->
+        <div class="p-3 bg-red-50 rounded-2xl border-2 border-red-300">
+          <div class="flex justify-between items-center text-red-600 font-black mb-1">
+            <span class="flex items-center gap-1"><i class="fa-solid fa-crown text-yellow-500"></i> 特別獎 (1000 萬元)</span>
+            <span class="text-xs font-bold bg-red-200 px-2 py-0.5 rounded-full">同期8位數相同</span>
+          </div>
+          <div id="listSpecial" class="text-2xl font-black text-red-600 tracking-wider font-mono">--</div>
+        </div>
+
+        <!-- 特獎 -->
+        <div class="p-3 bg-orange-50 rounded-2xl border-2 border-orange-300">
+          <div class="flex justify-between items-center text-orange-600 font-black mb-1">
+            <span class="flex items-center gap-1"><i class="fa-solid fa-gem text-orange-500"></i> 特獎 (200 萬元)</span>
+            <span class="text-xs font-bold bg-orange-200 px-2 py-0.5 rounded-full">同期8位數相同</span>
+          </div>
+          <div id="listGrand" class="text-2xl font-black text-orange-600 tracking-wider font-mono">--</div>
+        </div>
+
+        <!-- 頭獎 -->
+        <div class="p-3 bg-amber-50 rounded-2xl border-2 border-amber-300">
+          <div class="flex justify-between items-center text-amber-800 font-black mb-1">
+            <span class="flex items-center gap-1"><i class="fa-solid fa-star text-amber-500"></i> 頭獎 (20 萬元)</span>
+            <span class="text-xs font-bold bg-amber-200 px-2 py-0.5 rounded-full">3 組 8 位數</span>
+          </div>
+          <div id="listFirstGroup" class="space-y-1 font-mono text-xl font-black text-amber-900 tracking-wider">
+            <!-- 頭獎號碼 -->
+          </div>
+        </div>
+
+        <!-- 各級獎金規則提示 -->
+        <div class="bg-gray-50 p-3 rounded-2xl border border-gray-200 text-xs text-gray-600 space-y-1">
+          <div class="font-bold text-gray-700 mb-1">頭獎延伸獎項：</div>
+          <div class="flex justify-between"><span>二獎：末7位數相同</span><span class="font-bold">4 萬元</span></div>
+          <div class="flex justify-between"><span>三獎：末6位數相同</span><span class="font-bold">1 萬元</span></div>
+          <div class="flex justify-between"><span>四獎：末5位數相同</span><span class="font-bold">4 千元</span></div>
+          <div class="flex justify-between"><span>五獎：末4位數相同</span><span class="font-bold">1 千元</span></div>
+          <div class="flex justify-between text-brand-brown font-extrabold"><span>六獎：末3位數相同</span><span class="text-red-500 font-black">2 百元</span></div>
+        </div>
+
+      </div>
+
+      <div class="p-3 bg-gray-100 border-t-2 border-brand-brown text-center">
+        <button id="closePrizeListBottomBtn" class="w-full py-2.5 bg-brand-yellow border-2 border-brand-brown rounded-xl font-bold btn-press">
+          我知道了！開始對獎
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 音效生成器 (Web Audio API) -->
+  <script>
+    const SoundEffects = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+      },
+      playWin() {
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98]; // C5, E5, G5, C6, E6, G6
+        notes.forEach((freq, i) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + i * 0.07);
+          gain.gain.setValueAtTime(0.25, now + i * 0.07);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.07 + 0.35);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + i * 0.07);
+          osc.stop(now + i * 0.07 + 0.36);
+        });
+      },
+      playLoss() {
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(280, now);
+        osc.frequency.exponentialRampToValueAtTime(130, now + 0.4);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.linearRampToValueAtTime(0.001, now + 0.45);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.45);
+      },
+      playClick() {
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(950, now);
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+    };
+  </script>
+
+  <!-- 統一發票資料與邏輯 -->
+  <script>
+    // 統一發票中獎資料庫（截至 2026 年 10 月最新三期：115年 07-08 月、05-06 月、03-04 月）
+    const INVOICE_DATABASE = [
+      {
+        id: "115-07-08",
+        label: "115年 07-08 月",
+        periodText: "115年 07 ~ 08 月 (兌獎期限至 116/01/05)",
+        special: "89996565",       // 特別獎 1000 萬
+        grand: "91098182",         // 特獎 200 萬
+        first: [                   // 頭獎 20 萬 (末三碼中六獎 200元)
+          "54348835",
+          "44991397",
+          "06595111"
+        ],
+        extraSixth: []             // 增開六獎
+      },
+      {
+        id: "115-05-06",
+        label: "115年 05-06 月",
+        periodText: "115年 05 ~ 06 月 (兌獎期限至 115/11/05)",
+        special: "38548029",
+        grand: "10138845",
+        first: [
+          "24121106",
+          "28589937",
+          "83663333"
+        ],
+        extraSixth: []
+      },
+      {
+        id: "115-03-04",
+        label: "115年 03-04 月",
+        periodText: "115年 03 ~ 04 月 (兌獎期限至 115/09/07)",
+        special: "19531471",
+        grand: "85941329",
+        first: [
+          "07225810",
+          "20231230",
+          "83518781"
+        ],
+        extraSixth: []
+      }
+    ];
+
+    // 招財貓大大的鼓勵金句集 (中獎時)
+    const WIN_ENCOURAGEMENTS = [
+      "🐾 喵嗚～招財貓揮爪大顯靈！財神爺專程為你敲門啦！快去吃頓大餐慶祝！",
+      "💰 喵～手氣旺到擋不住！恭喜發財，記得摸摸喵吉的肚子沾沾更多喜氣！",
+      "✨ 喵喵！你是被幸運眷顧的超級天選之子，買張大樂透可能也會中喔！",
+      "🎊 喵嗚～每一張堅持對的發票都是值得的，太替你開心了！"
+    ];
+
+    // 招財貓大大的安慰與鼓勵金句集 (沒中時)
+    const LOSS_ENCOURAGEMENTS = [
+      "🌟 喵吉拍拍你：沒中獎也是在做善事做公益！每一次索取發票都在默默造福社會！",
+      "🐾 喵嗚～好運正搭捷運塞在路上，千萬特別獎大獎留在下一張！",
+      "💪 喵吉鼓勵你：沒中千萬別氣餒，省下的每分錢都在累積下一次的招財爆發！",
+      "💖 喵吉提醒：只要發票還在手上，財富自由的希望就不會滅！下一張繼續衝！",
+      "🌱 喵嗚！這張沒中代表下一張中千萬特別獎的機率又悄悄提高了唷！"
+    ];
+
+    // 狀態變數
+    let currentPeriod = INVOICE_DATABASE[0];
+    let quickDigits = "";
+    let checkHistory = [];
+    let html5QrCodeScanner = null;
+    let isScannerRunning = false;
+
+    // DOM 元素引用
+    const periodSelect = document.getElementById('periodSelect');
+    const periodBadge = document.getElementById('periodBadge');
+    const viewPrizeListBtn = document.getElementById('viewPrizeListBtn');
+    const prizeListModal = document.getElementById('prizeListModal');
+    const closePrizeListBtn = document.getElementById('closePrizeListBtn');
+    const closePrizeListBottomBtn = document.getElementById('closePrizeListBottomBtn');
+    const prizeListTitle = document.getElementById('prizeListTitle');
+    const listSpecial = document.getElementById('listSpecial');
+    const listGrand = document.getElementById('listGrand');
+    const listFirstGroup = document.getElementById('listFirstGroup');
+
+    // 頁籤按鈕
+    const tabEyesBtn = document.getElementById('tabEyesBtn');
+    const tabQuickBtn = document.getElementById('tabQuickBtn');
+    const tabFullBtn = document.getElementById('tabFullBtn');
+    const tabScanBtn = document.getElementById('tabScanBtn');
+
+    // 區塊
+    const eyesCheckSection = document.getElementById('eyesCheckSection');
+    const quickCheckSection = document.getElementById('quickCheckSection');
+    const fullCheckSection = document.getElementById('fullCheckSection');
+    const scanSection = document.getElementById('scanSection');
+
+    // 眼睛對獎看板元素
+    const quickEyesNumbers = document.getElementById('quickEyesNumbers');
+    const eyesSpecialNum = document.getElementById('eyesSpecialNum');
+    const eyesSpecialTail = document.getElementById('eyesSpecialTail');
+    const eyesGrandNum = document.getElementById('eyesGrandNum');
+    const eyesGrandTail = document.getElementById('eyesGrandTail');
+
+    // 末三碼元件
+    const digit1 = document.getElementById('digit1');
+    const digit2 = document.getElementById('digit2');
+    const digit3 = document.getElementById('digit3');
+    const quickClearBtn = document.getElementById('quickClearBtn');
+    const quickBackBtn = document.getElementById('quickBackBtn');
+
+    // 完整 8 碼元件
+    const fullInvoiceInput = document.getElementById('fullInvoiceInput');
+    const fullSubmitBtn = document.getElementById('fullSubmitBtn');
+    const fullResetBtn = document.getElementById('fullResetBtn');
+
+    // 掃描器元件
+    const startScanBtn = document.getElementById('startScanBtn');
+    const stopScanBtn = document.getElementById('stopScanBtn');
+    const qrFileInput = document.getElementById('qrFileInput');
+    const scanStatusMsg = document.getElementById('scanStatusMsg');
+
+    // 結果彈窗元件
+    const resultModal = document.getElementById('resultModal');
+    const resultCard = document.getElementById('resultCard');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const continueCheckBtn = document.getElementById('continueCheckBtn');
+    const winBgGlow = document.getElementById('winBgGlow');
+    const resultEmojiContainer = document.getElementById('resultEmojiContainer');
+    const resultBadge = document.getElementById('resultBadge');
+    const resultTitle = document.getElementById('resultTitle');
+    const resultInvoiceNo = document.getElementById('resultInvoiceNo');
+    const resultContentBox = document.getElementById('resultContentBox');
+    const resultEncouragement = document.getElementById('resultEncouragement');
+
+    // 歷史紀錄
+    const historyList = document.getElementById('historyList');
+    const recordCount = document.getElementById('recordCount');
+    const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+
+    // 初始化頁面
+    function init() {
+      // 填充期別選項
+      periodSelect.innerHTML = INVOICE_DATABASE.map((item, idx) => `
+        <option value="${item.id}" ${idx === 0 ? 'selected' : ''}>${item.label}</option>
+      `).join('');
+
+      currentPeriod = INVOICE_DATABASE[0];
+      updatePrizeModalContent();
+      renderEyesBoard();
+      setupEventListeners();
+    }
+
+    // 更新眼睛對獎看板
+    function renderEyesBoard() {
+      // 特別獎
+      eyesSpecialNum.innerText = currentPeriod.special;
+      eyesSpecialTail.innerText = currentPeriod.special.slice(-3);
+
+      // 特獎
+      eyesGrandNum.innerText = currentPeriod.grand;
+      eyesGrandTail.innerText = currentPeriod.grand.slice(-3);
+
+      // 頭獎末三碼速查方塊
+      const headTails = currentPeriod.first.map(h => h.slice(-3));
+      quickEyesNumbers.innerHTML = headTails.map((tail, idx) => `
+        <div class="bg-white border-2 border-brand-brown rounded-xl p-2 shadow-sm flex flex-col items-center">
+          <span class="text-[10px] font-bold text-gray-400">頭獎${idx+1}末碼</span>
+          <span class="text-2xl font-black text-red-600 font-mono tracking-wider">${tail}</span>
+          <span class="text-[10px] bg-red-100 text-red-700 px-1.5 rounded-full font-bold mt-0.5">中六獎</span>
+        </div>
+      `).join('');
+    }
+
+    // 更新獎號表資訊
+    function updatePrizeModalContent() {
+      prizeListTitle.innerText = `${currentPeriod.label} 中獎號碼`;
+      listSpecial.innerText = currentPeriod.special;
+      listGrand.innerText = currentPeriod.grand;
+      listFirstGroup.innerHTML = currentPeriod.first.map((num, i) => `
+        <div class="flex items-center justify-between">
+          <span>頭獎 ${i + 1}：</span>
+          <span class="font-extrabold">${num}</span>
+        </div>
+      `).join('');
+    }
+
+    // 精確發票比對演算法 (傳入 8 碼字串)
+    function evaluateInvoice(numStr) {
+      if (!/^\d{8}$/.test(numStr)) {
+        return { valid: false, error: "號碼必須為 8 位數字" };
+      }
+
+      // 1. 比對特別獎 (1,000 萬元：8碼全同)
+      if (numStr === currentPeriod.special) {
+        return {
+          won: true,
+          prizeName: "特別獎 👑",
+          amount: "1,000 萬元",
+          amountNum: 10000000,
+          desc: "8 碼與特別獎全部相同！天選之人！太狂啦！",
+          type: "jackpot"
+        };
+      }
+
+      // 2. 比對特獎 (200 萬元：8碼全同)
+      if (numStr === currentPeriod.grand) {
+        return {
+          won: true,
+          prizeName: "特獎 💎",
+          amount: "200 萬元",
+          amountNum: 2000000,
+          desc: "8 碼與特獎完全相同！超級大富翁！",
+          type: "grand"
+        };
+      }
+
+      // 3. 比對頭獎至六獎 (以三組頭獎號碼由末碼比對)
+      const headPrizes = currentPeriod.first;
+      let highestMatch = 0; // 相符位數
+
+      for (let head of headPrizes) {
+        let matchCount = 0;
+        for (let len = 8; len >= 3; len--) {
+          const subInput = numStr.slice(-len);
+          const subHead = head.slice(-len);
+          if (subInput === subHead) {
+            matchCount = len;
+            break;
+          }
+        }
+        if (matchCount > highestMatch) {
+          highestMatch = matchCount;
+        }
+      }
+
+      // 依相符位數發放獎項
+      if (highestMatch === 8) {
+        return { won: true, prizeName: "頭獎 🏆", amount: "20 萬元", amountNum: 200000, desc: "與頭獎 8 碼完全吻合！太厲害了！", type: "head" };
+      } else if (highestMatch === 7) {
+        return { won: true, prizeName: "二獎 🌟", amount: "4 萬元", amountNum: 40000, desc: "末 7 位數與頭獎相同！手氣超強！", type: "high" };
+      } else if (highestMatch === 6) {
+        return { won: true, prizeName: "三獎 ⭐", amount: "1 萬元", amountNum: 10000, desc: "末 6 位數與頭獎相同！太棒啦！", type: "high" };
+      } else if (highestMatch === 5) {
+        return { won: true, prizeName: "四獎 🌸", amount: "4 千元", amountNum: 4000, desc: "末 5 位數與頭獎相同！", type: "mid" };
+      } else if (highestMatch === 4) {
+        return { won: true, prizeName: "五獎 🍀", amount: "1 千元", amountNum: 1000, desc: "末 4 位數與頭獎相同！", type: "mid" };
+      } else if (highestMatch === 3) {
+        return { won: true, prizeName: "六獎 🎈", amount: "2 百元", amountNum: 200, desc: "末 3 位數與頭獎相同！小確幸入袋！", type: "basic" };
+      }
+
+      // 4. 增開六獎比對
+      if (currentPeriod.extraSixth && currentPeriod.extraSixth.length > 0) {
+        for (let extra of currentPeriod.extraSixth) {
+          if (numStr.slice(-3) === extra) {
+            return { won: true, prizeName: "增開六獎 🎈", amount: "2 百元", amountNum: 200, desc: "末 3 位數與增開六獎相同！", type: "basic" };
+          }
+        }
+      }
+
+      // 未中獎
+      return {
+        won: false,
+        prizeName: "未中獎",
+        amount: "0 元",
+        desc: "很可惜，此張發票號碼未對中任何中獎組合。"
+      };
+    }
+
+    // 末三碼快速核對邏輯
+    function evaluateQuickThree(threeDigits) {
+      if (threeDigits.length !== 3) return null;
+
+      const special3 = currentPeriod.special.slice(-3);
+      const grand3 = currentPeriod.grand.slice(-3);
+      const head3List = currentPeriod.first.map(n => n.slice(-3));
+      const extra3List = currentPeriod.extraSixth || [];
+
+      const hitSpecial = (threeDigits === special3);
+      const hitGrand = (threeDigits === grand3);
+      const hitHead = head3List.includes(threeDigits);
+      const hitExtra = extra3List.includes(threeDigits);
+
+      if (hitHead || hitExtra) {
+        return {
+          won: true,
+          guaranteed: "至少中 200 元 (六獎)！",
+          isPossibleJackpot: false,
+          msg: "恭喜！末三碼與頭獎相符，已確定中六獎 200 元！請拿出發票核對完整前 5 碼，說不定是 20 萬頭獎喔！"
+        };
+      } else if (hitSpecial || hitGrand) {
+        return {
+          won: true,
+          guaranteed: "有機會中特別獎或特獎！",
+          isPossibleJackpot: true,
+          msg: `哇！這組末三碼與【${hitSpecial ? '特別獎(1000萬)' : '特獎(200萬)'}】末三碼相符！請立刻輸入完整 8 碼確認是否發大財！`
+        };
+      } else {
+        return {
+          won: false,
+          msg: "很可惜，末 3 碼未出現在任何中獎號碼末尾。"
+        };
+      }
+    }
+
+    // 顯示結果視窗 (大大的鼓勵 / 大大的宣告未中)
+    function showResultModal({ won, prizeName, amount, invoiceNo, desc, isQuickMode = false, quickDetail = null }) {
+      resultModal.classList.remove('hidden');
+
+      if (won) {
+        SoundEffects.playWin();
+        triggerConfetti();
+        winBgGlow.classList.remove('opacity-0');
+        winBgGlow.classList.add('opacity-40');
+      } else {
+        SoundEffects.playLoss();
+        winBgGlow.classList.add('opacity-0');
+      }
+
+      setTimeout(() => {
+        resultCard.classList.remove('scale-95', 'opacity-0');
+        resultCard.classList.add('scale-100', 'opacity-100');
+      }, 10);
+
+      resultInvoiceNo.innerText = invoiceNo || "無號碼";
+
+      if (won) {
+        // 大大的鼓勵與賀詞
+        resultEmojiContainer.innerText = "😻";
+        resultEmojiContainer.className = "w-24 h-24 mx-auto rounded-full border-4 border-brand-brown flex items-center justify-center text-5xl shadow-inner bg-yellow-300 animate-wiggle";
+        
+        resultBadge.className = "inline-block mt-2 px-4 py-1 rounded-full text-xs font-black border-2 border-brand-brown bg-red-500 text-white shadow";
+        resultBadge.innerText = "🎊 喵吉大賀！中獎啦 🎊";
+
+        resultTitle.className = "text-3xl md:text-4xl font-black mb-1 leading-tight tracking-tight text-red-600";
+        resultTitle.innerText = "太棒啦！中獎了！";
+
+        if (isQuickMode && quickDetail) {
+          resultContentBox.className = "p-4 rounded-2xl border-4 border-brand-brown mb-4 text-center bg-yellow-50";
+          resultContentBox.innerHTML = `
+            <div class="text-xs font-bold text-amber-700 uppercase tracking-wider mb-1">末三碼對中通知</div>
+            <div class="text-2xl font-black text-brand-brown mb-1">${quickDetail.guaranteed}</div>
+            <p class="text-xs font-bold text-gray-700 leading-normal">${quickDetail.msg}</p>
+          `;
+        } else {
+          resultContentBox.className = "p-4 rounded-2xl border-4 border-brand-brown mb-4 text-center bg-red-50";
+          resultContentBox.innerHTML = `
+            <div class="text-xs font-bold text-red-500 uppercase tracking-wider mb-1">${prizeName}</div>
+            <div class="text-4xl font-black text-red-600 my-1 tracking-tight">${amount}</div>
+            <p class="text-xs font-bold text-gray-700">${desc}</p>
+          `;
+        }
+
+        const randomWinMsg = WIN_ENCOURAGEMENTS[Math.floor(Math.random() * WIN_ENCOURAGEMENTS.length)];
+        resultEncouragement.className = "text-xs font-black text-amber-900 leading-relaxed mb-5 bg-amber-100 p-2.5 rounded-xl border border-amber-300";
+        resultEncouragement.innerHTML = randomWinMsg;
+
+      } else {
+        // 大大的說出未中獎 + 大大的暖心鼓勵
+        resultEmojiContainer.innerText = "😿";
+        resultEmojiContainer.className = "w-24 h-24 mx-auto rounded-full border-4 border-brand-brown flex items-center justify-center text-5xl shadow-inner bg-gray-100";
+        
+        resultBadge.className = "inline-block mt-2 px-4 py-1 rounded-full text-xs font-black border-2 border-brand-brown bg-gray-600 text-white";
+        resultBadge.innerText = "🐾 對獎完畢";
+
+        // 大大的說出未中
+        resultTitle.className = "text-2xl md:text-3xl font-black mb-1 leading-tight tracking-tight text-gray-700";
+        resultTitle.innerText = "這張沒有中獎喔！";
+
+        resultContentBox.className = "p-4 rounded-2xl border-4 border-brand-brown mb-4 text-center bg-amber-50/60";
+        resultContentBox.innerHTML = `
+          <div class="text-3xl font-black text-gray-800 mb-1">差一點點！</div>
+          <p class="text-xs font-bold text-gray-600">${desc || '發票號碼未對中任何中獎組合'}</p>
+          <div class="mt-2 text-[11px] text-gray-400 font-bold">發票核對正確無誤 ‧ 感謝您誠實納稅做公益</div>
+        `;
+
+        const randomLossMsg = LOSS_ENCOURAGEMENTS[Math.floor(Math.random() * LOSS_ENCOURAGEMENTS.length)];
+        resultEncouragement.className = "text-xs font-bold text-gray-700 leading-relaxed mb-5 bg-yellow-50 p-3 rounded-xl border-2 border-brand-brown/20";
+        resultEncouragement.innerHTML = `<span class="text-base mr-1">🐱</span> ${randomLossMsg}`;
+      }
+
+      // 加入紀錄列表
+      addHistoryRecord({
+        invoiceNo: invoiceNo || "---",
+        won: won,
+        prizeName: won ? (isQuickMode ? "末三碼中獎" : prizeName) : "未中獎",
+        amount: won ? amount : "0元"
+      });
+    }
+
+    // 關閉結果視窗
+    function closeResultModal() {
+      resultCard.classList.remove('scale-100', 'opacity-100');
+      resultCard.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        resultModal.classList.add('hidden');
+      }, 200);
+    }
+
+    // 加入歷史紀錄
+    function addHistoryRecord(item) {
+      checkHistory.unshift(item);
+      recordCount.innerText = checkHistory.length;
+
+      historyList.innerHTML = checkHistory.map(rec => `
+        <div class="flex-shrink-0 px-3 py-1.5 rounded-xl border-2 border-brand-brown ${rec.won ? 'bg-red-100 text-red-700 font-black' : 'bg-gray-100 text-gray-600 font-bold'} flex items-center gap-1.5">
+          <span>${rec.won ? '🎉' : '🍃'}</span>
+          <span>${rec.invoiceNo}</span>
+          <span class="text-[10px] px-1.5 py-0.2 rounded-md ${rec.won ? 'bg-red-500 text-white' : 'bg-gray-300 text-gray-700'}">${rec.prizeName}</span>
+        </div>
+      `).join('');
+    }
+
+    // 清空歷史紀錄
+    function clearHistory() {
+      checkHistory = [];
+      recordCount.innerText = "0";
+      historyList.innerHTML = `<span class="text-gray-400 italic text-xs py-1">尚未對過任何發票唷～拿一張試試看手氣吧！🐾</span>`;
+    }
+
+    // 彩帶特效
+    function triggerConfetti() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+        setTimeout(() => {
+          confetti({
+            particleCount: 50,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0 }
+          });
+          confetti({
+            particleCount: 50,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1 }
+          });
+        }, 250);
+      }
+    }
+
+    // 更新末三碼畫面顯示
+    function renderQuickDigits() {
+      digit1.innerText = quickDigits[0] || "";
+      digit2.innerText = quickDigits[1] || "";
+      digit3.innerText = quickDigits[2] || "";
+
+      if (quickDigits.length === 3) {
+        SoundEffects.playClick();
+        setTimeout(() => {
+          const evalResult = evaluateQuickThree(quickDigits);
+          showResultModal({
+            won: evalResult.won,
+            prizeName: evalResult.won ? "中末三碼！" : "未中獎",
+            amount: evalResult.won ? "可得 200元 起" : "0元",
+            invoiceNo: `***-**${quickDigits}`,
+            desc: evalResult.msg,
+            isQuickMode: true,
+            quickDetail: evalResult
+          });
+          quickDigits = "";
+          renderQuickDigits();
+        }, 200);
+      }
+    }
+
+    // QR Code 掃描解析
+    function handleScannedCode(decodedText) {
+      console.log("掃描 QR Code:", decodedText);
+      SoundEffects.playClick();
+
+      let invoiceNumber = null;
+      let match = decodedText.match(/[A-Z]{2}(\d{8})/);
+      
+      if (match && match[1]) {
+        invoiceNumber = match[1];
+      } else {
+        let digitsMatch = decodedText.match(/\b\d{8}\b/);
+        if (digitsMatch) {
+          invoiceNumber = digitsMatch[0];
+        }
+      }
+
+      if (invoiceNumber) {
+        scanStatusMsg.innerText = `✅ 成功辨識發票號碼：${invoiceNumber}`;
+        const evalRes = evaluateInvoice(invoiceNumber);
+        showResultModal({
+          won: evalRes.won,
+          prizeName: evalRes.prizeName,
+          amount: evalRes.amount,
+          invoiceNo: invoiceNumber,
+          desc: evalRes.desc,
+          isQuickMode: false
+        });
+      } else {
+        scanStatusMsg.innerText = `⚠️ 掃到了內容，但未找到標準發票 8 碼數字，請對準發票左側條碼。`;
+      }
+    }
+
+    // 啟動相機
+    function startCameraScanner() {
+      if (isScannerRunning) return;
+
+      scanStatusMsg.innerText = "正在請求相機權限...";
+      html5QrCodeScanner = new Html5Qrcode("qr-reader");
+
+      const config = {
+        fps: 10,
+        qrbox: { width: 220, height: 220 },
+        aspectRatio: 1.0
+      };
+
+      html5QrCodeScanner.start(
+        { facingMode: "environment" },
+        config,
+        (decodedText, decodedResult) => {
+          handleScannedCode(decodedText);
+          stopCameraScanner();
+        },
+        (errorMessage) => {}
+      ).then(() => {
+        isScannerRunning = true;
+        startScanBtn.classList.add('hidden');
+        stopScanBtn.classList.remove('hidden');
+        scanStatusMsg.innerText = "相機運作中，請對準電子發票左邊的 QR Code";
+      }).catch(err => {
+        console.error("相機啟動失敗:", err);
+        scanStatusMsg.innerText = "無法開啟相機，請檢查瀏覽器相機權限或使用相片上傳功能。";
+      });
+    }
+
+    // 關閉相機
+    function stopCameraScanner() {
+      if (html5QrCodeScanner && isScannerRunning) {
+        html5QrCodeScanner.stop().then(() => {
+          isScannerRunning = false;
+          startScanBtn.classList.remove('hidden');
+          stopScanBtn.classList.add('hidden');
+          scanStatusMsg.innerText = "相機已關閉";
+        }).catch(err => {
+          console.error("停止相機失敗:", err);
+        });
+      }
+    }
+
+    // 綁定事件監聽
+    function setupEventListeners() {
+      // 期別下拉切換
+      periodSelect.addEventListener('change', (e) => {
+        const found = INVOICE_DATABASE.find(item => item.id === e.target.value);
+        if (found) {
+          currentPeriod = found;
+          updatePrizeModalContent();
+          renderEyesBoard();
+          periodBadge.innerText = found.id === INVOICE_DATABASE[0].id ? "最新開獎" : "已開獎期別";
+          SoundEffects.playClick();
+        }
+      });
+
+      // 獎號清單開關
+      viewPrizeListBtn.addEventListener('click', () => {
+        SoundEffects.playClick();
+        prizeListModal.classList.remove('hidden');
+      });
+      closePrizeListBtn.addEventListener('click', () => {
+        prizeListModal.classList.add('hidden');
+      });
+      closePrizeListBottomBtn.addEventListener('click', () => {
+        prizeListModal.classList.add('hidden');
+      });
+
+      // 4 個頁籤切換
+      tabEyesBtn.addEventListener('click', () => setActiveTab('eyes'));
+      tabQuickBtn.addEventListener('click', () => setActiveTab('quick'));
+      tabFullBtn.addEventListener('click', () => setActiveTab('full'));
+      tabScanBtn.addEventListener('click', () => setActiveTab('scan'));
+
+      function setActiveTab(tab) {
+        SoundEffects.playClick();
+        [tabEyesBtn, tabQuickBtn, tabFullBtn, tabScanBtn].forEach(btn => {
+          btn.classList.remove('tab-active');
+          btn.classList.add('text-gray-700');
+        });
+
+        eyesCheckSection.classList.add('hidden');
+        quickCheckSection.classList.add('hidden');
+        fullCheckSection.classList.add('hidden');
+        scanSection.classList.add('hidden');
+
+        if (tab === 'eyes') {
+          tabEyesBtn.classList.add('tab-active');
+          eyesCheckSection.classList.remove('hidden');
+          stopCameraScanner();
+        } else if (tab === 'quick') {
+          tabQuickBtn.classList.add('tab-active');
+          quickCheckSection.classList.remove('hidden');
+          stopCameraScanner();
+        } else if (tab === 'full') {
+          tabFullBtn.classList.add('tab-active');
+          fullCheckSection.classList.remove('hidden');
+          fullInvoiceInput.focus();
+          stopCameraScanner();
+        } else if (tab === 'scan') {
+          tabScanBtn.classList.add('tab-active');
+          scanSection.classList.remove('hidden');
+        }
+      }
+
+      // 末三碼鍵盤
+      document.querySelectorAll('.keypad-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (quickDigits.length < 3) {
+            SoundEffects.playClick();
+            quickDigits += btn.dataset.val;
+            renderQuickDigits();
+          }
+        });
+      });
+
+      quickClearBtn.addEventListener('click', () => {
+        SoundEffects.playClick();
+        quickDigits = "";
+        renderQuickDigits();
+      });
+
+      quickBackBtn.addEventListener('click', () => {
+        SoundEffects.playClick();
+        quickDigits = quickDigits.slice(0, -1);
+        renderQuickDigits();
+      });
+
+      // 實體鍵盤
+      window.addEventListener('keydown', (e) => {
+        if (!quickCheckSection.classList.contains('hidden')) {
+          if (e.key >= '0' && e.key <= '9' && quickDigits.length < 3) {
+            quickDigits += e.key;
+            renderQuickDigits();
+          } else if (e.key === 'Backspace') {
+            quickDigits = quickDigits.slice(0, -1);
+            renderQuickDigits();
+          } else if (e.key === 'Escape') {
+            quickDigits = "";
+            renderQuickDigits();
+          }
+        }
+      });
+
+      // 完整 8 碼輸入
+      fullSubmitBtn.addEventListener('click', submitFullInvoice);
+      fullInvoiceInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') submitFullInvoice();
+      });
+      fullResetBtn.addEventListener('click', () => {
+        SoundEffects.playClick();
+        fullInvoiceInput.value = "";
+        fullInvoiceInput.focus();
+      });
+
+      function submitFullInvoice() {
+        const val = fullInvoiceInput.value.trim();
+        if (val.length !== 8 || !/^\d{8}$/.test(val)) {
+          SoundEffects.playLoss();
+          scanStatusMsg.innerText = "請輸入正確的 8 位數字發票號碼！";
+          fullInvoiceInput.classList.add('ring-4', 'ring-red-400');
+          setTimeout(() => fullInvoiceInput.classList.remove('ring-4', 'ring-red-400'), 1000);
+          return;
+        }
+
+        const evalRes = evaluateInvoice(val);
+        showResultModal({
+          won: evalRes.won,
+          prizeName: evalRes.prizeName,
+          amount: evalRes.amount,
+          invoiceNo: val,
+          desc: evalRes.desc,
+          isQuickMode: false
+        });
+      }
+
+      // 相機按鈕
+      startScanBtn.addEventListener('click', () => {
+        SoundEffects.playClick();
+        startCameraScanner();
+      });
+      stopScanBtn.addEventListener('click', () => {
+        SoundEffects.playClick();
+        stopCameraScanner();
+      });
+
+      // 檔案上傳
+      qrFileInput.addEventListener('change', (e) => {
+        if (e.target.files.length === 0) return;
+        const file = e.target.files[0];
+        scanStatusMsg.innerText = "正在分析發票照片中...";
+
+        const html5QrCode = new Html5Qrcode("qr-reader");
+        html5QrCode.scanFile(file, true)
+          .then(decodedText => {
+            handleScannedCode(decodedText);
+          })
+          .catch(err => {
+            console.error("相片辨識失敗:", err);
+            scanStatusMsg.innerText = "無法辨識圖片中的 QR Code，請確認照片清晰無反光。";
+          });
+      });
+
+      // 彈窗關閉按鈕
+      closeModalBtn.addEventListener('click', closeResultModal);
+      continueCheckBtn.addEventListener('click', () => {
+        closeResultModal();
+        if (!fullCheckSection.classList.contains('hidden')) {
+          fullInvoiceInput.value = "";
+          fullInvoiceInput.focus();
+        }
+      });
+
+      clearHistoryBtn.addEventListener('click', () => {
+        SoundEffects.playClick();
+        clearHistory();
+      });
+
+      resultModal.addEventListener('click', (e) => {
+        if (e.target === resultModal) closeResultModal();
+      });
+      prizeListModal.addEventListener('click', (e) => {
+        if (e.target === prizeListModal) prizeListModal.classList.add('hidden');
+      });
+    }
+
+    window.onload = function() {
+      init();
+    };
+  </script>
+</body>
+</html>
