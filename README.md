@@ -3,7 +3,7 @@
 > **Mobile-First Portfolio · 20 年產品開發經驗 × iPAS AI 應用規劃師**  
 > *"Technology with Empathy — 從女性身型洞察到數位產品落地，創造有溫度且精準落地的科技產品。"*
 
-本專案為 **Grace Liu 呂逸庭** 的個人前端互動網頁作品集（`MyWorks`），結合 20 年產品開發洞察與生成式 AI 輔助開發，運用 HTML5、Tailwind CSS、Canvas 2D、Web Audio API 與多項前端技術，打造 **12 件 100% RWD 手機優先適配的互動式網頁作品**，涵蓋專注計時、休閒遊戲、開運占卜、商務數位工具與個人品牌網站五大主題。
+本專案為 **Grace Liu 呂逸庭** 的個人前端互動網頁作品集（`MyWorks`），結合 20 年產品開發洞察與生成式 AI 輔助開發，運用 HTML5、Tailwind CSS、Canvas 2D、Web Audio API 與多項前端技術，打造 **13 件 100% RWD 手機優先適配的互動式網頁作品**，涵蓋專注計時、休閒遊戲、開運占卜、商務數位工具、個人品牌網站與財經投資導航六大主題。
 
 ---
 
@@ -11,12 +11,12 @@
 
 - 📱 **Mobile-First 響應式設計**：針對手機、平板與桌面瀏覽器深度優化，內建手機專屬底部導覽列與橫向滑動分類篩選。
 - 🌓 **深淺色主題切換（Dark / Light Mode）**：支援系統主題感知與 `localStorage` 偏好記憶，大地文藝配色溫潤護眼。
-- 🔍 **即時分類篩選與關鍵字搜尋**：可依五大主題分類快速切換，或搜尋作品名稱、使用到的 Web API 及應用場景。
+- 🔍 **即時分類篩選與關鍵字搜尋**：可依六大主題分類快速切換，或搜尋作品名稱、使用到的 Web API 及應用場景。
 - 🖥️ **頁內即時互動預覽（In-Page Modal Preview）**：無須離開主頁即可在彈出視窗內直接體驗任一作品，亦支援新分頁獨立開啟。
 
 ---
 
-## 📂 作品總覽（共 12 件互動作品）
+## 📂 作品總覽（共 13 件互動作品）
 
 ### ⏱️ `clock/` 時鐘與專注計時（4 件）
 
@@ -55,6 +55,12 @@
 | :--- | :--- | :--- | :--- | :--- |
 | **12** | **Grace Liu 個人品牌與 AI 諮詢網站** | [`about/portfolio_website.html`](./about/portfolio_website.html) | Fetch API + Google Apps Script、Schema.org JSON-LD (AEO) | 展現 20 年服飾開發顧問百萬件銷售實績與 AI PM 轉型願景，內建背景音樂播放器、AEO 結構化標記與線上預約諮詢表單。 |
 
+### 📈 `web/` 財經與投資儀表板（1 件）
+
+| 編號 | 作品名稱 | 檔案路徑 | 核心技術與 API | 簡介與應用場景 |
+| :--- | :--- | :--- | :--- | :--- |
+| **13** | **【5 分鐘投資導航】台股動態儀表板** | [`web/dashboard_premarket_v2.html`](./web/dashboard_premarket_v2.html) | Google Sheets CSV 串接、Google Apps Script API、動態 SVG 走勢圖 | 整合每日台股盤前市況、大盤廣度與資金、十年走勢均線、景氣對策信號大曲線與台積電（2330）三情境 EPS/PE 估值試算系統。 |
+
 ---
 
 ## 🗂️ 專案目錄結構
@@ -83,6 +89,8 @@ MyWorks/
 ├── others/
 │   ├── business travel expence claim code_artifact.html      # 10. 企業差旅費報支申請系統
 │   └── invoice code_artifact.html                            # 11. 招財喵吉發票對獎機
+├── web/
+│   └── dashboard_premarket_v2.html                           # 13. 【5 分鐘投資導航】台股動態儀表板
 └── assets/                                                   # 專案靜態圖片與視覺素材
 ```
 
@@ -90,8 +98,8 @@ MyWorks/
 
 ## 🚀 如何瀏覽與使用
 
-1. **本地直接開啟**：下載或 Clone 本專案後，直接使用瀏覽器開啟根目錄下的 [`index.html`](./index.html)，即可瀏覽完整 12 件作品目錄並進行互動體驗。
-2. **GitHub Pages 線上瀏覽**：若已啟用 GitHub Pages，可直接透過 `https://graceliu0508.github.io/MyWorks/` 線上訪問。
+1. **本地直接開啟**：下載或 Clone 本專案後，直接使用瀏覽器開啟根目錄下的 [`index.html`](./index.html)，即可瀏覽完整 13 件作品目錄並進行互動體驗。
+2. **GitHub Pages 線上瀏覽**：可直接透過 `https://graceliu0508.github.io/MyWorks/` 線上訪問作品集總覽，或直接開啟 [`https://graceliu0508.github.io/MyWorks/web/dashboard_premarket_v2.html`](https://graceliu0508.github.io/MyWorks/web/dashboard_premarket_v2.html) 瀏覽投資導航儀表板。
 
 ---
 
